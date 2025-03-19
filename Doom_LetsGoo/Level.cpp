@@ -15,6 +15,7 @@ Level::Level()
 Level::~Level () {
 	// some instructions
 	delete[] m_pPlanes;
+	delete[] m_pFloorsNCeilings;
 	delete m_pWallTexture;
 	delete m_pFloorTexture;
 }

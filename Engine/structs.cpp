@@ -27,6 +27,15 @@ LMP::LMP(int16_t** Arr2D, int rowAmount, int columAmount)
 	, colums{ columAmount }
 {
 }
+
+LMP::~LMP()
+{
+	for (int i = 0; i < rows; ++i) {
+		delete[] data[i];
+	}
+	delete[] data;
+}
+
 point2D_3D::point2D_3D()
 {
 	point2D_3D(0.f, 0.f, 0.f);

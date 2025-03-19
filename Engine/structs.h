@@ -16,6 +16,7 @@ struct Window
 
 struct LMP {
 	LMP(int16_t** Arr2D, int rows, int colums);
+	~LMP();
 	const int16_t* const* data;
 	const int rows;
 	const int colums;
