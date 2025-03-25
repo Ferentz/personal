@@ -4,15 +4,21 @@
 <br />
 <div align="center">
 
-  <h2 align="center">NAME OF CHOSEN GAME</h2>
+  <h2 align="center">DOOM</h2>
 
   <p align="center">
-    Short description of the game.
+    The Doom video games consist of first-person
+    shooters in which the player controls an unnamed
+    space marine commonly referred to as Doomguy.
+    In the future, an unnamed marine fights for survival
+    on a space station on Mars where
+    the Union Aerospace Corporation accidentally opened up
+    a physical portal to Hell.
     <br />
     <strong>Original game : </strong>
-    <a href="https://www.google.be/"><strong>General info »</strong></a>
+    <a href="https://www.imdb.com/title/tt0286598/plotsummary/"><strong>General info »</strong></a>
     ·
-    <a href="https://www.google.be/"><strong>Youtube video »<strong></a>
+    <a href="https://www.youtube.com/watch?v=FTnMy1X_Hes"><strong>Youtube video »<strong></a>
     <br />
     <br />
   </p>
@@ -46,12 +52,14 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-TODO: add screenshot 
+<img src="./README_SCREENSHOT.png" />
+
 
 Here's why:
 TODO: describe why you chose this game 
-* reason 1
-* reason .. 
+* It was a pivotal game in the games industry
+* It would be an interesting challenge
+* I wanted to make it for programing for artists when i did GGP but wasn't allowed. No way am i not making it now that i'm doing GD
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -61,16 +69,21 @@ TODO: describe why you chose this game
 This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
-* .. 
-* .. 
+* the level generation (geometry) and it's collision 
+* the basis of the UI (showing health, armor amo)
+* the enemies and items
+* being able to kill the nemies
 
 ### What I will probably make as well:
-* .. 
-* .. 
+* the apropriate texture assignemnt to the level geometry
+* switching weapons and their properties (and it's ui visualization)
+* the apropriate sounds and visual cues for enemies and items
+* showing the level stats in the ui
 
 ### What I plan to create if I have enough time left:
-* .. 
-* .. 
+* start screen and end screen
+* animated environment textures in the apropriate locations
+* the doom guy head in the ui
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -144,9 +157,9 @@ Explain where you applied inheritance (mandatory).
 <!-- CONTACT -->
 ## Contact
 
-Your Name - email@student.howest.be
+Ferentz Indeherberge - Ferentz.indeherberge@student.howest.be
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Project Link: [https://github.com/HowestDAE/dae15-Ferentz_Indeherberge](https://github.com/HowestDAE/dae15-Ferentz_Indeherberge)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

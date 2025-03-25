@@ -4,17 +4,19 @@
 //#include "game.h"
 
 
-DoomCamera::DoomCamera()
+DoomCamera::DoomCamera(const Rectf& window)
 	:m_Pos{ 242.325, - 406.4 ,10 },
 	m_projDist{ 2.0f },
 	m_angleOffset{ 0 },
-	m_lookVector{ 0,0 }
+	m_lookVector{ 0,0 },
+	m_Window{window}
 {
 }
 
 Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) const {
-	const float DEVISION = 900 / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
-	const float SCALE{ 1.f };
+	//std::cout << m_Window.width << std::endl;
+	const float DEVISION = m_Window.width / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
+	const float SCALE{ 1.5f };
 	float yDist{ point.y - m_Pos.y };
 	float hightDist{ point.z - m_Pos.z };
 	float xDist{ (point.x - m_Pos.x) };
@@ -47,7 +49,7 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 	pointStruc.prevAngle[1] = pointStruc.Angle[1];
 
 	Vector2f Point2D{};
-	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + 800 / 2;
+	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
 
 	//the following code serves to map the points when they are passing behind you, as -pi would be all the wway to the left, and pi all the way to the right.
 	// When the point passed behind you, you dont want it to jump from left to right
@@ -61,7 +63,7 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 		direction = -1;
 	}
 	else {
-		Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + 800 / 2;
+		Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + m_Window.width / 2;
 		pointStruc.Angle[2] = (newXAngle)*m_projDist;
 		return Point2D;
 	}
@@ -71,14 +73,15 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 	float entryAngleRest = direction * M_PI - entryAngle;
 	float result = restAngle * entryAngle / entryAngleRest;
 
-	Point2D.x = SCALE * (result * m_projDist) * DEVISION + 800 / 2;
+	Point2D.x = SCALE * (result * m_projDist) * DEVISION + m_Window.width / 2;
 	pointStruc.Angle[2] = newXAngle;
 	return Point2D;
 
 }
 
 Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc) const {
-	const float DEVISION = 900 / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
+	//std::cout << m_Window.width << std::endl;
+	const float DEVISION = m_Window.width / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
 	const float SCALE{ 1.f };
 
 	const Vector3f point{ pointStruc.point3D };
@@ -115,13 +118,13 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc) const {
 	pointStruc.prevAngle[1] = pointStruc.Angle[1];
 
 	Vector2f Point2D{};
-	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + 800 / 2;
+	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
 
 	//the following code serves to map the points when they are passing behind you, as -pi would be all the wway to the left, and pi all the way to the right.
 	// When the point passed behind you, you dont want it to jump from left to right
 	// this is only releveant if it's posiblt to move through walls. to be tested if it's still necesary when you can walk through the level.
 
-	Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + 800 / 2;
+	Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + m_Window.width / 2;
 	pointStruc.Angle[2] = (newXAngle)*m_projDist;
 
 	if (pointStruc.Angle[2] > M_PI * 0.5f || pointStruc.Angle[2] < -M_PI * 0.5f) {

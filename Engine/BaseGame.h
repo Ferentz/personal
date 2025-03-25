@@ -23,7 +23,18 @@ public:
 	}
 	virtual void Draw() const
 	{
-		
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		// Set up a two-dimensional orthographic viewing region.
+		glOrtho(0, m_Window.width, 0, m_Window.height, -1, 1); // y from bottom to top
+
+		// Set the viewport to the client window area
+		// The viewport is the rectangular region of the window where the image is drawn.
+		glViewport(0, 0, int(m_Window.width), int(m_Window.height));
+
+		// Set the Modelview matrix to the identity matrix
+		glMatrixMode(GL_MODELVIEW);
 	}
 
 	// Event handling
@@ -56,12 +67,16 @@ public:
 	{
 		return m_Viewport;
 	}
+	const Window& GetWindow() const
+	{
+		return m_Window;
+	}
 
 private:
 	// DATA MEMBERS
 	// The window properties
-	const Window m_Window;
-	const Rectf m_Viewport;
+	Window m_Window;
+	Rectf m_Viewport;
 	// The window we render to
 	SDL_Window* m_pWindow;
 	// OpenGL context

@@ -6,6 +6,7 @@
 
 Game::Game( const Window& window ) 
 	:BaseGame{ window },
+	m_Camera{ GetViewPort()},
 	m_WindowWidth{window.width}
 {
 	Initialize();
@@ -46,6 +47,7 @@ void Game::Update( float elapsedSec )
 
 void Game::Draw( ) const
 {
+	BaseGame::Draw();
 	ClearBackground( );
 	m_pLevel->DrawLevel();;
 
@@ -133,7 +135,14 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 	//const float mouseX{ float(e.x) }; //.xrel
 	const float mouseX{ float(e.xrel) }; //.xrel
 	const float mouseY{ float(e.y) };
-	const float mult = 50 * M_PI / m_WindowWidth;// g_WindowWidth;
+	const float mousPosX{ float(e.x) };
+	if (mousPosX <= 1)
+	{
+		SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
+		//SDL_WarpMouseInWindow
+	}
+	
+	const float mult = 50 * M_PI / GetViewPort().width;// g_WindowWidth;
 	//g_offset = ((mouseX - g_WindowWidth / 2) * 1)/100;
 	m_Camera.m_angleOffset += mouseX / 100;
 

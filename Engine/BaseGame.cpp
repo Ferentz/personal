@@ -5,7 +5,7 @@
 #include "BaseGame.h"
 
 BaseGame::BaseGame(const Window& window)
-	: m_Window{ window }
+	: m_Window{ window } // copy constructer
 	, m_Viewport{ 0,0,window.width,window.height }
 	, m_pWindow{ nullptr }
 	, m_pContext{ nullptr }
@@ -19,6 +19,7 @@ BaseGame::~BaseGame()
 {
 	CleanupGameEngine();
 }
+
 
 void BaseGame::InitializeGameEngine()
 {
@@ -39,6 +40,7 @@ void BaseGame::InitializeGameEngine()
 	// Use OpenGL 2.1
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	
 
 	// Create window
 	m_pWindow = SDL_CreateWindow(
@@ -47,7 +49,12 @@ void BaseGame::InitializeGameEngine()
 		SDL_WINDOWPOS_CENTERED,
 		int(m_Window.width),
 		int(m_Window.height),
-		SDL_WINDOW_OPENGL);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+
+
+
+	//SDL_SetWindowResizable(m_pWindow, SDL_bool(true));
+
 	if (m_pWindow == nullptr)
 	{
 		std::cerr << "BaseGame::Initialize( ), error when calling SDL_CreateWindow: " << SDL_GetError() << std::endl;
@@ -230,6 +237,24 @@ void BaseGame::Run()
 					}
 					break;
 				}
+				case SDL_WINDOWEVENT:
+				{
+					if (0 != e.window.data1 || 0 != e.window.data2)
+					{
+						//m_pWindow.width
+						m_Window.width = float(e.window.data1);
+						m_Window.height = float(e.window.data2);
+						m_Viewport.width = float(e.window.data1);
+						m_Viewport.height = float(e.window.data2);
+						//glViewport(0, 0, m_Viewport.width, m_Viewport.height);
+						//std::cout << m_Window.width << "data" << std::endl;;
+						//_windowEvents.emplace_back(_lastWindowMetrics);
+
+						//_refresh(); // user callback that may be used to repaint the window
+					}
+					break;
+				}
+			
 			}
 		}
 

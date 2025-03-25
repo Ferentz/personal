@@ -35,6 +35,6 @@ private:
 	void ClearBackground( ) const;
 	
 	Level* m_pLevel{};
-	DoomCamera m_Camera{};
+	DoomCamera m_Camera;
 	float m_WindowWidth;
 };
