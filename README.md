@@ -15,6 +15,8 @@
     the Union Aerospace Corporation accidentally opened up
     a physical portal to Hell.
     <br />
+    (this project was aproved by jeff)
+    <br />
     <strong>Original game : </strong>
     <a href="https://www.imdb.com/title/tt0286598/plotsummary/"><strong>General info »</strong></a>
     ·
