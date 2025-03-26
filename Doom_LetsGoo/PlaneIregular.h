@@ -14,7 +14,6 @@ class PlaneIregular
 public:
 	PlaneIregular();
 	PlaneIregular(std::vector<Vector2f> vertexes, int colour, int height);
-	PlaneIregular(Vector2f* vertexes, int vertexAmount, int colour, int height);
 	void UpdatePlane(const DoomCamera& eyeObject);
 	void DrawPlane(const Texture& texture);
 	//void DrawPlane(const int colour);
@@ -40,15 +39,6 @@ private:
 	std::vector<point2D_3D> m_pPointsArr;
 	int m_amoountOfPoints;
 	int m_triangleIndexAmount;
-	void MakeConcave(Vector2f* vertexes, int vertexmount);
-
 };
-
-bool isConcave(Vector2f arr[], int arrLen);
-bool doIntersect(Vector2f p1, Vector2f q1, Vector2f p2, Vector2f q2,
-	Vector2f& res);
-bool isTriangulated(Vector2f* vertexes, int vertexIndexes[], int vertexAmount, int basepoint,
-	int newVertexAmountA, int* triangulated, int newTriIndex, int recursionDepth);
-
 
 

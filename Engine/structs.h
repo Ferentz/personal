@@ -2,6 +2,7 @@
 #include <string>
 #include "Vector2f.h"
 #include "Vector3f.h"
+#include <vector>
 
 struct Window
 {
@@ -25,6 +26,18 @@ struct LMP {
 struct Line {
 	Vector2f startPoint;
 	Vector2f endPoint;
+};
+
+struct BSPnode {
+	Line partitionLine;
+	int children[2];
+};
+
+struct BSPleafeNode
+{
+	int lineIndex;
+	float floorheight;
+	std::vector<int> wallIndexes;
 };
 
 struct point2D_3D {

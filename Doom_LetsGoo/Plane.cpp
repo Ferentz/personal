@@ -87,6 +87,7 @@ void Plane::DrawPlane(const Texture& texture) {
 }
 
 bool Plane::PlaneCollision(DoomCamera& eyeObject) {
+	
 	Vector3f normalWidth{ m_Width.Normalized()};
 	Vector3f normalHeight{ m_Height.Normalized() };
 	Vector3f normal{ m_Width.CrossProduct(m_Height).Normalized() }; //cross(height).normalize() };
@@ -95,7 +96,7 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 		eyeObject.m_Pos.y - m_Location.y,
 		eyeObject.m_Pos.z - m_Location.z };
 
-
+	//std::cout << relativeEyeLocation_moved << std::endl;
 
 	float newXpos = relativeEyeLocation_moved.DotProduct(normalWidth) * relativeEyeLocation_moved.DotProduct(normalWidth);//dot(normalWidth), 2)); // all power 2 to avoid using the square root later
 	float newYpos = relativeEyeLocation_moved.DotProduct(normalHeight) * relativeEyeLocation_moved.DotProduct(normalHeight);
@@ -113,6 +114,7 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 		if (sideCheck > 0) {
 			mult = 1;
 		}
+		std::cout << "collide" << std::endl;
 		eyeObject.m_Pos.x += normal.x * mult;
 		eyeObject.m_Pos.y += normal.y * mult;
 		eyeObject.m_Pos.z += normal.z * mult;

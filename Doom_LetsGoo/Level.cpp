@@ -5,6 +5,7 @@
 #include "PlaneIregular.h"
 #include <vector>
 #include <cassert>
+#include "DoomCamera.h"
 
 Level::Level()
 	:m_pWallTexture {}
@@ -26,6 +27,7 @@ void Level::DrawLevel()
 		m_pPlanes[i].DrawPlane(*m_pWallTexture);
 		//planes[i].drawPlane(g_Sectors[i]);
 	}
+	//m_pPlanes[55].DrawPlane(*m_pWallTexture);
 	//m_subSectorToDraw
 	for (int i = 0; i < m_floorsNCeilingsAmount; ++i) {
 	//for (int i = m_subSectorToDraw *2; i < m_subSectorToDraw * 2 + 2; ++i) {
@@ -34,13 +36,13 @@ void Level::DrawLevel()
 	}
 }
 
-void Level::UpdateLevel(const DoomCamera& eyeObject, float elapsedSec)
+void Level::UpdateLevel( DoomCamera& eyeObject, float elapsedSec)
 {
-	//std::cout << m_interval << std::endl;
 	m_interval += elapsedSec;
 	for (int i = 0; i < m_PlaneAmount; ++i) {
 		//planes[i].PlaneCollision(Eye);
 		m_pPlanes[i].UpdatePlane(eyeObject);
+		m_pPlanes[i].PlaneCollision(eyeObject);
 	}
 	for (int i = 0; i < m_floorsNCeilingsAmount; ++i) {
 	//for (int i = m_subSectorToDraw * 2; i < m_subSectorToDraw * 2 + 2; ++i) {
@@ -48,6 +50,7 @@ void Level::UpdateLevel(const DoomCamera& eyeObject, float elapsedSec)
 		m_pFloorsNCeilings[i].UpdatePlane(eyeObject);
 	}
 
+	//CollisionCHeck(eyeObject, m_BSP.size() - 1);
 	//if (m_interval >= 5) {
 	//	for (int i = m_subSectorToDraw * 2; i < m_subSectorToDraw * 2 + 2; ++i) {
 	//		//planes[i].PlaneCollision(Eye);
@@ -59,7 +62,7 @@ void Level::UpdateLevel(const DoomCamera& eyeObject, float elapsedSec)
 
 void Level::InitializeWallls()
 {
-	const int SCALE{ 10 };
+	const int SCALE{ 1 };
 	//TextureFromFile("Resources/WALL03_1.png", m_pwallTexture);
 	m_pWallTexture = new Texture("WALL03_1_converted.png");
 	m_pFloorTexture = new Texture("FLOOR4_8_converted.png");
@@ -97,7 +100,8 @@ void Level::InitializeWallls()
 	// partition x | partition y | p x diff | p y diff| rBox top | rBox bottom | rBox left | rBox right| lBox top | lBox bottom | lBox left | lBox right | right child | left child
 	const int NODESCULOMS{14}; // 14 bytepairs. | 4 bytepairs + 2 * (4 bytepairs (bounding boxes)) + 2 bytepairs
 	const LMP nodesImported{ utils::ReadLMP("NODES.lmp", NODESCULOMS) };
-
+	//m_LevelBSP.reserve(nodesImported.rows);
+	m_BSP.resize(nodesImported.rows);
 	// from this, i can get an exxtra set of vertexes.
 	// so i first will have to check if a sub sector makes a loop. if it does not make a loopp, add the devision line's vertees?
 	
@@ -129,6 +133,8 @@ void Level::InitializeWallls()
 	const int SECTORSEGSCOLUMS{ 2 }; // 2 * bytepair = 2
 	const LMP sectorSegsImported{ utils::ReadLMP("SSECTORS.lmp", SECTORSEGSCOLUMS) };
 	
+	m_BSPleafs.resize(sectorSegsImported.rows);
+
 	int* sectorPerSubsector{ new int[sectorSegsImported.rows * 2] };
 	//int* pNodePerSector{ new int[sectorSegsImported.rows] };
 	// save what node belongs to each sub sector
@@ -148,92 +154,7 @@ void Level::InitializeWallls()
 	//int** pVertexesPerSector{ new int* [sectorSegsImported.rows]};
 	//int* pVertexAmountPerSector{ new int[sectorSegsImported.rows] };
 	m_pFloorsNCeilings = new PlaneIregular [sectorSegsImported.rows * 2] ;
-	//for (int subSector{}; subSector < sectorSegsImported.rows; subSector++)
-	//{
-	//	int potentialVertexAmount{ sectorSegsImported.data[subSector][0] * 2 };
-	//	int* pVertexes{ new int [potentialVertexAmount] };
-	//	int curIndex{};
-	//	for (int index{}; index < potentialVertexAmount; index++)
-	//	{
-	//		pVertexes[index] = -1;
-	//	}
-	//	int segCount = sectorSegsImported.data[subSector][0];
-	//	int startSeg = sectorSegsImported.data[subSector][1];
-	//	//int curSeg{ startSeg };
-	//	for (int seg{}; seg < segCount; seg++)
-	//	{
-	//		int vertexes[2]{};
-	//		bool isFound[2]{};
-	//		int vertexPos[]{-1, -1};
-	//		vertexes[0] = segsImported.data[startSeg + seg][0];
-	//		vertexes[1] = segsImported.data[startSeg + seg][1];
-
-	//		for (int i = 0; i < 2; i++)
-	//		{ // we check if either vertex already exists, and if so, where in the array it exists
-	//			int vertexToCheck = vertexes[i];
-	//			for (int index{}; index < potentialVertexAmount; index++)
-	//			{
-	//				if (pVertexes[index] == vertexToCheck)
-	//				{
-	//					isFound[i] = true;
-	//					vertexPos[i] = index;
-	//				}
-	//			}
-	//			
-	//		}
-	//		
-
-	//		if (isFound[0] != isFound[1]) // if only one is true
-	//		{
-	//			//we want to check which one,
-	//			int insertPos{ 0 };
-	//			int vertexToInsert{};
-	//			if (isFound[0])
-	//			{
-	//				// and after if it's th efirst one
-	//				insertPos = vertexPos[0] + 1;
-	//				vertexToInsert = vertexes[1];
-	//			}
-	//			else
-	//			{
-	//				//insert it before if it's the second one,
-	//				insertPos = vertexPos[1];
-	//				vertexToInsert = vertexes[0];
-	//			}
-
-	//			for (int index{ potentialVertexAmount - 1 }; index >= insertPos; index--)
-	//			{
-	//				pVertexes[index] = pVertexes[index - 1]; // starting from the back, we insert the value in front
-	//			}
-	//			pVertexes[insertPos] = vertexToInsert;
-	//			curIndex++;
-
-	//		}
-	//		else if (isFound[0] == false) //if not only one is true, and one is false, meaning both are false
-	//		{
-	//			for (int i = 0; i < 2; i++)
-	//			{
-	//				pVertexes[curIndex] = vertexes[i];
-	//				curIndex++;
-	//			}
-
-	//		}
-	//	}
-
-	//	pVertexesPerSector[subSector] = pVertexes;
-	//	pVertexAmountPerSector[subSector] = curIndex;
-	//}
-
-	/*ConstructFloor(sectorSegsImported, segsImported, linesImported, sidesImported, sectorsImported, vertexesImported, 
-		nodesImported, pNodePerSector,
-		SCALE, pVertexAmountPerSector, pVertexesPerSector);*/
-
-	// so each line says for that sector ho many segs it has and at hat seg it starts
-	// for each sector
-		// loop for seg count
-			//first vec of the segs added
 	
-
 	Vector2f* pLines{ new Vector2f[linesImported.rows] }; // Allocate rows
 	for (int i = 0; i < linesImported.rows; ++i) {
 		pLines[i].x = linesImported.data[i][0];
@@ -242,7 +163,7 @@ void Level::InitializeWallls()
 
 
 	int wallamount{};
-	for (int i = 0; i < linesImported.rows; ++i) {
+	for (int line = 0; line < linesImported.rows; ++line) {
 		// okay, so basicaly, if it has a backside, it means it is part of 2 secorts. 
 		// then, depending on which parts get a texture, the middle, upper or lower part need to be made. 
 		// th upper part is made by looking at the ceining heights, the loer part by looking at the floor heights. 
@@ -250,11 +171,11 @@ void Level::InitializeWallls()
 
 
 		bool twoSectored{};
-		if (linesImported.data[i][6] != -1) {
+		if (linesImported.data[line][6] != -1) {
 			twoSectored = true;
 		}
 
-		int sideDef{ linesImported.data[i][5] };
+		int sideDef{ linesImported.data[line][5] };
 		int sector{ sidesImported.data[sideDef][14] };
 
 		std::string charString1 = utils::convertToCharString(sidesImported.data[sideDef][2],
@@ -267,20 +188,21 @@ void Level::InitializeWallls()
 		// top
 		if (charString1.find("-") == std::string::npos)
 		{
-			int sideDef2{ linesImported.data[i][5 + 1] };
+			int sideDef2{ linesImported.data[line][5 + 1] };
 			int sector2{ sidesImported.data[sideDef2][14] };
 
 			float ceilingHeight{ static_cast<float>(sectorsImported.data[sector][1]) / SCALE };
 			float ceilingHeight2{ static_cast<float>(sectorsImported.data[sector2][1]) / SCALE };
 
-			AddPlane(pLines, i, wallamount, ceilingHeight2, ceilingHeight, vertexesImported.data, SCALE);
+			m_LinePerWall.push_back(line);
+			AddPlane(pLines, line, wallamount, ceilingHeight2, ceilingHeight, vertexesImported.data, SCALE);
 			//g_Sectors[wallamount] = sector;
 			wallamount++;
 		}
 		// middle
 		if (charString3.find("-") == std::string::npos && twoSectored)
 		{
-			int sideDef2{ linesImported.data[i][5 + 1] };
+			int sideDef2{ linesImported.data[line][5 + 1] };
 			int sector2{ sidesImported.data[sideDef2][14] };
 
 			float floorHeight{ static_cast<float>(sectorsImported.data[sector][0]) / SCALE };
@@ -296,28 +218,29 @@ void Level::InitializeWallls()
 			if (ceilingHeight > ceilingHeight2) {
 				ceilingHeight2Use = ceilingHeight2;
 			}
-
-			AddPlane(pLines, i, wallamount, floorHeight2Use, ceilingHeight2Use, vertexesImported.data, SCALE);
+			m_LinePerWall.push_back(line);
+			AddPlane(pLines, line, wallamount, floorHeight2Use, ceilingHeight2Use, vertexesImported.data, SCALE);
 			//g_Sectors[wallamount] = sector;
 			wallamount++;
 		}
 		else if (charString3.find("-") == std::string::npos) {
 			float floorHeight{ static_cast<float>(sectorsImported.data[sector][0]) / SCALE };
 			float ceilingHeight{ static_cast<float>(sectorsImported.data[sector][1]) / SCALE };
-			AddPlane(pLines, i, wallamount, floorHeight, ceilingHeight, vertexesImported.data, SCALE);
+			m_LinePerWall.push_back(line);
+			AddPlane(pLines, line, wallamount, floorHeight, ceilingHeight, vertexesImported.data, SCALE);
 			//g_Sectors[wallamount] = sector;
 			wallamount++;
 		}
 		// bottom
 		if (charString2.find("-") == std::string::npos)
 		{
-			int sideDef2{ linesImported.data[i][5 + 1] };
+			int sideDef2{ linesImported.data[line][5 + 1] };
 			int sector2{ sidesImported.data[sideDef2][14] };
 
 			float floorHeight{ static_cast<float>(sectorsImported.data[sector][0]) / SCALE };
 			float floorHeight2{ static_cast<float>(sectorsImported.data[sector2][0]) / SCALE };
-
-			AddPlane(pLines, i, wallamount, floorHeight2, floorHeight, vertexesImported.data, SCALE);
+			m_LinePerWall.push_back(line);
+			AddPlane(pLines, line, wallamount, floorHeight2, floorHeight, vertexesImported.data, SCALE);
 			//g_Sectors[wallamount] = sector;
 			wallamount++;
 		}
@@ -345,6 +268,16 @@ void Level::InitializeWallls()
 	SeamFixSubsectors(sectorPerSubsector, sectorSegsImported, vertexesImported,
 		segsImported, linesImported, sidesImported);
 
+	for (int wallIndex{}; wallIndex < m_LinePerWall.size(); wallIndex++)
+	{
+		for (int leafnode{}; leafnode < m_BSPleafs.size(); leafnode++)
+		{
+			if (m_LinePerWall[wallIndex] == m_BSPleafs[leafnode].lineIndex)
+			{
+				m_BSPleafs[leafnode].wallIndexes.push_back(wallIndex);
+			}
+		}
+	}
 
 	/*for (int sector{}; sector < sectorSegsImported.rows; sector++) {
 		delete[] pVertexesPerSector[sector];
@@ -359,6 +292,42 @@ void Level::InitializeWallls()
 	pLines = nullptr;
 }
 
+void Level::CollisionCHeck(DoomCamera& player, const int node)
+{
+	//int node{ 3 };
+	// we want to run over the BSP with the camera and check where it is;
+	Vector2f pos = Vector2f{ player.m_Pos.x, player.m_Pos.y };
+	int orient = pos.orientation(m_BSP[node].partitionLine.startPoint, m_BSP[node].partitionLine.endPoint);
+	int child{ 0 };
+	if (orient > 0)
+	{
+		// go to left child
+		child = m_BSP[node].children[1];
+	}
+	else if (orient < 0)
+	{
+		// go to right child
+		child = m_BSP[node].children[0];
+	}
+
+	if (child < 0)
+	{
+		const int leafnode{ utils::ReadNodeField(child) };
+		const int wallsToCHeck{ int(m_BSPleafs[leafnode].wallIndexes.size()) };
+		for (int wall{}; wall < wallsToCHeck; wall++)
+		{
+			int wallIndex{ m_BSPleafs[leafnode].wallIndexes[wall] };
+			m_pPlanes[wallIndex].PlaneCollision(player);
+		}
+		// we have reached a leaf node
+		// now we must 
+	}
+	else
+	{
+		//go to the next node
+		CollisionCHeck(player, child);
+	}
+}
 
 void Level::AddPlane(const Vector2f pSides[], const int lineIndex, const int wallIndex,
 	const float floorHeight, const float ceilingHeight, const int16_t* const* pVertexesImported, const int scale)
@@ -381,79 +350,11 @@ void Level::AddPlane(const Vector2f pSides[], const int lineIndex, const int wal
 }
 
 
-void Level::ConstructFloor(const LMP& subSectorData , const LMP& segData, const LMP& lineData,
-	const LMP& sideData, const LMP& sectordata, const LMP& vertexData, const LMP& nodesArr, const int* nodePerSubSector,
-	const float scale, int* const pVertexAmountPerSubSector, int* const * const pVertexesPerSubSector) {
-
-	// it HAS which line it conects to AND if it takes the front side or back side
-	// so from seg, we can get line and relativeSide.
-	//from lines and relativeSide we can get side
-	//from side we can get sector
-	//from sector we can get height
-
-	for (int subSector{}; subSector < subSectorData.rows; subSector++)
-	{
-		//if (subSector == 15) {
-			//std::cout << "sub sector " << subSector << std::endl;
-		//}
-		int seg = subSectorData.data[subSector][1];
-		//if (subSector == 15) {
-			//std::cout << " seg " << seg << std::endl;
-		//}
-		int line = segData.data[seg][3];
-		int orienttion = segData.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
-		int sideIndex{ 5 };
-		if (orienttion > 0) { // 0 : front side | 1 : backside
-			sideIndex = 6;
-		}
-		int side = lineData.data[line][sideIndex];
-		int sector = sideData.data[side][14];
-
-		int ceilingHeight = sectordata.data[sector][1] / scale;
-		int floorHeight = sectordata.data[sector][0] / scale;
-
-		const int amount{ pVertexAmountPerSubSector[subSector] + 2 };
-		Vector2f* vertexes{ new Vector2f[amount] };
-
-		for (int vertex{}; vertex < amount - 2; vertex++) {
-			int vertexIndex{ pVertexesPerSubSector[subSector][vertex] };
-			vertexes[vertex] = Vector2f{ vertexData.data[vertexIndex][0] / scale,static_cast<float> (vertexData.data[vertexIndex][1]) / scale };
-			/*if (subSector == 6) {
-				std::cout << vertexes[vertex].x << " " << vertexes[vertex].y << std::endl;
-			}*/
-		}
-
-		int node{ nodePerSubSector[subSector] };
-		//std::cout << node << " : sS " << subSector << std::endl;
-		float startX{ float(nodesArr.data[node][0]) };
-		float startY{ float(nodesArr.data[node][1]) };
-		int xOffset{ nodesArr.data[node][2] };
-		int yOffset{ nodesArr.data[node][2] };
-		vertexes[amount - 2] = Vector2f{ startX / scale, startY / scale };
-		vertexes[amount - 1] = Vector2f{ (startX + xOffset) / scale, (startY + yOffset) / scale };
-		/*if (subSector == 6) {
-			std::cout << vertexes[amount - 2].x << " " << vertexes[amount - 2].y << std::endl;
-			std::cout << vertexes[amount - 1].x << " " << vertexes[amount - 1].y << std::endl;
-		}*/
-
-		PlaneIregular input{ vertexes, pVertexAmountPerSubSector[subSector], 2, int(ceilingHeight) };
-		PlaneIregular input2{ vertexes, pVertexAmountPerSubSector[subSector], 3, int(floorHeight) };
-		m_pFloorsNCeilings[2 * subSector] = input;
-		m_pFloorsNCeilings[2 * subSector + 1] = input2;
-		m_floorsNCeilingsAmount += 2;
-		delete[] vertexes;
-		vertexes = nullptr;
-
-	}
-}
-
 void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
 	const LMP& nodes, int startNode, const LMP& subsectors, const LMP& vertexes,
 	const LMP& segs, const LMP& lines, const LMP& sides, const LMP& sectors,
 	const int SCALE, int* sectorPerSubsector)
 {
-	//std::cout << std::endl;
-	//std::cout << " going into node " << startNode << std::endl;
 	//     0	   |    1		 |	  2		|   3	  |
 	// partition x | partition y | p x diff | p y diff|
 	//   4		|     5		  |	    6	  |		7	  |
@@ -475,6 +376,8 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 	int childIndex = 12;
 	for (int i{}; i < 2; i++)
 	{
+		int child{ nodes.data[startNode][childIndex + i] };
+
 		if (i == 0)
 		{
 			sliceLines.push_back(Line{ partitionPoint1, partitionPoint2 });
@@ -483,7 +386,9 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 		{
 			sliceLines.push_back(Line{ partitionPoint2, partitionPoint1 });
 		}
-		int child{ nodes.data[startNode][childIndex + i] };
+		m_BSP[startNode].partitionLine = Line{ partitionPoint1, partitionPoint2 };
+		m_BSP[startNode].children[i] = child;
+		
 		if (child < 0)
 		{
 
@@ -523,6 +428,7 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 				//std::cout << " seg " << seg << std::endl;
 			//}
 			int lineI = segs.data[seg][3];
+			
 			int orienttion = segs.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
 			int sideIndex{ 5 };
 			if (orienttion > 0)
@@ -544,8 +450,10 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 			{
 				boundingBoxParent.push_back(Vector2f{ boundingBoxParent[vertex].x / SCALE, boundingBoxParent[vertex].y / SCALE });
 			}*/
-			int ceilingHeight = sectors.data[sector][1] / SCALE;
-			int floorHeight = sectors.data[sector][0] / SCALE;
+			float ceilingHeight = sectors.data[sector][1] / SCALE;
+			float floorHeight = sectors.data[sector][0] / SCALE;
+			m_BSPleafs[subSector].lineIndex = lineI;
+			m_BSPleafs[subSector].floorheight = floorHeight;
 			PlaneIregular input{ boundingBoxChild, sector, int(ceilingHeight) };
 			PlaneIregular input2{ boundingBoxChild, 3, int(floorHeight) };
 			m_pFloorsNCeilings[m_floorsNCeilingsAmount] = input;
@@ -580,6 +488,7 @@ void Level::SeamFixSubsectors(const int* sectorPerSubsector, const LMP& subsecto
 			//std::cout << " seg " << seg << std::endl;
 		//}
 		int lineI = segs.data[seg][3];
+
 		int orienttion = segs.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
 		int sideIndex{ 5 };
 		if (orienttion > 0)
@@ -661,222 +570,6 @@ void Level::SeamFixSubsectors(const int* sectorPerSubsector, const LMP& subsecto
 	//m_floorsNCeilingsAmount += 2;
 }
 
-//int Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
-//	const LMP& nodes, int startNode, const LMP& subsectors, const LMP& vertexes,
-//	const LMP& segs, const LMP& lines, const LMP& sides, const LMP& sectors,
-//	const int SCALE)
-//{
-//	//std::cout << std::endl;
-//	//std::cout << " going into node " << startNode << std::endl;
-//	//     0	   |    1		 |	  2		|   3	  |
-//	// partition x | partition y | p x diff | p y diff|
-//	//   4		|     5		  |	    6	  |		7	  |
-//	// rBox top | rBox bottom | rBox left | rBox right|
-//	//    8		|		9	  |    10	  |		11	   |
-//	// lBox top | lBox bottom | lBox left | lBox right |
-//	//		12	   |	13 
-//	// right child | left child
-//
-//	// we need for each subsector an array of vector2f's
-//	// we need a vector of vector2f's along which all the points will be handled
-//
-//	Vector2f partitionPoint1{ float(nodes.data[startNode][0]), float(nodes.data[startNode][1]) };
-//	Vector2f partitionPoint2{ float(partitionPoint1.x + nodes.data[startNode][2]), float(partitionPoint1.y + nodes.data[startNode][3]) };
-//	
-//	//we can pass on the slicelines,but what about the sides?
-//	//
-//
-//	int childIndex = 12;
-//	for (int i{}; i < 2; i++)
-//	{
-//		if (i == 0)
-//		{
-//			sliceLines.push_back(Line{ partitionPoint1, partitionPoint2 });
-//		}
-//		else
-//		{
-//			sliceLines.push_back(Line{ partitionPoint2, partitionPoint1 });
-//		}
-//		int child{ nodes.data[startNode][childIndex + i] };
-//		if (child < 0)
-//		{
-//			
-//			// it's a subSector
-//			int subSector = utils::ReadNodeField(child);
-//
-//			if (subSector == 15)
-//			{
-//
-//				std::vector<Vector2f> boundingBoxParent{};
-//				for (int vertex{}; vertex < boundingBox.size(); vertex++)
-//				{
-//					boundingBoxParent.push_back(boundingBox[vertex]);
-//				}
-//				std::cout << std::endl << " arived at subsector " << subSector << std::endl;
-//
-//				for (int line{}; line < sliceLines.size(); line++)
-//				{
-//					std::cout << std::endl << line << std::endl;
-//					std::cout << sliceLines[line].startPoint << " , " << sliceLines[line].endPoint << std::endl;
-//					std::vector<Vector2f> boundingBoxChild{};
-//					sliceLine(boundingBoxParent, boundingBoxChild, sliceLines[line].startPoint, sliceLines[line].endPoint);
-//					boundingBoxParent.clear();
-//
-//					
-//
-//					for (int vertex{}; vertex < boundingBoxChild.size(); vertex++)
-//					{
-//						boundingBoxParent.push_back(boundingBoxChild[vertex]);
-//					}
-//
-//					//now we wanna generate the actual plane.
-//
-//					int seg = subsectors.data[subSector][1];
-//					//if (subSector == 15) {
-//						//std::cout << " seg " << seg << std::endl;
-//					//}
-//					int lineI = segs.data[seg][3];
-//					int orienttion = segs.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
-//					int sideIndex{ 5 };
-//					if (orienttion > 0)
-//					{ // 0 : front side | 1 : backside
-//						sideIndex = 6;
-//					}
-//					int side = lines.data[lineI][sideIndex];
-//					int sector = sides.data[side][14];
-//
-//					for (int vertex{}; vertex < boundingBoxChild.size(); vertex++)
-//					{
-//						boundingBoxChild[vertex].x = boundingBoxChild[vertex].x / SCALE;
-//						boundingBoxChild[vertex].y = boundingBoxChild[vertex].y / SCALE;
-//					}
-//					/*for (int vertex{}; vertex < boundingBox.size(); vertex++)
-//					{
-//						boundingBoxParent.push_back(Vector2f{ boundingBoxParent[vertex].x / SCALE, boundingBoxParent[vertex].y / SCALE });
-//					}*/
-//					int ceilingHeight = sectors.data[sector][1] / SCALE;
-//					int floorHeight = sectors.data[sector][0] / SCALE;
-//					PlaneIregular input{ boundingBoxChild, 2, int(ceilingHeight) };
-//					PlaneIregular input2{ boundingBoxChild, 3, int(floorHeight) };
-//					m_pFloorsNCeilings[m_floorsNCeilingsAmount] = input;
-//					m_pFloorsNCeilings[m_floorsNCeilingsAmount + 1] = input2;
-//
-//					m_floorsNCeilingsAmount += 2;
-//
-//
-//
-//				}
-//			}
-//		}
-//		else
-//		{
-//			ConstructSubSectors(boundingBox, sliceLines, nodes, child,
-//				subsectors, vertexes, segs, lines, sides, sectors,
-//				SCALE);
-//		}
-//
-//		sliceLines.pop_back();
-//
-//	}
-//	return 0;
-//}
-
-//int Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, 
-//	const LMP& nodes, int startNode, const LMP& subsectors, const LMP& vertexes,
-//	const LMP& segs, const LMP& lines, const LMP& sides, const LMP& sectors,
-//	const int SCALE)
-//{
-//	std::cout << std::endl;
-//	std::cout << " going into node " << startNode << std::endl;
-//	//     0	   |    1		 |	  2		|   3	  |
-//	// partition x | partition y | p x diff | p y diff|
-//	//   4		|     5		  |	    6	  |		7	  |
-//	// rBox top | rBox bottom | rBox left | rBox right|
-//	//    8		|		9	  |    10	  |		11	   |
-//	// lBox top | lBox bottom | lBox left | lBox right |
-//	//		12	   |	13 
-//	// right child | left child
-//
-//	// we need for each subsector an array of vector2f's
-//	// we need a vector of vector2f's along which all the points will be handled
-//
-//	std::vector<Vector2f> boundingBoxRight{};
-//
-//	Vector2f partitionPoint1{ float(nodes.data[startNode][0]), float(nodes.data[startNode][1]) };
-//	Vector2f partitionPoint2{ float(partitionPoint1.x + nodes.data[startNode][2]), float(partitionPoint1.y + nodes.data[startNode][3]) };
-//	int childIndex = 12;
-//	for (int i{}; i < 2; i++)
-//	{
-//		int child{ nodes.data[startNode][childIndex + i] };
-//		if (child < 0)
-//		{
-//			std::vector<Vector2f> boundingBoxChild{};
-//			// it's a subSector
-//			int subSector = utils::ReadNodeField(child);
-//
-//			std::cout << "from " << startNode << " arived at subsector " << subSector << std::endl;
-//			std::cout << "using partition points " << partitionPoint1 << " and " << partitionPoint2 << std::endl;
-//			//sliceLine(boundingBox, boundingBoxChild, partitionPoint1, partitionPoint2, i);
-//			// we want to clip the curent plane against each seg of the subsector
-//			//std::vector<Vector2f> boundingBoxSubSector{};
-//			//boundingBoxSubSector.reserve(boundingBox.size());
-//			//SliceSegs(boundingBoxChild, boundingBoxSubSector, subSector, subsectors, segs, vertexes);
-//
-//			//now we wanna generate the actual plane.
-//
-//			int seg = subsectors.data[subSector][1];
-//			//if (subSector == 15) {
-//				//std::cout << " seg " << seg << std::endl;
-//			//}
-//			int line = segs.data[seg][3];
-//			int orienttion = segs.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
-//			int sideIndex{ 5 };
-//			if (orienttion > 0)
-//			{ // 0 : front side | 1 : backside
-//				sideIndex = 6;
-//			}
-//			int side = lines.data[line][sideIndex];
-//			int sector = sides.data[side][14];
-//			
-//			/*for (int vertex{}; vertex < boundingBoxChild.size(); vertex++)
-//			{
-//				boundingBoxChild[vertex].x = boundingBoxChild[vertex].x / SCALE;
-//				boundingBoxChild[vertex].y = boundingBoxChild[vertex].y / SCALE;
-//			}*/
-//			for (int vertex{}; vertex < boundingBox.size(); vertex++)
-//			{
-//				boundingBoxChild.push_back(Vector2f{ boundingBox[vertex].x / SCALE, boundingBox[vertex].y / SCALE });
-//			}
-//			int ceilingHeight = sectors.data[sector][1] / SCALE;
-//			int floorHeight = sectors.data[sector][0] / SCALE;
-//			PlaneIregular input{ boundingBoxChild, 2, int(ceilingHeight) };
-//			PlaneIregular input2{ boundingBoxChild, 3, int(floorHeight) };
-//			m_pFloorsNCeilings[m_floorsNCeilingsAmount] = input;
-//			m_pFloorsNCeilings[m_floorsNCeilingsAmount + 1] = input2;
-//
-//			m_floorsNCeilingsAmount += 2;
-//		}
-//		else
-//		{
-//			std::cout << "from " << startNode << " to child node " << child << std::endl;
-//			std::cout << "using partition points " << partitionPoint1 << " and " << partitionPoint2 << std::endl;
-//			//first child right, then child left
-//			//it's another node
-//			// we want to clip the curent plane against the partition line
-//			std::vector<Vector2f> boundingBoxChild{};
-//			sliceLine(boundingBox, boundingBoxChild, partitionPoint1, partitionPoint2, i);
-//			
-//			int subsector{
-//				ConstructSubSectors(boundingBoxChild, nodes, child,
-//				subsectors, vertexes, segs, lines, sides, sectors,
-//				SCALE)
-//			};
-//			
-//		}
-//	}
-//	return 0;
-//}
-
 void Level::sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vector2f>& boundingBoxNew,
 	const Vector2f& partitionPoint1, const Vector2f& partitionPoint2, bool keepEdgePoints) {
 	for (int point{}; point < boundingBoxOriginal.size(); point++)
@@ -945,64 +638,6 @@ void Level::sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vec
 	}
 }
 
-
-//void Level::sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vector2f>& boundingBoxNew,
-//	 const Vector2f& partitionPoint1, const Vector2f& partitionPoint2, const int sideToSlice) {
-//	for (int point{}; point < boundingBoxOriginal.size(); point++)
-//	{
-//		// we make a new vector to store the child points
-//
-//
-//		// we take a point from the bounding box
-//		Vector2f segPoint1 = boundingBoxOriginal[point];
-//		
-//		//and check if it belongs to the left or right side
-//		// To find orientation of ordered triplet (p, q, r). 
-//		// The function returns following values 
-//		// 0 --> p1, p2 and r are collinear 
-//		// 1 --> Counterclockwise 
-//		// -1 --> Clockwise 
-//		int orientation{ segPoint1.orientation(partitionPoint1, partitionPoint2) };
-//		
-//		//left and right are to be done subsequentialy
-//		// 0 is right side
-//		// 1 is left side
-//		if (sideToSlice == 0 && orientation < 0)
-//		{
-//			//right side
-//			boundingBoxNew.push_back(segPoint1);
-//		}
-//		if (sideToSlice == 1 && orientation > 0)
-//		{
-//			//left side
-//			boundingBoxNew.push_back(segPoint1);
-//		}
-//		if (orientation == 0) {
-//			boundingBoxNew.push_back(segPoint1);
-//		}
-//		// get the following point of the bounding box
-//		int nextPoint = utils::getArrIndex(boundingBoxOriginal.size(), point + 1);
-//		Vector2f segPoint2 = boundingBoxOriginal[nextPoint];
-//		
-//		Vector2f intersectionPoint{}; // point in which the potential intersection is stored.
-//		//check if the partition line and the bounding box segment intersect
-//		//bool intersectsWithPartition = Vector2f::doIntersect(
-//		bool intersectsWithPartition = Vector2f::intersection(
-//			partitionPoint1, partitionPoint2, segPoint1, segPoint2, intersectionPoint
-//		);
-//
-//
-//
-//		//if they intersect, add the intersectionPoint to the child bounding box.
-//		//all intersection pointys should always be added.
-//		if (intersectsWithPartition) {
-//			if (intersectionPoint.OnSegment(segPoint1, segPoint2))
-//			{
-//				boundingBoxNew.push_back(intersectionPoint);
-//			}
-//		}
-//	}
-//}
 
 //for a child, we need to slice it with all the segments
 void Level::SliceSegs(std::vector<Vector2f>& boundingBox, std::vector<Vector2f>& boundingBoxSubSector, int subSector, const LMP& subsectors, const LMP& segs, const LMP& vertexes)

@@ -17,7 +17,8 @@ public:
 	//void DrawLevel() const override;
 	void InitializeWallls();
 	void DrawLevel();
-	void UpdateLevel(const DoomCamera& eyeObject, float elapsedSec);
+	void UpdateLevel( DoomCamera& eyeObject, float elapsedSec);
+	void CollisionCHeck( DoomCamera& player, const int node);
 	float m_interval{};
 	int m_subSectorToDraw{};
 private:
@@ -25,15 +26,18 @@ private:
 	//added vars
 	Texture* m_pWallTexture;
 	Texture* m_pFloorTexture;
+	std::vector<BSPnode> m_BSP;
+	std::vector<BSPleafeNode> m_BSPleafs;
 	int m_PlaneAmount{};
 	Plane* m_pPlanes{ nullptr };
 	int m_floorsNCeilingsAmount{};
 	PlaneIregular* m_pFloorsNCeilings{ nullptr };
+
+	// we need a vector to store what line a wall belongs to
+	std::vector<int> m_LinePerWall;
+
 	void AddPlane(const Vector2f pSides[], const int lineIndex, const int wallIndex,
 		const float floorHeight, const float ceilingHeight, const int16_t* const * pVertexesImported, const int scale);
-	void ConstructFloor(const LMP& subSectorData, const LMP& segData, const LMP& lineData,
-		const LMP& sideData, const LMP& sectordata, const LMP& vertexArr, const LMP& nodesArr, const int* nodePerSubSector,
-		const float scale, int* const pVertexAmountPerSubSector, int* const * const pVertexesPerSubSector);
 	void ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
 		const LMP& nodes, int startNode, const LMP& subsectors, const LMP& vertexes,
 		const LMP& segs, const LMP& lines, const LMP& sides, const LMP& sectors,

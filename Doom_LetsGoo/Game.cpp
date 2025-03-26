@@ -75,12 +75,10 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		//Eye.m_eyePos.x = Eye.m_eyePos.x + Eye.getLookkVector().x;
 		//Eye.m_eyePos.y = Eye.m_eyePos.y + Eye.getLookkVector().y;
 		m_pLevel->m_subSectorToDraw++;
-		std::cout << "drawing sub sector " << m_pLevel->m_subSectorToDraw << std::endl;
 		break;
 	case SDLK_DOWN:
 		//g_eyePos.z = g_eyePos.z - increment;
 		m_pLevel->m_subSectorToDraw--;
-		std::cout << "drawing sector " << m_pLevel->m_subSectorToDraw << std::endl;
 		break;
 	case SDLK_a:
 		m_Camera.m_Pos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
@@ -138,7 +136,14 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 	const float mousPosX{ float(e.x) };
 	if (mousPosX <= 1)
 	{
-		SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
+		//SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
+		SDL_WarpMouseInWindow(SDL_GL_GetCurrentWindow(), GetViewPort().width - 2, mouseY);
+		//SDL_WarpMouseInWindow
+	}
+	if (mousPosX >= GetViewPort().width - 1)
+	{
+		//SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
+		SDL_WarpMouseInWindow(SDL_GL_GetCurrentWindow(), 2, mouseY);
 		//SDL_WarpMouseInWindow
 	}
 	
@@ -193,10 +198,10 @@ void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)
 {
 
-	float increment{ 0.05f };
+	float increment{ 10.f };
 	//Eye.m_eyePos.y = Eye.m_eyePos.y + increment * e.y;
-	m_Camera.m_Pos.x += cos(m_Camera.m_angleOffset) * e.y;
-	m_Camera.m_Pos.y -= sin(m_Camera.m_angleOffset) * e.y;
+	m_Camera.m_Pos.x += cos(m_Camera.m_angleOffset) * e.y * increment;
+	m_Camera.m_Pos.y -= sin(m_Camera.m_angleOffset) * e.y * increment;
 
 
 }

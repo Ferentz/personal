@@ -239,7 +239,7 @@ void BaseGame::Run()
 				}
 				case SDL_WINDOWEVENT:
 				{
-					if (0 != e.window.data1 || 0 != e.window.data2)
+					if (e.window.event == SDL_WINDOWEVENT_RESIZED)
 					{
 						//m_pWindow.width
 						m_Window.width = float(e.window.data1);
@@ -251,7 +251,9 @@ void BaseGame::Run()
 						//_windowEvents.emplace_back(_lastWindowMetrics);
 
 						//_refresh(); // user callback that may be used to repaint the window
+						
 					}
+					
 					break;
 				}
 			
