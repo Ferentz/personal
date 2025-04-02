@@ -3,14 +3,17 @@
 #include <vector>
 
 //class Window;
-struct DoomCamera final
+class DoomCamera final
 {
 public:
 	Vector3f m_Pos;
+	Vector3f m_NextPos;
+	std::vector<Vector2f> m_Walls;
 	float m_projDist;
 	//const float m_Pi;
+	void pushPosition();
 	float m_angleOffset;
-
+	void rayy();
 	DoomCamera(const Rectf& window);
 	Vector2f PerspCalc(point2D_3D& pointStruc, const Vector3f& point)const;
 	Vector2f PerspCalc(point2D_3D& pointStruc)const;

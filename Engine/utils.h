@@ -92,7 +92,7 @@ namespace utils
 #pragma region FileHandelingFunctionality
 	//LMP ReadLMP(const std::string& filename, int16_t**& outArray, int elementsPerRow);
 	LMP ReadLMP(const std::string& filename, int elementsPerRow);
-	std::string convertToCharString(uint16_t a, uint16_t b, uint16_t c, uint16_t d);
+	std::string convertToCharString(const int16_t* stringStart);
 	uint16_t ReadNodeField(uint16_t field);
 #pragma endregion FileHandelingFunctionality
 	int getArrIndex(int arrLen, int index);

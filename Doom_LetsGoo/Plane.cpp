@@ -85,42 +85,80 @@ void Plane::DrawPlane(const Texture& texture) {
 		texture.DrawTexturePersp(planesCompArr3D);
 	}
 }
-
 bool Plane::PlaneCollision(DoomCamera& eyeObject) {
-	
-	Vector3f normalWidth{ m_Width.Normalized()};
-	Vector3f normalHeight{ m_Height.Normalized() };
-	Vector3f normal{ m_Width.CrossProduct(m_Height).Normalized() }; //cross(height).normalize() };
 
-	Vector3f relativeEyeLocation_moved{ eyeObject.m_Pos.x - m_Location.x,
-		eyeObject.m_Pos.y - m_Location.y,
-		eyeObject.m_Pos.z - m_Location.z };
-
-	//std::cout << relativeEyeLocation_moved << std::endl;
-
-	float newXpos = relativeEyeLocation_moved.DotProduct(normalWidth) * relativeEyeLocation_moved.DotProduct(normalWidth);//dot(normalWidth), 2)); // all power 2 to avoid using the square root later
-	float newYpos = relativeEyeLocation_moved.DotProduct(normalHeight) * relativeEyeLocation_moved.DotProduct(normalHeight);
-	float newZpos = relativeEyeLocation_moved.DotProduct(normal) * relativeEyeLocation_moved.DotProduct(normal);
-
-	float planeWidth = m_Width.DotProduct(m_Width);  // Squared length of width vector
-	float planeHeight = m_Height.DotProduct(m_Height);  // Squared length of height vector
-
-	while (newXpos >= 0 - planeOfset && newXpos <= planeWidth + planeOfset &&
-		newYpos >= 0 - planeOfset && newYpos <= planeHeight + planeOfset &&
-		newZpos >= -planeOfset && newZpos <= planeOfset) //planeOfset is the power 2 of the actual planeoffset
+	float top{ m_Location.z + m_Height.z };
+	float bottom{ m_Location.z };
+	float topUse{ top };
+	float bottomUse{ bottom };
+	if (top < bottom)
 	{
-		float sideCheck = relativeEyeLocation_moved.DotProduct(normal);
-		int mult{ -1 };
-		if (sideCheck > 0) {
-			mult = 1;
-		}
-		std::cout << "collide" << std::endl;
-		eyeObject.m_Pos.x += normal.x * mult;
-		eyeObject.m_Pos.y += normal.y * mult;
-		eyeObject.m_Pos.z += normal.z * mult;
+		topUse = bottom;
+		bottomUse = top;
+	}
+	
+	if (eyeObject.m_NextPos.z > topUse || eyeObject.m_NextPos.z < bottomUse)
+	{
+		return false;
+	}
+		
+	utils::HitInfo hitInfo{};
+	Vector2f pos{ eyeObject.m_Pos.x, eyeObject.m_Pos.y };
+	Vector2f nextPos{ eyeObject.m_NextPos.x, eyeObject.m_NextPos.y };
+	Vector2f wallvert[]{ Vector2f( m_Points[0].point3D.x, m_Points[0].point3D.y ),
+		Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y } };
+	
+	
+	if (utils::Raycast(wallvert, 2,
+		pos, nextPos,
+		hitInfo))
+	{
+		const Vector2f RAY{ pos - nextPos };
+		const Vector2f REFLECTION{ RAY.Reflect(hitInfo.normal) };
+
+		Vector2f nextPoint2D = hitInfo.intersectPoint - REFLECTION * (hitInfo.lambda);
+		eyeObject.m_NextPos.x = nextPoint2D.x;
+		eyeObject.m_NextPos.y = nextPoint2D.y;
 		return true;
 	}
-
 	return false;
 }
+//
+//bool Plane::PlaneCollision(DoomCamera& eyeObject) {
+//	
+//	Vector3f normalWidth{ m_Width.Normalized()};
+//	Vector3f normalHeight{ m_Height.Normalized() };
+//	Vector3f normal{ m_Width.CrossProduct(m_Height).Normalized() }; //cross(height).normalize() };
+//
+//	Vector3f relativeEyeLocation_moved{ eyeObject.m_Pos.x - m_Location.x,
+//		eyeObject.m_Pos.y - m_Location.y,
+//		eyeObject.m_Pos.z - m_Location.z };
+//
+//	//std::cout << relativeEyeLocation_moved << std::endl;
+//
+//	float newXpos = relativeEyeLocation_moved.DotProduct(normalWidth) * relativeEyeLocation_moved.DotProduct(normalWidth);//dot(normalWidth), 2)); // all power 2 to avoid using the square root later
+//	float newYpos = relativeEyeLocation_moved.DotProduct(normalHeight) * relativeEyeLocation_moved.DotProduct(normalHeight);
+//	float newZpos = relativeEyeLocation_moved.DotProduct(normal) * relativeEyeLocation_moved.DotProduct(normal);
+//
+//	float planeWidth = m_Width.DotProduct(m_Width);  // Squared length of width vector
+//	float planeHeight = m_Height.DotProduct(m_Height);  // Squared length of height vector
+//
+//	while (newXpos >= 0 - planeOfset && newXpos <= planeWidth + planeOfset &&
+//		newYpos >= 0 - planeOfset && newYpos <= planeHeight + planeOfset &&
+//		newZpos >= -planeOfset && newZpos <= planeOfset) //planeOfset is the power 2 of the actual planeoffset
+//	{
+//		float sideCheck = relativeEyeLocation_moved.DotProduct(normal);
+//		int mult{ -1 };
+//		if (sideCheck > 0) {
+//			mult = 1;
+//		}
+//		std::cout << "collide" << std::endl;
+//		eyeObject.m_Pos.x += normal.x * mult;
+//		eyeObject.m_Pos.y += normal.y * mult;
+//		eyeObject.m_Pos.z += normal.z * mult;
+//		return true;
+//	}
+//
+//	return false;
+//}
 

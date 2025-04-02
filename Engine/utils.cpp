@@ -839,10 +839,15 @@ LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
 }
 
 
-std::string utils::convertToCharString(uint16_t a, uint16_t b, uint16_t c, uint16_t d) {
+std::string utils::convertToCharString(const int16_t* stringStart)
+{
 	// Create a string large enough to hold the binary representation of four 16-bit integers
 	std::string result(sizeof(uint16_t) * 4, '\0');
 
+	const int16_t a{ stringStart[0] };
+	const int16_t b{ stringStart[1] };
+	const int16_t c{ stringStart[2] };
+	const int16_t d{ stringStart[3] };
 	// Pack the integers into the string
 	result[0] = a & 0xFF;        // Lower 8 bits of A
 	result[1] = (a >> 8) & 0xFF; // Upper 8 bits of A

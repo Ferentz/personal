@@ -44,6 +44,11 @@ void Level::UpdateLevel( DoomCamera& eyeObject, float elapsedSec)
 		m_pPlanes[i].UpdatePlane(eyeObject);
 		m_pPlanes[i].PlaneCollision(eyeObject);
 	}
+
+	// we wanna implememnt the raycast
+	// the ray is from pos to next pos. and we cast to the relevant level geometry
+
+
 	for (int i = 0; i < m_floorsNCeilingsAmount; ++i) {
 	//for (int i = m_subSectorToDraw * 2; i < m_subSectorToDraw * 2 + 2; ++i) {
 		//planes[i].PlaneCollision(Eye);
@@ -178,12 +183,9 @@ void Level::InitializeWallls()
 		int sideDef{ linesImported.data[line][5] };
 		int sector{ sidesImported.data[sideDef][14] };
 
-		std::string charString1 = utils::convertToCharString(sidesImported.data[sideDef][2],
-			sidesImported.data[sideDef][3], sidesImported.data[sideDef][4], sidesImported.data[sideDef][5]);
-		std::string charString2 = utils::convertToCharString(sidesImported.data[sideDef][6],
-			sidesImported.data[sideDef][7], sidesImported.data[sideDef][8], sidesImported.data[sideDef][9]);
-		std::string charString3 = utils::convertToCharString(sidesImported.data[sideDef][10],
-			sidesImported.data[sideDef][11], sidesImported.data[sideDef][12], sidesImported.data[sideDef][13]);
+		std::string charString1 = utils::convertToCharString(&sidesImported.data[sideDef][2]);
+		std::string charString2 = utils::convertToCharString(&sidesImported.data[sideDef][6]);
+		std::string charString3 = utils::convertToCharString(&sidesImported.data[sideDef][10]);
 
 		// top
 		if (charString1.find("-") == std::string::npos)

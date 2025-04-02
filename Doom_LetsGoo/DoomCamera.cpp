@@ -13,6 +13,11 @@ DoomCamera::DoomCamera(const Rectf& window)
 {
 }
 
+void DoomCamera::pushPosition()
+{
+	m_Pos = m_NextPos;
+}
+
 Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) const {
 	//std::cout << m_Window.width << std::endl;
 	const float DEVISION = m_Window.width / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
@@ -257,4 +262,21 @@ void DoomCamera::CalculateLookAtVector() { // why is it like this? because with 
 
 Vector2f DoomCamera::GetLookAtVector() {
 	return m_lookVector;
+}
+
+void DoomCamera::rayy()
+{
+	utils::HitInfo hitInfo{};
+	Vector2f pos{ m_Pos.x, m_Pos.y };
+	Vector2f nextPos{ m_NextPos.x, m_NextPos.y };
+	if (utils::Raycast(m_Walls,
+		pos,
+		nextPos,
+		hitInfo))
+	{
+		const Vector2f RAY{ pos - nextPos };
+		const Vector2f REFLECTION{ RAY.Reflect(hitInfo.normal) };
+		// basicaly, we want the colision to happen before the character gets moved.
+		// so, if there is hit info, it needs to be checked.
+	}
 }

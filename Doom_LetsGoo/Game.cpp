@@ -42,6 +42,7 @@ void Game::Update( float elapsedSec )
 	//	std::cout << "Left and up arrow keys are down\n";
 	//}
 	m_pLevel->UpdateLevel(m_Camera, elapsedSec);
+	m_Camera.m_Pos = m_Camera.m_NextPos;
 
 }
 
@@ -61,14 +62,14 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 	{
 	case SDLK_LEFT:
 		//g_eyePos.x = g_eyePos.x + increment;
-		m_Camera.m_Pos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_Pos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 
 		break;
 	case SDLK_RIGHT:
 		//g_eyePos.x = g_eyePos.x - increment;
-		m_Camera.m_Pos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_Pos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_UP:
 		//g_eyePos.z = g_eyePos.z + increment;
@@ -81,26 +82,26 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		m_pLevel->m_subSectorToDraw--;
 		break;
 	case SDLK_a:
-		m_Camera.m_Pos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_Pos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_d:
-		m_Camera.m_Pos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_Pos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_w:
-		m_Camera.m_Pos.x += m_Camera.GetLookAtVector().x;
-		m_Camera.m_Pos.y -= m_Camera.GetLookAtVector().y;
+		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().x;
+		m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().y;
 		break;
 	case SDLK_s:
-		m_Camera.m_Pos.x -= m_Camera.GetLookAtVector().x;
-		m_Camera.m_Pos.y += m_Camera.GetLookAtVector().y;
+		m_Camera.m_NextPos.x -= m_Camera.GetLookAtVector().x;
+		m_Camera.m_NextPos.y += m_Camera.GetLookAtVector().y;
 		break;
 	case SDLK_q:
-		m_Camera.m_Pos.z += 1;
+		m_Camera.m_NextPos.z += 1;
 		break;
 	case SDLK_e:
-		m_Camera.m_Pos.z -= 1;
+		m_Camera.m_NextPos.z -= 1;
 		break;
 		//case SDLK_1:
 		//case SDLK_KP_1:
@@ -200,8 +201,8 @@ void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)
 
 	float increment{ 10.f };
 	//Eye.m_eyePos.y = Eye.m_eyePos.y + increment * e.y;
-	m_Camera.m_Pos.x += cos(m_Camera.m_angleOffset) * e.y * increment;
-	m_Camera.m_Pos.y -= sin(m_Camera.m_angleOffset) * e.y * increment;
+	m_Camera.m_NextPos.x += cos(m_Camera.m_angleOffset) * e.y * increment;
+	m_Camera.m_NextPos.y -= sin(m_Camera.m_angleOffset) * e.y * increment;
 
 
 }

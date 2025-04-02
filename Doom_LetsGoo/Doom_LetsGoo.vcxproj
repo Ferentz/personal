@@ -160,6 +160,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="DoomCamera.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="LevelGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Plane.cpp" />
@@ -169,6 +170,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="DoomCamera.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="LevelGenerator.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PlaneIregular.h" />
