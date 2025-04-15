@@ -3,11 +3,13 @@
 #include <ios>
 #include <iostream>
 
+// need to start thinking on ui
 
 Game::Game( const Window& window ) 
 	:BaseGame{ window },
 	m_Camera{ GetViewPort()},
-	m_WindowWidth{window.width}
+	m_WindowWidth{window.width},
+	m_UI{ new Texture{"STBAR_converted.png"} }
 {
 	Initialize();
 }
@@ -42,7 +44,11 @@ void Game::Update( float elapsedSec )
 	//	std::cout << "Left and up arrow keys are down\n";
 	//}
 	m_pLevel->UpdateLevel(m_Camera, elapsedSec);
-	m_Camera.m_Pos = m_Camera.m_NextPos;
+	m_Camera.ColideWLevel(m_pLevel);
+	m_Camera.VelocCalc(elapsedSec);
+	m_Camera.pushPosition();
+	// preferably, we want to just say "player, colide!" and the player then checks where it is in the bsp tree etc
+	// perhaps we first gather all the input, and then check it agianst 
 
 }
 
@@ -50,7 +56,15 @@ void Game::Draw( ) const
 {
 	BaseGame::Draw();
 	ClearBackground( );
-	m_pLevel->DrawLevel();;
+	m_pLevel->DrawLevel();
+	float width{ GetWindow().width };
+	float uiWidth{ m_UI->GetWidth() };
+	float ratio{ uiWidth / width };
+
+	Rectf hi{ 0, 0, width, m_UI->GetHeight()/ratio};
+	
+
+	m_UI->Draw(hi);
 
 }
 
@@ -102,6 +116,15 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		break;
 	case SDLK_e:
 		m_Camera.m_NextPos.z -= 1;
+		break;
+	case SDLK_SPACE:
+		if (m_Camera.m_Standing)
+		{
+			std::cout << "jump";
+			m_Camera.m_Standing = false;
+			m_Camera.m_vericalVelocity = 4;
+		}
+		
 		break;
 		//case SDLK_1:
 		//case SDLK_KP_1:

@@ -55,15 +55,9 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int colour)
 void Plane::UpdatePlane(const DoomCamera& eyeObject) {
 	for (int index{}; index < 4; index++) {
 		m_Points[index].point2D = eyeObject.PerspCalc(m_Points[index], m_Points[index].point3D);
-		if (m_Points[index].Angle[2] > M_PI * 0.5f || m_Points[index].Angle[2] < - M_PI * 0.5f) {
-			m_Points[index].amIVisible = false;
-		}
-		else {
-			m_Points[index].amIVisible = true;
-		}
 	}
-
 }
+
 void Plane::DrawPlane(const Texture& texture) {
 	//the negine, open gl might not be set up to draw for 3D
 	bool isVisible{ false };
@@ -123,6 +117,53 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 	}
 	return false;
 }
+
+bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
+	Vector2f& returnPos, Vector2f& outNormal) const
+{
+	float top = m_Location.z + m_Height.z;
+	float bottom = m_Location.z;
+	float topUse = std::max(top, bottom);
+	float bottomUse = std::min(top, bottom);
+
+	if (nextPos3D.z > topUse || nextPos3D.z < bottomUse)
+		return false;
+
+	Vector2f pos{ pos3D.x, pos3D.y };
+	Vector2f nextPos{ nextPos3D.x, nextPos3D.y };
+
+	Vector2f wallVerts[] = {
+		Vector2f{ m_Points[0].point3D.x, m_Points[0].point3D.y },
+		Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y }
+	};
+
+	utils::HitInfo hitInfo{};
+	if (utils::Raycast(wallVerts, 2, pos, nextPos, hitInfo))
+	{
+		// Get approach vector
+		Vector2f moveDir = (nextPos - pos).Normalized();
+
+		// Make sure normal is pointing toward pos (against motion)
+		Vector2f hitNormal = hitInfo.normal.Normalized();
+		if (hitNormal.DotProduct(moveDir) > 0.0f)
+		{
+			hitNormal = -hitNormal;  // Flip
+		}
+
+		outNormal = hitNormal;
+
+		// Calculate reflection result
+		Vector2f RAY = pos - nextPos;
+		Vector2f REFLECTION = RAY.Reflect(hitNormal);
+		Vector2f nextPoint2D = hitInfo.intersectPoint - REFLECTION * hitInfo.lambda;
+
+		returnPos = nextPoint2D;
+		return true;
+	}
+
+	return false;
+}
+
 //
 //bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 //	

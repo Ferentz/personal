@@ -19,6 +19,12 @@ public:
 	void DrawLevel();
 	void UpdateLevel( DoomCamera& eyeObject, float elapsedSec);
 	void CollisionCHeck( DoomCamera& player, const int node);
+	int getBSP(Vector2f& pos, const bool returnLeaf) const;
+	int getBSP(Vector2f& pos, const int node, const bool returnLeaf) const;
+	bool crossesBSPborder(Vector2f& pos, Vector2f& nextPos, const int node) const;
+	int GetLeafWallAmount(const int leaf) const;
+	float GetFloorOfLeaf(const int leaf) const;
+	Plane* GetWallFromLeaf(int leaf, int wallIdx) const;
 	float m_interval{};
 	int m_subSectorToDraw{};
 private:
@@ -39,7 +45,7 @@ private:
 	void AddPlane(const Vector2f pSides[], const int lineIndex, const int wallIndex,
 		const float floorHeight, const float ceilingHeight, const int16_t* const * pVertexesImported, const int scale);
 	void ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
-		const LMP& nodes, int startNode, const LMP& subsectors, const LMP& vertexes,
+		const LMP& nodes, int startNode, int prevNode, const LMP& subsectors, const LMP& vertexes,
 		const LMP& segs, const LMP& lines, const LMP& sides, const LMP& sectors,
 		const int SCALE, int* sectorPerSubsector);
 	void SeamFixSubsectors(const int* sectorPerSubsector, const LMP& subsectors, const LMP& vertexes,

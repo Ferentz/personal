@@ -31,11 +31,14 @@ struct Line {
 struct BSPnode {
 	Line partitionLine;
 	int children[2];
+	int parent;
 };
 
 struct BSPleafeNode
 {
-	int lineIndex;
+	int parent;
+	int startSeg;
+	int amountOfSegs;
 	float floorheight;
 	std::vector<int> wallIndexes;
 };

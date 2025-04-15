@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "DoomCamera.h"
 #include <iostream>
+#include "Level.h"
+#include "Plane.h"
 //#include "game.h"
+
+// next we need to work on jump
 
 
 DoomCamera::DoomCamera(const Rectf& window)
@@ -17,6 +21,144 @@ void DoomCamera::pushPosition()
 {
 	m_Pos = m_NextPos;
 }
+
+//so, we wanna call a function here that then does the colision.
+// perhaps the player can have a reference to the level.
+// then the player, in collision calls eveything.
+// we want a function that receives the level as a const
+void DoomCamera::ColideWLevel(const Level* pLevel)
+{
+	const int MaxIterations = 10;
+	const float Epsilon = 0.01f;
+
+	Vector3f curPos = m_Pos;
+	Vector3f nextPos = m_NextPos;
+
+	int iterations = 0;
+	bool hitSomething = true;
+	float NextHeight{};
+	while (hitSomething && iterations < MaxIterations)
+	{
+		hitSomething = false;
+
+		Vector2f cur2D{ curPos.x, curPos.y };
+		int leaf = pLevel->getBSP(cur2D, true);
+		float floorHeight = pLevel->GetFloorOfLeaf(leaf);
+		NextHeight = floorHeight;
+		//nextPos.z = floorHeight;
+
+		Vector3f moveVec = nextPos - curPos;
+		if (moveVec.Length() < Epsilon)
+			break;
+
+		Vector3f moveDirNorm = moveVec.Normalized();
+
+		for (int i = 0; i < pLevel->GetLeafWallAmount(leaf); ++i)
+		{
+			const Plane* wall = pLevel->GetWallFromLeaf(leaf, i);
+
+			Vector2f impactPoint2D, wallNormal2D;
+			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * m_charDIameter, impactPoint2D, wallNormal2D))
+			{
+				Vector3f wallNormal3D(wallNormal2D.x, wallNormal2D.y, 0.0f);
+
+				Vector3f fullMove = nextPos - curPos;
+				Vector3f slideVec = fullMove - wallNormal3D * (fullMove.DotProduct(wallNormal3D));
+
+				if (slideVec.Length() < Epsilon)
+				{
+					nextPos = curPos;
+				}
+				else
+				{
+					nextPos = curPos + slideVec;
+				}
+
+				// Update next floor height after wall slide
+				Vector2f next2D{ nextPos.x, nextPos.y };
+				int newLeaf = pLevel->getBSP(next2D, true);
+				NextHeight = pLevel->GetFloorOfLeaf(newLeaf);
+
+				hitSomething = true;
+				//break;
+			}
+		}
+
+		++iterations;
+	}
+
+	// Final corrected position after all slides
+	m_NextPos.x = nextPos.x;
+	m_NextPos.y = nextPos.y;
+	m_FLoorHeigt = NextHeight;
+
+}
+//
+//void DoomCamera::ColideWLevel(const Level* pLevel)
+//{
+//	//int charHeight{ 50 };
+//	float NextHeight{};
+//	Vector2f pos{ m_Pos.x,  m_Pos.y };
+//	//Vector2f posNext{ m_NextPos.x,  m_NextPos.y };
+//
+//	// we get the curent node that the player is in
+//	int leaf{ pLevel->getBSP(pos, true) };
+//	//int node{ pLevel->getBSP(pos, false) };
+//	// we set the floor height to the one of the current leaf.
+//	NextHeight = pLevel->GetFloorOfLeaf(leaf);
+//
+//	//we  check if it crosses the border
+//	//pLevel->crossesBSPborder(pos, posNext, node);
+//	Vector3f curPos{ m_Pos };
+//	Vector3f nextPos{ m_NextPos };
+//	
+//	
+//	bool lookForHit{ true };
+//	int whileDepth{};
+//	// we loop over the walls of the curent leaf
+//	while (lookForHit && whileDepth < 10)
+//	{
+//		if (whileDepth > 0)
+//		{
+//			std::cout << whileDepth << std::endl;
+//		}
+//		
+//		Vector3f interPosNorm{ Vector3f{nextPos - curPos}.Normalized() };
+//		Vector2f returnPos{};
+//		lookForHit = false;
+//		for (int i{}; i < pLevel->GetLeafWallAmount(leaf); i++)
+//		{
+//			// we get each wall
+//			const Plane* wall{ pLevel->GetWallFromLeaf(leaf, i) };
+//			// we check if the player colides with a wall
+//			// if it was to keep it's cuurent direction.
+//			if (wall->PlaneCollision(curPos, nextPos + (interPosNorm * m_charDIameter), returnPos))
+//			{
+//				// if it does collide, we receive the reflected position
+//
+//				// and ket the floorheight of the new leafnode
+//				leaf = pLevel->getBSP(returnPos, true);
+//				NextHeight = pLevel->GetFloorOfLeaf(leaf);
+//				nextPos.x = returnPos.x;
+//				nextPos.y = returnPos.y;
+//				nextPos.z = NextHeight;
+//				lookForHit = true;
+//				break;
+//			}
+//		}
+//		whileDepth++;
+//	}
+//	
+//
+//	m_NextPos.x = nextPos.x;
+//	m_NextPos.y = nextPos.y;
+//	m_FLoorHeigt = NextHeight;
+//
+//}
+
+// we can check if the 2 posses are on the same orientation to the partition line. if they are, just check curent leaf.
+// else check what the next one is and if the collision makes sense.
+// the we just safe the node, and if it's negative, we can save it.
 
 Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) const {
 	//std::cout << m_Window.width << std::endl;
@@ -52,6 +194,14 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 	pointStruc.Angle[1] = yAngle;
 	pointStruc.prevAngle[0] = pointStruc.Angle[0];
 	pointStruc.prevAngle[1] = pointStruc.Angle[1];
+	if (newXDist > 0)
+	{
+		pointStruc.amIVisible = true;
+	}
+	else
+	{
+		pointStruc.amIVisible = false;
+	}
 
 	Vector2f Point2D{};
 	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
@@ -70,6 +220,7 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 	else {
 		Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + m_Window.width / 2;
 		pointStruc.Angle[2] = (newXAngle)*m_projDist;
+		pointStruc.point2D = Point2D;
 		return Point2D;
 	}
 
@@ -80,6 +231,7 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 
 	Point2D.x = SCALE * (result * m_projDist) * DEVISION + m_Window.width / 2;
 	pointStruc.Angle[2] = newXAngle;
+	pointStruc.point2D = Point2D;
 	return Point2D;
 
 }
@@ -207,6 +359,20 @@ void DoomCamera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) 
 	}
 	//utils::Raycast(LINE_SEGMENT, CENTER, m_MousePos, hitInfo)
 
+}
+
+void DoomCamera::VelocCalc(float elapsedSec)
+{
+	m_vericalVelocity -= (m_GRAVITY * elapsedSec);
+	m_NextPos.z = m_Pos.z + m_vericalVelocity;
+	if (m_NextPos.z <= m_FLoorHeigt + m_charHeight)
+	{
+		m_vericalVelocity = 0;
+		m_NextPos.z = m_FLoorHeigt + m_charHeight;
+		m_Standing = true;
+		return;
+	}
+	
 }
 
 void DoomCamera::PerspCalc(point2D_3D& pointStruct1, point2D_3D& pointStruct2) const {

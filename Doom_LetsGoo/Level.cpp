@@ -42,7 +42,7 @@ void Level::UpdateLevel( DoomCamera& eyeObject, float elapsedSec)
 	for (int i = 0; i < m_PlaneAmount; ++i) {
 		//planes[i].PlaneCollision(Eye);
 		m_pPlanes[i].UpdatePlane(eyeObject);
-		m_pPlanes[i].PlaneCollision(eyeObject);
+		//m_pPlanes[i].PlaneCollision(eyeObject);
 	}
 
 	// we wanna implememnt the raycast
@@ -263,7 +263,7 @@ void Level::InitializeWallls()
 	std::vector<Vector2f> startingBox{ Vector2f{left, top},Vector2f{right, top},Vector2f{right, bottom },Vector2f{left, bottom}};
 	std::vector<Line> sliceLines;
 	ConstructSubSectors(startingBox, sliceLines,
-		nodesImported, nodesImported.rows - 1, sectorSegsImported, vertexesImported,
+		nodesImported, nodesImported.rows - 1, nodesImported.rows - 1, sectorSegsImported, vertexesImported,
 		segsImported, linesImported, sidesImported, sectorsImported,
 		SCALE, sectorPerSubsector);
 
@@ -274,10 +274,17 @@ void Level::InitializeWallls()
 	{
 		for (int leafnode{}; leafnode < m_BSPleafs.size(); leafnode++)
 		{
-			if (m_LinePerWall[wallIndex] == m_BSPleafs[leafnode].lineIndex)
+			for (int segOffset{}; segOffset < m_BSPleafs[leafnode].amountOfSegs; segOffset++)
 			{
-				m_BSPleafs[leafnode].wallIndexes.push_back(wallIndex);
+				int line = segsImported.data[m_BSPleafs[leafnode].startSeg + segOffset][3];
+				if (m_LinePerWall[wallIndex] == line)
+				{
+					m_BSPleafs[leafnode].wallIndexes.push_back(wallIndex);
+				}
 			}
+			
+			// so we gotta get the first line, and then all lines after.
+			
 		}
 	}
 
@@ -292,6 +299,11 @@ void Level::InitializeWallls()
 	delete[] sectorPerSubsector;
 	delete[] pLines;
 	pLines = nullptr;
+}
+
+float Level::GetFloorOfLeaf(const int leaf) const
+{
+	return m_BSPleafs[leaf].floorheight;
 }
 
 void Level::CollisionCHeck(DoomCamera& player, const int node)
@@ -331,6 +343,68 @@ void Level::CollisionCHeck(DoomCamera& player, const int node)
 	}
 }
 
+int Level::getBSP(Vector2f& pos, const bool returnLeaf) const
+{
+	return getBSP(pos, m_BSP.size() - 1, returnLeaf);
+}
+
+int Level::getBSP(Vector2f& pos, const int node, const bool returnLeaf) const 
+{
+	//int node{ 3 };
+	// we want to run over the BSP with the camera and check where it is;
+	//Vector2f pos = Vector2f{ player.m_Pos.x, player.m_Pos.y };
+	int orient = pos.orientation(m_BSP[node].partitionLine.startPoint, m_BSP[node].partitionLine.endPoint);
+	int child{ 0 };
+	if (orient > 0)
+	{
+		// go to left child
+		child = m_BSP[node].children[1];
+	}
+	else if (orient < 0)
+	{
+		// go to right child
+		child = m_BSP[node].children[0];
+	}
+
+	if (child < 0)
+	{
+		if (returnLeaf)
+		{
+			const int leafnode{ utils::ReadNodeField(child) };
+			return leafnode;
+		}
+		else
+		{
+			return node;
+		}
+	}
+	else
+	{
+		//go to the next node
+		return getBSP(pos, child, returnLeaf);
+	}
+}
+bool Level::crossesBSPborder(Vector2f& pos, Vector2f& nextPos, const int node) const
+{
+	int orient = pos.orientation(m_BSP[node].partitionLine.startPoint, m_BSP[node].partitionLine.endPoint);
+	int orientNext = nextPos.orientation(m_BSP[node].partitionLine.startPoint, m_BSP[node].partitionLine.endPoint);
+	if (orient == orientNext)
+	{
+		return false;
+	}
+	return true;
+}
+int Level::GetLeafWallAmount(const int leaf) const
+{
+	return m_BSPleafs[leaf].wallIndexes.size();
+}
+
+Plane* Level::GetWallFromLeaf(const int leaf, const int wallIdx) const
+{
+	const int wallIndex{ m_BSPleafs[leaf].wallIndexes[wallIdx] };
+	return &m_pPlanes[wallIndex];
+}
+
 void Level::AddPlane(const Vector2f pSides[], const int lineIndex, const int wallIndex,
 	const float floorHeight, const float ceilingHeight, const int16_t* const* pVertexesImported, const int scale)
 {
@@ -353,7 +427,7 @@ void Level::AddPlane(const Vector2f pSides[], const int lineIndex, const int wal
 
 
 void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
-	const LMP& nodes, int startNode, const LMP& subsectors, const LMP& vertexes,
+	const LMP& nodes, int startNode, int prevNode, const LMP& subsectors, const LMP& vertexes,
 	const LMP& segs, const LMP& lines, const LMP& sides, const LMP& sectors,
 	const int SCALE, int* sectorPerSubsector)
 {
@@ -390,6 +464,7 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 		}
 		m_BSP[startNode].partitionLine = Line{ partitionPoint1, partitionPoint2 };
 		m_BSP[startNode].children[i] = child;
+		m_BSP[startNode].parent = prevNode;
 		
 		if (child < 0)
 		{
@@ -429,7 +504,7 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 			//if (subSector == 15) {
 				//std::cout << " seg " << seg << std::endl;
 			//}
-			int lineI = segs.data[seg][3];
+			int lineI = segs.data[seg][3]; // it just gets the first line. we need the rest too
 			
 			int orienttion = segs.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
 			int sideIndex{ 5 };
@@ -454,8 +529,10 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 			}*/
 			float ceilingHeight = sectors.data[sector][1] / SCALE;
 			float floorHeight = sectors.data[sector][0] / SCALE;
-			m_BSPleafs[subSector].lineIndex = lineI;
+			m_BSPleafs[subSector].startSeg = seg;
+			m_BSPleafs[subSector].amountOfSegs = subsectors.data[subSector][0];
 			m_BSPleafs[subSector].floorheight = floorHeight;
+			m_BSPleafs[subSector].parent = startNode;
 			PlaneIregular input{ boundingBoxChild, sector, int(ceilingHeight) };
 			PlaneIregular input2{ boundingBoxChild, 3, int(floorHeight) };
 			m_pFloorsNCeilings[m_floorsNCeilingsAmount] = input;
@@ -470,7 +547,7 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 		}
 		else
 		{
-			ConstructSubSectors(boundingBox, sliceLines, nodes, child,
+			ConstructSubSectors(boundingBox, sliceLines, nodes, child, startNode,
 				subsectors, vertexes, segs, lines, sides, sectors,
 				SCALE, sectorPerSubsector);
 		}

@@ -34,6 +34,7 @@ private:
 	void Cleanup( );
 	void ClearBackground( ) const;
 	
+	Texture* m_UI;
 	Level* m_pLevel{};
 	DoomCamera m_Camera;
 	float m_WindowWidth;

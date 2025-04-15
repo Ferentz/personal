@@ -14,6 +14,8 @@ public:
 	void DrawPlane(const Texture& texture);
 	//verb in ervey function, plus, since we're already in plane class, no "plane" needed
 	bool PlaneCollision(DoomCamera& eyeObject);
+	bool PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
+		Vector2f& returnPos, Vector2f& outNormal) const;
 	float planeOfset2{ 50.f };
 	float planeOfset{ 400.f };
 	int m_colour;
