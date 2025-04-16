@@ -16,6 +16,7 @@ public:
 	//void UpdateLevel(float elapsedSec) override;
 	//void DrawLevel() const override;
 	void InitializeWallls();
+	void traverseBSP(int leaf, Vector2f pos);
 	void DrawLevel();
 	void UpdateLevel( DoomCamera& eyeObject, float elapsedSec);
 	void CollisionCHeck( DoomCamera& player, const int node);

@@ -22,6 +22,7 @@ Game::~Game( )
 void Game::Initialize( )
 {
 	glEnable(GL_DEPTH_TEST);
+	
 	m_pLevel = new Level();
 	m_pLevel->InitializeWallls();
 }
@@ -56,14 +57,16 @@ void Game::Draw( ) const
 {
 	BaseGame::Draw();
 	ClearBackground( );
-	m_pLevel->DrawLevel();
+	//m_pLevel->DrawLevel();
+	Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
+	int leaf{ m_pLevel->getBSP(pos, true) };
+	m_pLevel->traverseBSP(leaf, pos);
+
 	float width{ GetWindow().width };
 	float uiWidth{ m_UI->GetWidth() };
 	float ratio{ uiWidth / width };
 
 	Rectf hi{ 0, 0, width, m_UI->GetHeight()/ratio};
-	
-
 	m_UI->Draw(hi);
 
 }

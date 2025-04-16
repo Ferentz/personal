@@ -23,6 +23,7 @@ public:
 	}
 	virtual void Draw() const
 	{
+		glDepthFunc(GL_NOTEQUAL);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 

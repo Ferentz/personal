@@ -93,7 +93,7 @@ namespace utils
 	//LMP ReadLMP(const std::string& filename, int16_t**& outArray, int elementsPerRow);
 	LMP ReadLMP(const std::string& filename, int elementsPerRow);
 	std::string convertToCharString(const int16_t* stringStart);
-	uint16_t ReadNodeField(uint16_t field);
+	short InvertInt(uint16_t field);
 #pragma endregion FileHandelingFunctionality
 	int getArrIndex(int arrLen, int index);
 }

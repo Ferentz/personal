@@ -861,20 +861,29 @@ std::string utils::convertToCharString(const int16_t* stringStart)
 	return result;
 }
 
-uint16_t utils::ReadNodeField(uint16_t field) {
+short utils::InvertInt(uint16_t field) {
 	// Bit 15 determines if it's a subnode (0) or a subsector (1)
-	bool isSubsector = (field & 0x8000) != 0; // Check if bit 15 is set
+	bool isNegative = ((field & 0x8000) != 0); // Check if bit 15 is set
+	// reads field as binary, as well as 0x8000 and compares where both bits are true.
+	// since in 0x8000 only bit 15 is true, the result will either be 0x8000 or 0x0000.
 
 	// Bits 0-14 store the node or subsector number
-	uint16_t number = field & 0x7FFF; // Mask out bit 15
+	short number = field & 0x7FFF; // Mask out bit 15
+	// same as the previous, only all bits EXEPT for the final bit are true, so it will coppy field in it's entirety exept for the final bit.
 
-	/*if (isSubsector) {
-		std::cout << "Subsector number: " << number << std::endl;
+	if (isNegative) {
+		// return positive number
+		return number;
 	}
 	else {
-		std::cout << "Subnode number: " << number << std::endl;
-	}*/
-	return number;
+		//return negative number
+		number = number | 0x8000;
+		return number;
+		//with 0x8000 only having 1 in the sign bit, and since we're comparing with OR 
+		// this means that regardless of if number has the sign bit on or not,
+		// the result will be 1 for the signbit, always turning the number negative
+	}
+	
 }
 
 #pragma endregion FileHandelingFunctionality

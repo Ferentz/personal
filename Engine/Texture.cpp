@@ -301,7 +301,7 @@ void Texture::Draw( const Rectf& dstRect, const Rectf& srcRect ) const
 	// Tell opengl which texture we will use
 	glBindTexture( GL_TEXTURE_2D, m_Id );
 	glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-
+	glDepthFunc(GL_ALWAYS);
 	// Draw
 	glEnable( GL_TEXTURE_2D );
 	{
@@ -379,7 +379,7 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Rectf& srcRect) 
 
 	// Draw
 
-
+	
 
 	glEnable(GL_TEXTURE_2D);
 	{
@@ -391,16 +391,20 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Rectf& srcRect) 
 			float w3 = 1.0f / pVertices[3].z;
 
 			glTexCoord4f(textLeft * w0, textBottom * w0, 0.0f, w0);
-			glVertex3f(pVertices[0].x, pVertices[0].y, pVertices[0].z);
+			//glVertex3f(pVertices[0].x, pVertices[0].y, pVertices[0].z);
+			glVertex2f(pVertices[0].x, pVertices[0].y);
 
 			glTexCoord4f(textLeft * w1, textTop * w1, 0.0f, w1);
-			glVertex3f(pVertices[1].x, pVertices[1].y, pVertices[1].z);
+			//glVertex3f(pVertices[1].x, pVertices[1].y, pVertices[1].z);
+			glVertex2f(pVertices[1].x, pVertices[1].y);
 
 			glTexCoord4f(textRight * w2, textTop * w2, 0.0f, w2);
-			glVertex3f(pVertices[2].x, pVertices[2].y, pVertices[2].z);
+			//glVertex3f(pVertices[2].x, pVertices[2].y, pVertices[2].z);
+			glVertex2f(pVertices[2].x, pVertices[2].y);
 
 			glTexCoord4f(textRight * w3, textBottom * w3, 0.0f, w3);
-			glVertex3f(pVertices[3].x, pVertices[3].y, pVertices[3].z);
+			//glVertex3f(pVertices[3].x, pVertices[3].y, pVertices[3].z);
+			glVertex2f(pVertices[3].x, pVertices[3].y);
 		}
 		glEnd();
 	}
@@ -418,6 +422,8 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Vector2f*pVertec
 
 	glEnable(GL_TEXTURE_2D);
 
+	
+
 	glBegin(GL_POLYGON);  // Suitable for convex floors
 	{
 		//const float textureScale = 100.0f;  // Adjust for texture density
@@ -431,7 +437,8 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Vector2f*pVertec
 			float texV = (pVerteciesLayout[i].y / scale);
 
 			glTexCoord2f(texU, texV);
-			glVertex3f(pVertices[i].x, pVertices[i].y, pVertices[i].z);
+			//glVertex3f(pVertices[i].x, pVertices[i].y, pVertices[i].z);
+			glVertex2d(pVertices[i].x, pVertices[i].y);
 		}
 	}
 	glEnd();

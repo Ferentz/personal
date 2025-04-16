@@ -6,6 +6,8 @@
 #include <vector>
 #include <cassert>
 #include "DoomCamera.h"
+#include <set>
+#include <stack>
 
 Level::Level()
 	:m_pWallTexture {}
@@ -15,11 +17,196 @@ Level::Level()
 
 Level::~Level () {
 	// some instructions
-	delete[] m_pPlanes;
+	delete[] m_pPlanes;		
 	delete[] m_pFloorsNCeilings;
 	delete m_pWallTexture;
 	delete m_pFloorTexture;
 }
+
+
+void Level::traverseBSP(int leaf, Vector2f pos)
+{
+	/*
+	we want to receive a childnode
+	find the parent
+	dive into it's other child untill we find a new child node.
+	then go back and find the parent
+
+	parent = startCHild.parent
+	for i < 2
+		newChild = bsp[parent].child[i]
+		if newChild !=startChild
+			diveTilChild()
+	------------------------------------------
+	*/
+
+	// set for constant look up time
+	std::set<int> visitedNodes{};
+	
+	//current ? leafIndex
+	int startLeaf{leaf};
+	if (leaf >= 0)
+	{
+		startLeaf = utils::InvertInt(leaf); // make sure the leaf is read as negative for correct handeling
+	}
+	std::stack<int> nodeStack;
+	nodeStack.push(startLeaf);
+
+	//while stack is not empty:
+	while (nodeStack.size() > 0)
+	{
+		int current = nodeStack.top();
+		nodeStack.pop();
+		if (visitedNodes.find(current) != visitedNodes.end())
+		{
+			continue;
+		}
+		//std::cout << current << std::endl;
+		if (current < 0)
+		{
+			
+			//visitLeaf(item.index)
+			//!!!!!!!! do what i need to do.
+
+			visitedNodes.insert(current);
+			int leafIndex{ utils::InvertInt(current) };
+			m_pFloorsNCeilings[leafIndex * 2].DrawPlane(*m_pFloorTexture);
+			m_pFloorsNCeilings[leafIndex * 2 + 1].DrawPlane(*m_pFloorTexture);
+			for (int wallNum{}; wallNum < m_BSPleafs[leafIndex].wallIndexes.size(); wallNum++)
+			{
+				int wallIndex{ m_BSPleafs[leafIndex].wallIndexes[wallNum] };
+				m_pPlanes[wallIndex].DrawPlane(*m_pWallTexture);
+			}
+			
+			int parent{ m_BSPleafs[leafIndex].parent };
+	
+			if (parent != current) {
+				nodeStack.push(parent);
+			}
+		}
+		else
+		{
+			// we have a node
+			visitedNodes.insert(current);
+			int parent{ m_BSP[current].parent };
+			if (parent != current) {
+				nodeStack.push(parent);
+			}
+			BSPnode node{ m_BSP[current] };
+			// perhaps we can check on what side the person is?
+			Vector2f end{ node.partitionLine.endPoint };
+			Vector2f start{ node.partitionLine.startPoint };
+			int orientation{ pos.orientation(start, end) };
+			if (orientation < 0)
+			{
+				nodeStack.push(node.children[1]);
+				nodeStack.push(node.children[0]);
+			}
+			else
+			{
+				nodeStack.push(node.children[0]);
+				nodeStack.push(node.children[1]);
+			}
+			
+			
+		}
+	}
+}
+
+//void Level::traverseBSP(int leaf)
+//{
+//	/*
+//	we want to receive a childnode
+//	find the parent
+//	dive into it's other child untill we find a new child node.
+//	then go back and find the parent
+//
+//	parent = startCHild.parent
+//	for i < 2
+//		newChild = bsp[parent].child[i]
+//		if newChild !=startChild
+//			diveTilChild()
+//	------------------------------------------
+//	*/
+//
+//	// set for constant look up time
+//	std::set<int> visitedNodes{};
+//
+//	//current ? leafIndex
+//	int startLeaf{ leaf };
+//	if (leaf >= 0)
+//	{
+//		startLeaf = utils::InvertInt(leaf); // make sure the leaf is read as negative for correct handeling
+//	}
+//	std::stack<int> nodeStack;
+//	nodeStack.push(startLeaf);
+//
+//	//while stack is not empty:
+//	while (nodeStack.size() > 0)
+//	{
+//		int current = nodeStack.top();
+//		nodeStack.pop();
+//		if (visitedNodes.find(current) != visitedNodes.end())
+//		{
+//			continue;
+//		}
+//		if (current < 0)
+//		{
+//			//visitLeaf(item.index)
+//			//!!!!!!!! do what i need to do.
+//
+//			visitedNodes.insert(current);
+//			int leafIndex{ utils::InvertInt(current) };
+//
+//			for (int wallNum{}; wallNum < m_BSPleafs[leafIndex].wallIndexes.size(); wallNum++)
+//			{
+//				int wallIndex{ m_BSPleafs[leafIndex].wallIndexes[wallNum] };
+//				m_pPlanes[wallIndex].DrawPlane(*m_pWallTexture);
+//			}
+//			m_pFloorsNCeilings[leafIndex].DrawPlane(*m_pFloorTexture);
+//			m_pFloorsNCeilings[leafIndex + 1].DrawPlane(*m_pFloorTexture);
+//			int parent{ m_BSPleafs[leafIndex].parent };
+//
+//			if (parent != current) {
+//				nodeStack.push(parent);
+//			}
+//		}
+//		else
+//		{
+//			// we have a node
+//			visitedNodes.insert(current);
+//			BSPnode node{ m_BSP[current] };
+//			nodeStack.push(node.children[0]);
+//			nodeStack.push(node.children[1]);
+//			int parent{ m_BSP[current].parent };
+//			if (parent != current) {
+//				nodeStack.push(parent);
+//			}
+//		}
+//	}
+//}
+
+//void printNumber(int n) {
+//	std::cout << "Number: " << n << "\n";
+//}
+//
+//void callFunction(void (*func)(int), int val) {
+//	func(val);
+//}
+//
+//int main() {
+//	callFunction(greet(5));  // Pass greet as a function pointer
+//	return 0;
+//}
+
+//void printNumber(int n) {
+//	std::cout << "Number: " << n << "\n";
+//}
+//
+//void callFunction(void (*func)(int), int val) {
+//	func(val);
+//}
+
 
 void Level::DrawLevel()
 {
@@ -148,7 +335,7 @@ void Level::InitializeWallls()
 			int16_t value{ nodesImported.data[i][j] };
 			int16_t sectorVal{ value };
 			if (value < 0) {
-				sectorVal = utils::ReadNodeField(value);
+				sectorVal = utils::InvertInt(value);
 				//pNodePerSector[sectorVal] = i;
 				
 			}
@@ -326,7 +513,7 @@ void Level::CollisionCHeck(DoomCamera& player, const int node)
 
 	if (child < 0)
 	{
-		const int leafnode{ utils::ReadNodeField(child) };
+		const int leafnode{ utils::InvertInt(child) };
 		const int wallsToCHeck{ int(m_BSPleafs[leafnode].wallIndexes.size()) };
 		for (int wall{}; wall < wallsToCHeck; wall++)
 		{
@@ -370,7 +557,7 @@ int Level::getBSP(Vector2f& pos, const int node, const bool returnLeaf) const
 	{
 		if (returnLeaf)
 		{
-			const int leafnode{ utils::ReadNodeField(child) };
+			const int leafnode{ utils::InvertInt(child) };
 			return leafnode;
 		}
 		else
@@ -470,7 +657,7 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 		{
 
 			// it's a subSector
-			const int subSector{ utils::ReadNodeField(child) };
+			const int subSector{ utils::InvertInt(child) };
 
 			/*if (subSector == 34)
 			{*/
@@ -533,12 +720,15 @@ void Level::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::v
 			m_BSPleafs[subSector].amountOfSegs = subsectors.data[subSector][0];
 			m_BSPleafs[subSector].floorheight = floorHeight;
 			m_BSPleafs[subSector].parent = startNode;
+			std::cout << subSector << std::endl;
 			PlaneIregular input{ boundingBoxChild, sector, int(ceilingHeight) };
 			PlaneIregular input2{ boundingBoxChild, 3, int(floorHeight) };
+			std::cout << "fnc" << m_floorsNCeilingsAmount << std::endl;
 			m_pFloorsNCeilings[m_floorsNCeilingsAmount] = input;
 			m_pFloorsNCeilings[m_floorsNCeilingsAmount + 1] = input2;
 
 			m_floorsNCeilingsAmount += 2;
+			
 
 
 
