@@ -24,7 +24,6 @@ void Game::Initialize( )
 	glEnable(GL_DEPTH_TEST);
 	
 	m_pLevel = new Level();
-	m_pLevel->InitializeWallls();
 }
 
 void Game::Cleanup( )

@@ -55,10 +55,10 @@ void DoomCamera::ColideWLevel(const Level* pLevel)
 
 		for (int i = 0; i < pLevel->GetLeafWallAmount(leaf); ++i)
 		{
-			const Plane* wall = pLevel->GetWallFromLeaf(leaf, i);
-
+			const Plane& wall{ pLevel->GetWallFromLeaf(leaf, i) };
+		
 			Vector2f impactPoint2D, wallNormal2D;
-			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * m_charDIameter, impactPoint2D, wallNormal2D))
+			if (wall.PlaneCollision(curPos, nextPos + moveDirNorm * m_charDIameter, impactPoint2D, wallNormal2D))
 			{
 				Vector3f wallNormal3D(wallNormal2D.x, wallNormal2D.y, 0.0f);
 

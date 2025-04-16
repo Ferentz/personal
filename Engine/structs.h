@@ -29,17 +29,17 @@ struct Line {
 };
 
 struct BSPnode {
-	Line partitionLine;
-	int children[2];
-	int parent;
+	Line partitionLine{};
+	int children[2]{};
+	int parent{};
 };
 
 struct BSPleafeNode
 {
-	int parent;
-	int startSeg;
-	int amountOfSegs;
-	float floorheight;
+	int parent{};
+	int startSeg{};
+	int amountOfSegs{};
+	float floorheight{};
 	std::vector<int> wallIndexes;
 };
 
