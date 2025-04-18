@@ -71,7 +71,7 @@ struct Vector2f final
 	Vector2f Reflect( const Vector2f& surfaceNormal ) const;
 
 	//check if the point lies on th elinesegment
-	bool OnSegment(Vector2f segStart, Vector2f segEnd);
+	bool WithinSegmentBounds(Vector2f segStart, Vector2f segEnd);
 
 	int orientation(Vector2f p, Vector2f q);
 	static bool doIntersect(Vector2f p1, Vector2f q1, Vector2f p2, Vector2f q2,

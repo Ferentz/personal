@@ -1,15 +1,18 @@
 #pragma once
 #include "utils.h"
 #include "structs.h"
+#include <set>
 
 class LevelGenerator final
 {
 public:
 	LevelGenerator(std::vector<BSPnode>& p_BSPtree, std::vector<BSPleafeNode>& p_BSPleafs,
-		std::vector <Plane>& p_Planes, std::vector <PlaneIregular>& p_FloorsNCeilings);
+		std::vector <Plane*>& p_Planes, std::vector <PlaneIregular>& p_FloorsNCeilings,
+		std::set<int>& tags1, std::set<int>& tags2);
 private:
 	void GenerateLevel();
-	void AddPlane(int line, float ceilingHeight, float floorHeight, const float SCALE);
+	void MakeWalls(const float SCALE);
+	void AddPlane(int line, float floorHeight, float ceilingHeight, const float SCALE);
 	int GetSectorFromLine(int line, bool backSide);
 	void ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
 		int startNode, int prevNode, const float SCALE, int* sectorPerSubsector);
@@ -59,8 +62,11 @@ private:
 
 	std::vector<BSPnode>& r_BSPtree;
 	std::vector<BSPleafeNode>& r_BSPleafs;
-	std::vector <Plane>& r_Planes;
+	std::vector <Plane*>& r_Planes;
 	std::vector <PlaneIregular>& r_FloorsNCeilings;
+	std::set<int> r_tags[2];
+	std::vector<int> linePerWall;
+	
 	//std::vector <int> m_LinePerWall;
 };
 
@@ -68,24 +74,31 @@ namespace ReadVertexes {
 	const int x{ 0 }, y{ 1 };
 }
 namespace ReadLines {
-	const int vertex1{ 0 }, vertex2{ 1 }, flags{ 2 }, actionSpecial{ 3 },
+	const int vertex1{ 0 }, vertex2{ 1 }, flags{ 2 },
+		actionSpecial{ 3 },
 		sectorTag{ 4 }, frontSide{ 5 }, backSide{ 6 };
 }
 namespace ReadSides {
-	const int xOffset{ 0 }, yOffset{ 1 }, upperTexture{ 2 }, lowerTexture{ 6 },
+	const int xOffset{ 0 }, yOffset{ 1 }, upperTexture{ 2 },
+		lowerTexture{ 6 },
 		middleTexture{ 10 }, sector{ 14 };
 }
 namespace ReadSectors {
-	const int floorHeight{ 0 }, ceilingHeight{ 1 }, floorTexture{ 2 }, ceilingTexture{ 6 },
+	const int floorHeight{ 0 }, ceilingHeight{ 1 }, floorTexture{ 2 },
+		ceilingTexture{ 6 },
 		lightLevel{ 10 }, special{ 11 }, tag{ 12 };
 }
 namespace ReadNodes {
-	const int partitionX{ 0 }, partitionY{ 1 }, pXdiff{ 2 }, pYdiff{ 3 }, rBoxTop{ 4 },
-		rBoxBottom{ 5 }, rBoxLeft{ 6 }, rBoxRight{ 7 }, lBoxLop{ 8 }, lBoxBottom{ 9 },
-		lBoxLeft{ 10 }, lBoxRight{ 11 }, rightChild{ 12 }, leftChild{ 13 };
+	const int partitionX{ 0 }, partitionY{ 1 }, pXdiff{ 2 },
+		pYdiff{ 3 }, rBoxTop{ 4 },
+		rBoxBottom{ 5 }, rBoxLeft{ 6 }, rBoxRight{ 7 }, lBoxLop{ 8 },
+		lBoxBottom{ 9 },
+		lBoxLeft{ 10 }, lBoxRight{ 11 }, rightChild{ 12 },
+		leftChild{ 13 };
 }
 namespace ReadSegs {
-	const int vertex1{ 0 }, vertex2{ 1 }, angle{ 2 }, line{ 3 }, side{ 4 }, offset{ 5 };
+	const int vertex1{ 0 }, vertex2{ 1 }, angle{ 2 }, line{ 3 },
+		side{ 4 }, offset{ 5 };
 }
 
 namespace ReadSectorSegs {

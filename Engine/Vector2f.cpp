@@ -98,7 +98,7 @@ Vector2f Vector2f::Reflect( const Vector2f& surfaceNormal ) const
 	return (*this) - 2 * ( this->DotProduct( surfaceNormal ) * surfaceNormal );
 }
 
-bool Vector2f::OnSegment(Vector2f segStart, Vector2f segEnd)
+bool Vector2f::WithinSegmentBounds(Vector2f segStart, Vector2f segEnd)
 {
 	const float EPSILON = 0.01f; // Small tolerance for floating-point errors
 
@@ -124,7 +124,7 @@ int Vector2f::orientation(Vector2f p, Vector2f q)
 
 	// Handle floating-point precision errors
 	//if (std::abs(val) < 1e-6) return 0;  // Collinear
-	if (std::abs(val) < 0.0001f) return 0;  // Collinear
+	if (std::abs(val) < 0.001f) return 0;  // Collinear
 
 	return (val > 0) ? 1 : -1; // 1: Left (Counterclockwise), -1: Right (Clockwise)
 }
@@ -163,22 +163,22 @@ bool Vector2f::doIntersect(Vector2f p1, Vector2f p2, Vector2f s1, Vector2f s2,
 
 	// Special Cases: check if the lines are collinear and
 	// overlap
-	if (o1 == 0 && s1.OnSegment(p1, p2))
+	if (o1 == 0 && s1.WithinSegmentBounds(p1, p2))
 	{
 		res = s1;
 		return true;
 	}
-	if (o2 == 0 && s2.OnSegment(p1, p2))
+	if (o2 == 0 && s2.WithinSegmentBounds(p1, p2))
 	{
 		res = s2;
 		return true;
 	}
-	if (o3 == 0 && p1.OnSegment(s1, s2))
+	if (o3 == 0 && p1.WithinSegmentBounds(s1, s2))
 	{
 		res = p1;
 		return true;
 	}
-	if (o4 == 0 && p2.OnSegment(s1, s2))
+	if (o4 == 0 && p2.WithinSegmentBounds(s1, s2))
 	{
 		res = p2;
 		return true;

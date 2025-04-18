@@ -44,11 +44,15 @@ void Game::Update( float elapsedSec )
 	//	std::cout << "Left and up arrow keys are down\n";
 	//}
 	m_pLevel->UpdateLevel(m_Camera, elapsedSec);
-	m_Camera.ColideWLevel(m_pLevel);
+	int wal{ m_Camera.ColideWLevel(m_pLevel) };
 	m_Camera.VelocCalc(elapsedSec);
 	m_Camera.pushPosition();
 	// preferably, we want to just say "player, colide!" and the player then checks where it is in the bsp tree etc
 	// perhaps we first gather all the input, and then check it agianst 
+	/*if (wal >= 0)
+	{
+		m_pLevel.
+	}*/
 
 }
 

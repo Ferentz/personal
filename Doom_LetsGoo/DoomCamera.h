@@ -13,7 +13,7 @@ public:
 	std::vector<Vector2f> m_Walls;
 	float m_projDist;
 	void pushPosition();
-	void ColideWLevel(const Level* pLevel);
+	int ColideWLevel(const Level* pLevel);
 	float m_angleOffset;
 	void rayy();
 	DoomCamera(const Rectf& window);

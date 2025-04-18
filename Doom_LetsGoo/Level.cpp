@@ -6,7 +6,7 @@
 #include <vector>
 #include <cassert>
 #include "DoomCamera.h"
-#include <set>
+
 #include <stack>
 #include "LevelGenerator.h"
 
@@ -15,11 +15,15 @@ Level::Level()
 {
 	m_pWallTexture = new Texture("WALL03_1_converted.png");
 	m_pFloorTexture = new Texture("FLOOR4_8_converted.png");
-	LevelGenerator gen{ m_BSP, m_BSPleafs,m_pPlanes, m_pFloorsNCeilings };// m_pPlanes, m_pFloorsNCeilings};
+	LevelGenerator gen{ m_BSP, m_BSPleafs,m_pPlanes, m_pFloorsNCeilings, m_tags[0], m_tags[1] };// m_pPlanes, m_pFloorsNCeilings};
 }
 
 Level::~Level() {
 	// some instructions
+	for (int i{}; i < m_pPlanes.size(); i++)
+	{
+		delete m_pPlanes[i];
+	}
 	delete m_pWallTexture;
 	delete m_pFloorTexture;
 }
@@ -76,7 +80,7 @@ void Level::traverseBSP(int leaf, Vector2f pos)
 			for (int wallNum{}; wallNum < m_BSPleafs[leafIndex].wallIndexes.size(); wallNum++)
 			{
 				int wallIndex{ m_BSPleafs[leafIndex].wallIndexes[wallNum] };
-				m_pPlanes[wallIndex].DrawPlane(*m_pWallTexture);
+				m_pPlanes[wallIndex]->DrawPlane(*m_pWallTexture);
 			}
 
 			int parent{ m_BSPleafs[leafIndex].parent };
@@ -212,7 +216,7 @@ void Level::traverseBSP(int leaf, Vector2f pos)
 void Level::DrawLevel()
 {
 	for (int i = 0; i < m_PlaneAmount; ++i) {
-		m_pPlanes[i].DrawPlane(*m_pWallTexture);
+		m_pPlanes[i]->DrawPlane(*m_pWallTexture);
 		//planes[i].drawPlane(g_Sectors[i]);
 	}
 	//m_pPlanes[55].DrawPlane(*m_pWallTexture);
@@ -229,7 +233,7 @@ void Level::UpdateLevel(DoomCamera& eyeObject, float elapsedSec)
 	m_interval += elapsedSec;
 	for (int i = 0; i < m_pPlanes.size(); ++i) {
 		//planes[i].PlaneCollision(Eye);
-		m_pPlanes[i].UpdatePlane(eyeObject);
+		m_pPlanes[i]->UpdatePlane(eyeObject, elapsedSec);
 		//m_pPlanes[i].PlaneCollision(eyeObject);
 	}
 
@@ -285,7 +289,7 @@ void Level::CollisionCHeck(DoomCamera& player, const int node)
 		for (int wall{}; wall < wallsToCHeck; wall++)
 		{
 			int wallIndex{ m_BSPleafs[leafnode].wallIndexes[wall] };
-			m_pPlanes[wallIndex].PlaneCollision(player);
+			m_pPlanes[wallIndex]->PlaneCollision(player);
 		}
 		// we have reached a leaf node
 		// now we must 
@@ -353,8 +357,47 @@ int Level::GetLeafWallAmount(const int leaf) const
 	return m_BSPleafs[leaf].wallIndexes.size();
 }
 
-const Plane& Level::GetWallFromLeaf(const int leaf, const int wallIdx) const
+Plane* Level::GetWallFromLeaf(const int leaf, const int wallIdx) const
 {
 	const int wallIndex{ m_BSPleafs[leaf].wallIndexes[wallIdx] };
 	return m_pPlanes.at(wallIndex);
+}
+
+void Level::TriggerDoor(const int leaf, const int wallIdx) const
+{
+	const int wallIndex{ m_BSPleafs[leaf].wallIndexes[wallIdx] };
+	if (m_pPlanes.at(wallIndex + 1)->IsDoor())
+	{
+		m_pPlanes.at(wallIndex + 1)->Triggered();
+	}
+	if (m_pPlanes.at(wallIndex - 1)->IsDoor())
+	{
+		m_pPlanes.at(wallIndex - 1)->Triggered();
+	}
+}
+
+bool Level::IsInSet(int object)
+{
+	if (m_tags[0].find(object) != m_tags[0].end())
+	{
+		std::set<int>::reverse_iterator object;
+		for (object = m_tags[0].rbegin();
+			object != m_tags[0].rend(); object++)
+		{
+			if(*object < 0)
+			{
+				// it's a subsector
+			}
+			else
+			{
+				//it's a line
+				//m_pPlanes[*object]->triggered();
+			}
+		}
+	}
+	if (m_tags[1].find(object) != m_tags[1].end())
+	{
+
+	}
+	return false;
 }

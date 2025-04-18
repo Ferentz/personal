@@ -52,7 +52,10 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int colour)
 	}
 
 }
-void Plane::UpdatePlane(const DoomCamera& eyeObject) {
+Plane::~Plane()
+{
+}
+void Plane::UpdatePlane(const DoomCamera& eyeObject, float elapsSec) {
 	for (int index{}; index < 4; index++) {
 		m_Points[index].point2D = eyeObject.PerspCalc(m_Points[index], m_Points[index].point3D);
 	}
@@ -107,6 +110,15 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 		pos, nextPos,
 		hitInfo))
 	{
+		std::cout << m_bBlock << std::endl;
+		std::cout << m_bBlockMonster << std::endl;
+		std::cout << m_bSecret << std::endl;
+		std::cout << m_bSoundBlock << std::endl;
+		std::cout << std::endl;
+		if (m_bBlockMonster)
+		{
+			std::cout << "activate door" << std::endl;
+		}
 		const Vector2f RAY{ pos - nextPos };
 		const Vector2f REFLECTION{ RAY.Reflect(hitInfo.normal) };
 
@@ -119,7 +131,7 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 }
 
 bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
-	Vector2f& returnPos, Vector2f& outNormal) const
+	Vector2f& returnPos, Vector2f& outNormal)
 {
 	float top = m_Location.z + m_Height.z;
 	float bottom = m_Location.z;
@@ -140,6 +152,15 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	utils::HitInfo hitInfo{};
 	if (utils::Raycast(wallVerts, 2, pos, nextPos, hitInfo))
 	{
+		/*std::cout << m_bBlock << std::endl;
+		std::cout << m_bBlockMonster << std::endl;
+		std::cout << m_bSecret << std::endl;
+		std::cout << m_bSoundBlock << std::endl;
+		std::cout << std::endl;*/
+		if (m_bBlock)
+		{
+			std::cout << "activate door" << std::endl;
+		}
 		// Get approach vector
 		Vector2f moveDir = (nextPos - pos).Normalized();
 
@@ -164,6 +185,29 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	return false;
 }
 
+void Plane::SetActionBools(uint16_t actionBit)
+{
+	m_bBlock = (actionBit & 0x0001) != 0 ;
+	m_bBlockMonster = (actionBit & 0x0002) != 0 ;
+	m_bTwoSided = (actionBit & 0x0004) != 0 ;
+	m_bUnpeggedUpperTex = (actionBit & 0x0008) != 0;
+	m_bUnpeggedLowerTex = (actionBit & 0x0010) != 0 ;
+	m_bSecret = (actionBit & 0x0020) != 0 ;
+	m_bSoundBlock = (actionBit & 0x0040) != 0 ;
+	m_bNotOnAutoMap = (actionBit & 0x0080) != 0 ;
+	m_bAlwaysOnAUtoMap = (actionBit & 0x0100) != 0 ;
+}
+bool Plane::IsDoor()
+{
+	if (m_bBlock)
+	{
+		return true;
+	}
+	return false;
+}
+void Plane::Triggered()
+{
+}
 //
 //bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 //	

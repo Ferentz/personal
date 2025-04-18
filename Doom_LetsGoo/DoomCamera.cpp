@@ -26,7 +26,7 @@ void DoomCamera::pushPosition()
 // perhaps the player can have a reference to the level.
 // then the player, in collision calls eveything.
 // we want a function that receives the level as a const
-void DoomCamera::ColideWLevel(const Level* pLevel)
+int DoomCamera::ColideWLevel(const Level* pLevel)
 {
 	const int MaxIterations = 10;
 	const float Epsilon = 0.01f;
@@ -36,6 +36,7 @@ void DoomCamera::ColideWLevel(const Level* pLevel)
 
 	int iterations = 0;
 	bool hitSomething = true;
+	int hitWal{ -1 };
 	float NextHeight{};
 	while (hitSomething && iterations < MaxIterations)
 	{
@@ -55,11 +56,20 @@ void DoomCamera::ColideWLevel(const Level* pLevel)
 
 		for (int i = 0; i < pLevel->GetLeafWallAmount(leaf); ++i)
 		{
-			const Plane& wall{ pLevel->GetWallFromLeaf(leaf, i) };
+			Plane* wall{ pLevel->GetWallFromLeaf(leaf, i) };
 		
 			Vector2f impactPoint2D, wallNormal2D;
-			if (wall.PlaneCollision(curPos, nextPos + moveDirNorm * m_charDIameter, impactPoint2D, wallNormal2D))
+			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * m_charDIameter, impactPoint2D, wallNormal2D))
 			{
+				if (wall->IsDoor())
+				{
+					pLevel->TriggerDoor(leaf, i);
+				}
+				if (hitWal == -1)
+				{
+					hitWal = i;
+				}
+				
 				Vector3f wallNormal3D(wallNormal2D.x, wallNormal2D.y, 0.0f);
 
 				Vector3f fullMove = nextPos - curPos;
@@ -91,6 +101,8 @@ void DoomCamera::ColideWLevel(const Level* pLevel)
 	m_NextPos.x = nextPos.x;
 	m_NextPos.y = nextPos.y;
 	m_FLoorHeigt = NextHeight;
+
+	return hitWal;
 
 }
 //

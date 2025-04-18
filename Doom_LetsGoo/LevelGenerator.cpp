@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Plane.h"
+#include "Door.h"
 #include "PlaneIregular.h"
 #include "LevelGenerator.h"
 //#include "LevelGenerator.h"
@@ -17,7 +18,7 @@ the level just wants the bsp tree, the walls, the floors. and that's it basicaly
 
 
 LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BSPleafeNode>& p_BSPleafs_p,
-	std::vector <Plane>& p_Planes_p, std::vector <PlaneIregular>& p_FloorsNCeilings_p)
+	std::vector <Plane*>& p_Planes_p, std::vector <PlaneIregular>& p_FloorsNCeilings_p, std::set<int>& tags1, std::set<int>& tags2)
 	:vertexesImported{ utils::ReadLMP("VERTEXES.lmp", VERTEXCOLUMS) },
 	linesImported{ utils::ReadLMP("LINEDEFS.lmp", LINECOLUMS) },
 	sidesImported{ utils::ReadLMP("SIDEDEFS.lmp", SIDECOLUMS) },
@@ -28,12 +29,24 @@ LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BS
 	r_BSPtree{ p_BSPtree_p },
 	r_BSPleafs{ p_BSPleafs_p },
 	r_Planes{ p_Planes_p },
-	r_FloorsNCeilings{ p_FloorsNCeilings_p }
+	r_FloorsNCeilings{ p_FloorsNCeilings_p },
+	r_tags{ tags1 , tags2 }
 {
 	GenerateLevel();
 }
-
-void LevelGenerator::AddPlane(int line, float ceilingHeight, float floorHeight, const float SCALE)
+bool WillBeDoor(uint16_t actionBit)
+{
+	return (actionBit & 0x0001) != 0;
+	//m_bBlockMonster = (actionBit & 0x0002) != 0;
+	//m_bTwoSided = (actionBit & 0x0004) != 0;
+	//m_bUnpeggedUpperTex = (actionBit & 0x0008) != 0;
+	//m_bUnpeggedLowerTex = (actionBit & 0x0010) != 0;
+	//m_bSecret = (actionBit & 0x0020) != 0;
+	//m_bSoundBlock = (actionBit & 0x0040) != 0;
+	//m_bNotOnAutoMap = (actionBit & 0x0080) != 0;
+	//m_bAlwaysOnAUtoMap = (actionBit & 0x0100) != 0;
+}
+void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, const float SCALE)
 {
 	int vertex1 = int(linesImported.data[line][ReadLines::vertex1]);
 	int vertex2 = int(linesImported.data[line][ReadLines::vertex2]);
@@ -55,8 +68,23 @@ void LevelGenerator::AddPlane(int line, float ceilingHeight, float floorHeight, 
 	Vector3f height{ 0,0,wallHeight };
 	Vector3f location{ vertex1Loc.x, vertex1Loc.y, floorHeight };
 	//Plane plane2{ positionPlanea, widtha, heighta, 2 };
-	//Plane input{ location, width, height, 2 };
-	r_Planes.emplace_back(Plane{ location, width, height, 2 });
+	if (linesImported.data[line][ReadLines::sectorTag] == 1)
+	{
+		r_tags[0].insert(r_Planes.size());
+	}
+	if (linesImported.data[line][ReadLines::sectorTag] == 2)
+	{
+		r_tags[1].insert(r_Planes.size());
+	}
+	if (WillBeDoor(linesImported.data[line][ReadLines::actionSpecial]))
+	{
+		r_Planes.emplace_back(new Door{ location, width, height, 2, ceilingHeight, floorHeight });
+	}
+	else
+	{
+		r_Planes.emplace_back(new Plane{ location, width, height, 2 });
+	}
+	r_Planes.back()->SetActionBools(linesImported.data[line][ReadLines::actionSpecial]);
 }
 
 int LevelGenerator::GetSectorFromLine(int line, bool backSide)
@@ -74,7 +102,6 @@ void sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vec
 
 		// we take a point from the bounding box
 		Vector2f segPoint1 = boundingBoxOriginal[point];
-		//std::cout << boundingBoxOriginal[point] << " is first point " << std::endl;
 
 		//and check if it belongs to the left or right side
 		// To find orientation of ordered triplet (p, q, r). 
@@ -107,7 +134,7 @@ void sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vec
 
 		if (keepEdgePoints) {
 			Vector2f partPoint1{ partitionPoint1 };
-			if (partPoint1.OnSegment(segPoint1, segPoint2))
+			if (partPoint1.WithinSegmentBounds(segPoint1, segPoint2))
 			{
 				boundingBoxNew.push_back(partPoint1);
 			}
@@ -117,7 +144,7 @@ void sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vec
 		//if they intersect, add the intersectionPoint to the child bounding box.
 		//all intersection pointys should always be added.
 		if (intersectsWithPartition) {
-			if (intersectionPoint.OnSegment(segPoint1, segPoint2))
+			if (intersectionPoint.WithinSegmentBounds(segPoint1, segPoint2))
 			{
 				boundingBoxNew.push_back(intersectionPoint);
 			}
@@ -125,7 +152,7 @@ void sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vec
 
 		if (keepEdgePoints) {
 			Vector2f partPoint2{ partitionPoint2 };
-			if (partPoint2.OnSegment(segPoint1, segPoint2))
+			if (partPoint2.WithinSegmentBounds(segPoint1, segPoint2))
 			{
 				boundingBoxNew.push_back(partPoint2);
 			}
@@ -158,8 +185,9 @@ void SliceSegs(std::vector<Vector2f>& boundingBox, std::vector<Vector2f>& boundi
 	}
 }
 
+
 void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
-	int startNode, int prevNode, const float SCALE, int* sectorPerSubsector)
+	int currentNode, int prevNode, const float SCALE, int* sectorPerSubsector)
 {
 	//     0	   |    1		 |	  2		|   3	  |
 	// partition x | partition y | p x diff | p y diff|
@@ -173,53 +201,48 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 	// we need for each subsector an array of vector2f's
 	// we need a vector of vector2f's along which all the points will be handled
 
-	Vector2f partitionPoint1{ float(nodesImported.data[startNode][0]), float(nodesImported.data[startNode][1]) };
-	Vector2f partitionPoint2{ float(partitionPoint1.x + nodesImported.data[startNode][2]), float(partitionPoint1.y + nodesImported.data[startNode][3]) };
+	Vector2f partitionPoint1{ float(nodesImported.data[currentNode][ReadNodes::partitionX]),
+		float(nodesImported.data[currentNode][ReadNodes::partitionY]) };
+	Vector2f partitionPoint2{ float(partitionPoint1.x + nodesImported.data[currentNode][ReadNodes::pXdiff]),
+		float(partitionPoint1.y + nodesImported.data[currentNode][ReadNodes::pYdiff]) };
 
 	//we can pass on the slicelines,but what about the sides?
 	//
 
-	int childIndex = 12;
-	for (int i{}; i < 2; i++)
+	int childIndex = ReadNodes::rightChild;
+	for (int childOffset{}; childOffset < 2; childOffset++) // right child then left child
 	{
-		int child{ nodesImported.data[startNode][childIndex + i] };
+		int childNodeIndex{ nodesImported.data[currentNode][childIndex + childOffset] };
 
-		if (i == 0)
-		{
+		if (childOffset == 0)
+		{ // right child
 			sliceLines.push_back(Line{ partitionPoint1, partitionPoint2 });
 		}
 		else
-		{
+		{ // left child
 			sliceLines.push_back(Line{ partitionPoint2, partitionPoint1 });
 		}
-		r_BSPtree[startNode].partitionLine = Line{ partitionPoint1, partitionPoint2 };
-		r_BSPtree[startNode].children[i] = child;
-		r_BSPtree[startNode].parent = prevNode;
+		r_BSPtree[currentNode].partitionLine = Line{ partitionPoint1, partitionPoint2 };
+		r_BSPtree[currentNode].children[childOffset] = childNodeIndex;
+		r_BSPtree[currentNode].parent = prevNode;
 
-		if (child < 0)
+		if (childNodeIndex < 0)
 		{
-
 			// it's a subSector
-			const int subSector{ utils::InvertInt(child) };
-
-			/*if (subSector == 34)
-			{*/
+			const int subSector{ utils::InvertInt(childNodeIndex) };
 
 			std::vector<Vector2f> boundingBoxParent{};
 			for (int vertex{}; vertex < boundingBox.size(); vertex++)
 			{
 				boundingBoxParent.push_back(boundingBox[vertex]);
 			}
-			//std::cout << std::endl << " arived at subsector " << subSector << std::endl;
-
+			
 			for (int line{}; line < sliceLines.size(); line++)
 			{
 				std::vector<Vector2f> boundingBoxChild{};
-				sliceLine(boundingBoxParent, boundingBoxChild, sliceLines[line].startPoint, sliceLines[line].endPoint, SCALE);
+				sliceLine(boundingBoxParent, boundingBoxChild, sliceLines[line].startPoint, sliceLines[line].endPoint, false);
 				boundingBoxParent.clear();
 
-				//std::cout << std::endl << line << std::endl;
-				//std::cout << sliceLines[line].startPoint << " , " << sliceLines[line].endPoint << std::endl;
 
 				for (int vertex{}; vertex < boundingBoxChild.size(); vertex++)
 				{
@@ -238,13 +261,26 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 			int lineI = segsImported.data[seg][3]; // it just gets the first line. we need the rest too
 
 			int orienttion = segsImported.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
-			int sideIndex{ 5 };
+			int sideIndex{ ReadLines::frontSide };
 			if (orienttion > 0)
 			{ // 0 : front side | 1 : backside
-				sideIndex = 6;
+				sideIndex = ReadLines::backSide;
 			}
 			int side = linesImported.data[lineI][sideIndex];
-			int sector = sidesImported.data[side][14];
+			int sector = sidesImported.data[side][ReadSides::sector];
+
+			if (sectorsImported.data[sector][ReadSectors::tag] != 0)
+			{
+				std::cout << sectorsImported.data[sector][ReadSectors::tag] << std::endl;
+			}
+			if (sectorsImported.data[sector][ReadSectors::tag] == 1)
+			{
+				r_tags[0].insert(-subSector);
+			}
+			if (sectorsImported.data[sector][ReadSectors::tag] == 2)
+			{
+				r_tags[1].insert(-subSector);
+			}
 
 			sectorPerSubsector[subSector] = sector;
 			sectorPerSubsector[subSector + 1] = sector;
@@ -263,8 +299,7 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 			r_BSPleafs[subSector].startSeg = seg;
 			r_BSPleafs[subSector].amountOfSegs = sectorSegsImported.data[subSector][0];
 			r_BSPleafs[subSector].floorheight = floorHeight;
-			r_BSPleafs[subSector].parent = startNode;
-			std::cout << subSector << std::endl;
+			r_BSPleafs[subSector].parent = currentNode;
 			PlaneIregular input{ boundingBoxChild, sector, int(ceilingHeight) };
 			PlaneIregular input2{ boundingBoxChild, 3, int(floorHeight) };
 			r_FloorsNCeilings[subSector*2] = input;
@@ -279,27 +314,29 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 		else
 		{
 			ConstructSubSectors(boundingBox, sliceLines, 
-				child, startNode, SCALE, sectorPerSubsector);
+				childNodeIndex, currentNode, SCALE, sectorPerSubsector);
 		}
 
 		sliceLines.pop_back();
 	}
 }
 
-void LevelGenerator::GenerateLevel()
+// so, we have the flag on linedefs
+// it's an 8 way bool (each bit sets a flag)
+/*
+0	0x0001	blocks players and monsters
+1	0x0002	blocks monsters
+2	0x0004	two sided
+3	0x0008	upper texture is unpegged
+4	0x0010	lower texture is unpegged
+5	0x0020	secret (shows as one-sided on automap), and monsters cannot open if it is a door (type 1)
+6	0x0040	blocks sound
+7	0x0080	never shows on automap
+8	0x0100	always shows on automap
+*/
+
+void LevelGenerator::MakeWalls(const float SCALE)
 {
-
-	const float SCALE{ 1.f };
-	
-	
-	r_BSPtree.resize(nodesImported.rows);
-	r_BSPleafs.resize(sectorSegsImported.rows);
-	r_Planes.reserve(segsImported.rows);
-	//p_FloorsNCeilings.reserve(sectorSegsImported.rows * 2); // 1 for the floor and 1 for the ceiling
-	r_FloorsNCeilings.resize(sectorSegsImported.rows * 2);
-	std::vector<int> linePerWall;
-	linePerWall.reserve(sidesImported.rows);
-
 
 	for (int line = 0; line < linesImported.rows; ++line) {
 
@@ -309,12 +346,17 @@ void LevelGenerator::GenerateLevel()
 		}
 
 		int sideDef{ linesImported.data[line][ReadLines::frontSide] };
+		if (linesImported.data[line][ReadLines::sectorTag] != 0)
+		{
+			std::cout << linesImported.data[line][ReadLines::sectorTag] << std::endl;
+		}
+		
 		int sector{ sidesImported.data[sideDef][ReadSides::sector] };
 
 		std::string upperTexture = utils::convertToCharString(&sidesImported.data[sideDef][ReadSides::upperTexture]);
 		std::string lowerTexture = utils::convertToCharString(&sidesImported.data[sideDef][ReadSides::lowerTexture]);
 		std::string middleTexture = utils::convertToCharString(&sidesImported.data[sideDef][ReadSides::middleTexture]);
-		
+
 		float ceilingHeight = sectorsImported.data[sector][ReadSectors::ceilingHeight] / SCALE;
 		float floorHeight = sectorsImported.data[sector][0] / SCALE;
 
@@ -355,8 +397,26 @@ void LevelGenerator::GenerateLevel()
 			AddPlane(line, floorHeight, ceilingHeight, SCALE);
 		}
 		// bottom
-		
+
 	}
+}
+
+void LevelGenerator::GenerateLevel()
+{
+
+	const float SCALE{ 1.f };
+	
+	
+	r_BSPtree.resize(nodesImported.rows);
+	r_BSPleafs.resize(sectorSegsImported.rows);
+	r_Planes.reserve(segsImported.rows);
+	//p_FloorsNCeilings.reserve(sectorSegsImported.rows * 2); // 1 for the floor and 1 for the ceiling
+	r_FloorsNCeilings.resize(sectorSegsImported.rows * 2);
+	
+	linePerWall.reserve(sidesImported.rows);
+
+	// the walls have a sector tag
+	MakeWalls(SCALE);
 
 	const int buffer{ 1000 };
 	float top = nodesImported.data[nodesImported.rows - 1][8] + buffer;
@@ -367,6 +427,8 @@ void LevelGenerator::GenerateLevel()
 	std::vector<Vector2f> startingBox{ Vector2f{left, top},Vector2f{right, top},Vector2f{right, bottom },Vector2f{left, bottom} };
 	std::vector<Line> sliceLines;
 	int* sectorPerSubsector{ new int[sectorSegsImported.rows * 2] };
+	std::cout << "--" << std::endl;
+	//the sectors have a tag
 	ConstructSubSectors(startingBox, sliceLines, nodesImported.rows - 1, nodesImported.rows - 1,
 		SCALE, sectorPerSubsector);
 
@@ -397,72 +459,63 @@ void LevelGenerator::SeamFixSubsectors(const int* sectorPerSubsector)
 {
 	for (int subsectorThis{}; subsectorThis < r_FloorsNCeilings.size(); subsectorThis++) //we go over all the subsectors
 	{
-		PlaneIregular& This{ r_FloorsNCeilings[subsectorThis] };
-		int seg = sectorSegsImported.data[subsectorThis / 2][1];
-		//if (subSector == 15) {
-			//std::cout << " seg " << seg << std::endl;
-		//}
-		int lineI = segsImported.data[seg][3];
+		PlaneIregular& thisPlane{ r_FloorsNCeilings[subsectorThis] };
+		int seg = sectorSegsImported.data[subsectorThis / 2][ReadSectorSegs::firstSeg];
+		int lineI = segsImported.data[seg][ReadSegs::line];
 
-		int orienttion = segsImported.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
-		int sideIndex{ 5 };
+		int orienttion = segsImported.data[seg][ReadSegs::side]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
+		int sideIndex{ ReadLines::frontSide };
 		if (orienttion > 0)
 		{ // 0 : front side | 1 : backside
-			sideIndex = 6;
+			sideIndex = ReadLines::backSide;
 		}
 		int side = linesImported.data[lineI][sideIndex];
-		int sector = sidesImported.data[side][14]; // get the sector that the subsector belongs to
+		int sector = sidesImported.data[side][ReadSides::sector]; // get the sector that the subsector belongs to
 		int sectorThis{ sectorPerSubsector[subsectorThis] };
 		for (int subSectorNeighbor{}; subSectorNeighbor < r_FloorsNCeilings.size(); subSectorNeighbor++)
 		{
-			if (subsectorThis % 1 == subSectorNeighbor % 1)
+			if (subsectorThis % 1 == subSectorNeighbor % 1) // dont compare ceilings and floors
 			{
-				int sectorNeighbor = sectorPerSubsector[subSectorNeighbor]; // get the other's subsector
+				int sectorNeighbor = sectorPerSubsector[subSectorNeighbor]; // get the other's sector
 				if (sectorThis == sectorNeighbor) // if they match, we need to start comparing points
 				{
 					// so, the sector is the same.
 					// now we gotta check if the points are on the edges of the subsector
 					// if they are on the subsector edges, add them in between
 
-					PlaneIregular Neighbor{ r_FloorsNCeilings[subSectorNeighbor] };
-
-					int amountOfPointsNeighbor{ Neighbor.GetAmountPoints() };
+					PlaneIregular neighborPlane{ r_FloorsNCeilings[subSectorNeighbor] };
+					int amountOfPointsNeighbor{ neighborPlane.GetAmountPoints() };
 
 					for (int indexNeighbor{}; indexNeighbor < amountOfPointsNeighbor; indexNeighbor++)
 					{
-						point2D_3D curPointNeighbor{ Neighbor.GetPoint(indexNeighbor) };
-						Vector2f curPointNeighbor_XZ{ curPointNeighbor.point3D.x, curPointNeighbor.point3D.y };
+						point2D_3D curPointNeighbor{ neighborPlane.GetPoint(indexNeighbor) };
+						Vector2f curPointNeighbor_XY{ curPointNeighbor.point3D.x, curPointNeighbor.point3D.y };
 						int popIndex{ -1 };
 
-						int amountOfPointsThis{ This.GetAmountPoints() };
+						int amountOfPointsThis{ thisPlane.GetAmountPoints() };
 						for (int indexThis{}; indexThis < amountOfPointsThis; indexThis++)
 						{
-							point2D_3D curPointThis{ This.GetPoint(indexThis) };
-							Vector2f curPointThis_XZ{ curPointThis.point3D.x, curPointThis.point3D.y };
+							point2D_3D curPointThis{ thisPlane.GetPoint(indexThis) };
+							Vector2f curPointThis_XY{ curPointThis.point3D.x, curPointThis.point3D.y };
 
 
 							int nextIndexThis{ utils::getArrIndex(amountOfPointsThis, indexThis + 1) };
-							point2D_3D nextPointThis{ This.GetPoint(nextIndexThis) };
-							Vector2f nextPointThis_XZ{ nextPointThis.point3D.x, nextPointThis.point3D.y };
-							if (curPointThis_XZ == nextPointThis_XZ) {
+							point2D_3D nextPointThis{ thisPlane.GetPoint(nextIndexThis) };
+							Vector2f nextPointThis_XY{ nextPointThis.point3D.x, nextPointThis.point3D.y };
+							if (curPointThis_XY == nextPointThis_XY) {
 								popIndex = indexThis;
 								continue;
 							}
 							else
 							{
-								//assert(nextPointThis_XZ == curPointNeighbor_XZ);
-
-														//if (curPointNeighbor_XZ.OnSegment(curPointThis_XZ, nextPointThis_XZ))
-								if (curPointNeighbor_XZ.orientation(curPointThis_XZ, nextPointThis_XZ) == 0 && curPointNeighbor_XZ.OnSegment(curPointThis_XZ, nextPointThis_XZ))
+								if (curPointNeighbor_XY.orientation(curPointThis_XY, nextPointThis_XY) == 0
+									&& curPointNeighbor_XY.WithinSegmentBounds(curPointThis_XY, nextPointThis_XY))
 								{
-									if (curPointNeighbor_XZ != curPointThis_XZ && curPointNeighbor_XZ != nextPointThis_XZ)
+									if (curPointNeighbor_XY != curPointThis_XY && curPointNeighbor_XY != nextPointThis_XY)
 									{
-										//std::cout << curPointThis.point3D << "is the curent point" << std::endl;
-										//std::cout << nextPointThis.point3D << "is the next point" << std::endl;
 										//if so, we want to add the point to the array in between these 2 points;
 										curPointNeighbor.point3D.z = curPointThis.point3D.z;
-										//std::cout << curPointNeighbor.point3D << "is the newly added point" << std::endl << std::endl;
-										This.insertPoint(nextIndexThis, curPointNeighbor);
+										thisPlane.insertPoint(nextIndexThis, curPointNeighbor);
 										break;
 									}
 
@@ -470,10 +523,10 @@ void LevelGenerator::SeamFixSubsectors(const int* sectorPerSubsector)
 							}
 
 						}
-						// check it against the edges
+						// pop duplicate points
 						if (popIndex >= 0)
 						{
-							This.PopPoint(popIndex);
+							thisPlane.PopPoint(popIndex);
 						}
 					}
 				}

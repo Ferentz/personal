@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "Utils.h"
 #include "structs.h"
+#include <set>
 
 class DoomCamera;
 class Plane;
@@ -24,9 +25,11 @@ public:
 	bool crossesBSPborder(Vector2f& pos, Vector2f& nextPos, const int node) const;
 	int GetLeafWallAmount(const int leaf) const;
 	float GetFloorOfLeaf(const int leaf) const;
-	const Plane& GetWallFromLeaf(int leaf, int wallIdx) const;
+	Plane* GetWallFromLeaf(int leaf, int wallIdx) const;
+	void TriggerDoor(const int leaf, const int wallIdx) const;
 	float m_interval{};
 	int m_subSectorToDraw{};
+	bool IsInSet(int object);
 private:
 
 	//added vars
@@ -35,12 +38,13 @@ private:
 	std::vector<BSPnode> m_BSP{};
 	std::vector<BSPleafeNode> m_BSPleafs{};
 	int m_PlaneAmount{};
-	std::vector <Plane> m_pPlanes{};
+	std::vector <Plane*> m_pPlanes{};
 	// so now, 
 	int m_floorsNCeilingsAmount{};
 	std::vector <PlaneIregular> m_pFloorsNCeilings{};
 
 	// we need a vector to store what line a wall belongs to
 	std::vector<int> m_LinePerWall;
+	std::set<int> m_tags[2];
 };
 
