@@ -1,10 +1,13 @@
 #pragma once
 #include "base.h"
 
+
+
 class Texture final
 {
 public:
 	explicit Texture( const std::string& imagePath );
+	explicit Texture(const WallTexture& wallTex);
 	explicit Texture( const std::string& text, TTF_Font *pFont, const Color4f& textColor );
 	explicit Texture( const std::string& text, const std::string& fontPath, int ptSize, const Color4f& textColor );
 	Texture( const Texture& other ) = delete;
@@ -35,6 +38,8 @@ private:
 	void CreateFromString( const std::string& text, TTF_Font *pFont, const Color4f& textColor );
 	void CreateFromString( const std::string& text, const std::string& fontPath, int ptSize, const Color4f& textColor );
 	void CreateFromSurface( SDL_Surface *pSurface );
+	void CreateFromImages(const std::vector< Patch>& path);
+	void CreateFromSurfaces(const std::vector<SDL_Surface*>& surfaces, const std::vector<Int2>& uvOffsets);
 	SDL_Surface * STBImageLoad( const std::string& path );
 	void DrawFilledRect(const Rectf& dstRect) const;
 };

@@ -92,8 +92,61 @@ namespace utils
 #pragma region FileHandelingFunctionality
 	//LMP ReadLMP(const std::string& filename, int16_t**& outArray, int elementsPerRow);
 	LMP ReadLMP(const std::string& filename, int elementsPerRow);
+	void ReadTexLMP(const std::string& filename, std::vector<PatchData>& patches);
+	void ReadTexData(std::vector<int8_t> data, int baseTextureDataIndex, std::vector<int32_t>& offsets, std::vector<PatchData>& patches);
+	void ReadPatchData(std::vector<int8_t> data, int basePatchDataIndex, int16_t patchCount, std::vector<PatchData>& patches);
 	std::string convertToCharString(const int16_t* stringStart);
 	short InvertInt(uint16_t field);
 #pragma endregion FileHandelingFunctionality
 	int getArrIndex(int arrLen, int index);
+
+	int GetBSP(Vector2f& pos, const bool returnLeaf, const std::vector<BSPnode>& nodes);
+
+	int GetBSP(Vector2f& pos, const int node, const bool returnLeaf, const std::vector<BSPnode>& nodes);
+
+	enum class ThingType {
+		other,
+		monster,
+		deco,
+		obstacle,
+		weapon,
+		ammunition,
+		powerUp,
+		artifact
+	};
+
+	enum class ThingsEnum {
+		defaultThing = 0,
+		playerStart = 1,
+		player2Start = 2,
+		player3Start = 3,
+		player4Start = 4,
+		ShotgunGuy = 9,
+		BloodyMess = 10,
+		DeathmatchStart = 11,
+		BloodyMess2 = 12,
+		DeadPlayer = 15,
+		PoolOfBloodAndFlesh = 24,
+		Candelabra = 35,
+		TallTechnoColumn = 48,
+		Shotgun = 2001,
+		Chaingun = 2002,
+		RocketLauncher = 2003,
+		Clip = 2007,
+		shotgunShells4 = 2008,
+		Stimpack = 2011,
+		Medikit = 2012,
+		HealthBonus = 2014,
+		ArmorBonus = 2015,
+		Armor = 2018,
+		Megaarmor = 2019,
+		FloorLamp = 2028,
+		ExplodingBarrel = 2035,
+		BoxOfRockets = 2046,
+		BoxOfBullets = 2048,
+		BoxOfShotgunShells = 2049,
+		Imp = 3001,
+		Zombieman = 3004,
+
+	};
 }

@@ -41,6 +41,38 @@ struct BSPleafeNode
 	int amountOfSegs{};
 	float floorheight{};
 	std::vector<int> wallIndexes;
+	std::vector<int> thingIndexes;
+};
+
+struct PatchData
+{
+	uint16_t xOffset{};
+	uint16_t yOffset{};
+	uint16_t patchNum{};
+};
+
+struct Int2 {
+	Int2(int x, int y) :u_offset{ x }, v_offset{ y } {}
+	int u_offset;
+	int v_offset;
+};
+
+struct Patch {
+	Patch(std::string nameIn, int xIn, int yIn)
+		:name{nameIn},
+		x{xIn},
+		y{yIn}
+	{};
+	std::string name;
+	int x;
+	int y;
+};
+struct WallTexture {
+	WallTexture(std::string nameIn, int xIn, int yIn) : name{ nameIn }, x{ xIn }, y{ yIn } {};
+	std::string name;
+	int x;
+	int y;
+	std::vector<Patch> patches{};
 };
 
 struct point2D_3D {

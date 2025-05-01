@@ -28,6 +28,7 @@ void DoomCamera::pushPosition()
 // we want a function that receives the level as a const
 int DoomCamera::ColideWLevel(const Level* pLevel)
 {
+	/*
 	const int MaxIterations = 10;
 	const float Epsilon = 0.01f;
 
@@ -97,13 +98,21 @@ int DoomCamera::ColideWLevel(const Level* pLevel)
 		++iterations;
 	}
 
+	if (iterations >= MaxIterations)
+	{
+		m_NextPos = m_Pos;
+	}
+	else {
+		m_NextPos.x = nextPos.x;
+		m_NextPos.y = nextPos.y;
+		m_FLoorHeigt = NextHeight;
+	}
 	// Final corrected position after all slides
-	m_NextPos.x = nextPos.x;
-	m_NextPos.y = nextPos.y;
-	m_FLoorHeigt = NextHeight;
+	
 
 	return hitWal;
-
+	*/
+	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter);
 }
 //
 //void DoomCamera::ColideWLevel(const Level* pLevel)

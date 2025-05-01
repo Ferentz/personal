@@ -13,6 +13,17 @@ Texture::Texture( const std::string& imagePath )
 	CreateFromImage( imagePath );
 }
 
+Texture::Texture(const WallTexture& wallTex)
+	:m_Id{ }
+	, m_Width{ 10.0f }
+	, m_Height{ 10.0f }
+	, m_CreationOk{ false }
+{
+	
+	CreateFromImages(wallTex.patches);
+	std::cout << "made";
+}
+
 Texture::Texture( const std::string& text, TTF_Font *pFont, const Color4f& textColor )
 	:m_Id{}
 	,m_Width{ 10.0f }
@@ -214,6 +225,134 @@ void Texture::CreateFromSurface( SDL_Surface* pSurface )
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 }
 
+void Texture::CreateFromImages(const std::vector< Patch>& path)
+{
+	m_CreationOk = true;
+	std::vector< SDL_Surface*> surfaces{};
+	std::vector<Int2> uvOffsets{};
+	surfaces.reserve(path.size());
+	uvOffsets.reserve(path.size());
+	for (const Patch& patch : path)
+	{
+		// Load image at specified path
+		std::string fileName{ patch.name.c_str() };
+		const std::string filePath{ "patches/" + fileName + ".png"};
+		SDL_Surface* pLoadedSurface = IMG_Load(filePath.c_str());
+		if (pLoadedSurface == nullptr)
+		{
+			std::cerr << "Texture::CreateFromImage, error when calling IMG_Load: " << SDL_GetError() << std::endl;
+			m_CreationOk = false;
+			return;
+		}
+		surfaces.push_back(pLoadedSurface);
+		uvOffsets.emplace_back(patch.x, patch.y);
+	}
+	
+	
+	CreateFromSurfaces(surfaces, uvOffsets);
+
+	for (SDL_Surface*& surface : surfaces)
+	{
+		SDL_FreeSurface(surface);
+	}
+
+	// Free loaded surface
+	//SDL_FreeSurface(pLoadedSurface);
+
+}
+
+void Texture::CreateFromSurfaces(
+	const std::vector<SDL_Surface*>&surfaces,
+	const std::vector<Int2>&uvOffsets
+)
+{
+	m_CreationOk = true;
+
+	if (surfaces.size() != uvOffsets.size()) {
+		std::cerr << "Texture::CreateFromSurfacesWithOffsets: Surface count and offset count mismatch.\n";
+		m_CreationOk = false;
+		return;
+	}
+
+	// 1. Determine required atlas size
+	int atlasWidth = 0;
+	int atlasHeight = 0;
+
+	for (size_t i = 0; i < surfaces.size(); ++i) {
+		SDL_Surface* surf = surfaces[i];
+		const Int2& uv = uvOffsets[i];
+		if (!surf) {
+			std::cerr << "Texture::CreateFromSurfacesWithOffsets: Null surface at index " << i << '\n';
+			m_CreationOk = false;
+			return;
+		}
+		int right = uv.u_offset + surf->w;
+		int bottom = uv.v_offset + surf->h;
+		atlasWidth = std::max(atlasWidth, right);
+		atlasHeight = std::max(atlasHeight, bottom);
+	}
+
+	// 2. Create atlas surface
+	SDL_Surface* atlasSurface = SDL_CreateRGBSurface(
+		0, atlasWidth, atlasHeight, 32,
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff
+#else
+		0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000
+#endif
+	);
+	if (!atlasSurface) {
+		std::cerr << "Texture::CreateFromSurfacesWithOffsets: SDL_CreateRGBSurface failed: " << SDL_GetError() << '\n';
+		m_CreationOk = false;
+		return;
+	}
+
+	// 3. Blit each surface to the atlas at its given offset
+	for (size_t i = 0; i < surfaces.size(); ++i) {
+		const SDL_Surface* surf = surfaces[i];
+		const Int2& uv = uvOffsets[i];
+		SDL_Rect dst{ uv.u_offset, uv.v_offset, surf->w, surf->h };
+		SDL_BlitSurface(const_cast<SDL_Surface*>(surf), nullptr, atlasSurface, &dst);
+	}
+
+	// 4. Determine pixel format
+	GLenum pixelFormat = GL_RGBA;
+	switch (atlasSurface->format->BytesPerPixel) {
+	case 3:
+		pixelFormat = (atlasSurface->format->Rmask == 0x000000ff) ? GL_RGB : GL_BGR;
+		break;
+	case 4:
+		pixelFormat = (atlasSurface->format->Rmask == 0x000000ff) ? GL_RGBA : GL_BGRA;
+		break;
+	default:
+		std::cerr << "Texture::CreateFromSurfacesWithOffsets: Unsupported pixel format.\n";
+		SDL_FreeSurface(atlasSurface);
+		m_CreationOk = false;
+		return;
+	}
+
+	// 5. Upload to OpenGL
+	m_Width = float(atlasSurface->w);
+	m_Height = float(atlasSurface->h);
+
+	glGenTextures(1, &m_Id);
+	glBindTexture(GL_TEXTURE_2D, m_Id);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, atlasSurface->pitch / atlasSurface->format->BytesPerPixel);
+
+	GLenum e = glGetError();
+	if (e != GL_NO_ERROR) {
+		std::cerr << "Texture::CreateFromSurfacesWithOffsets: OpenGL error after binding texture: " << e << '\n';
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasSurface->w, atlasSurface->h, 0, pixelFormat, GL_UNSIGNED_BYTE, atlasSurface->pixels);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// 6. Clean up
+	SDL_FreeSurface(atlasSurface);
+}
+
 void Texture::Draw( const Vector2f& dstBottomLeft, const Rectf& srcRect ) const
 {
 	const float epsilon{ 0.001f };
@@ -301,7 +440,7 @@ void Texture::Draw( const Rectf& dstRect, const Rectf& srcRect ) const
 	// Tell opengl which texture we will use
 	glBindTexture( GL_TEXTURE_2D, m_Id );
 	glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-	glDepthFunc(GL_ALWAYS);
+	
 	// Draw
 	glEnable( GL_TEXTURE_2D );
 	{

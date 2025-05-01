@@ -18,15 +18,15 @@ Plane::Plane()
 	:m_Location{},
 	m_Width{},
 	m_Height{},
-	m_colour{}
+	m_TextureIndex{}
 {
 
 }
-Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int colour)
+Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 	:m_Location{ position },
 	m_Width{ width },
 	m_Height{ height },
-	m_colour{ colour }
+	m_TextureIndex{ texIdx }
 {
 	for (int index{}; index < 4; index++) {
 		m_Points[index] = {};
@@ -204,6 +204,10 @@ bool Plane::IsDoor()
 		return true;
 	}
 	return false;
+}
+int Plane::GetTexIdx()
+{
+	return m_TextureIndex;
 }
 void Plane::Triggered()
 {

@@ -22,6 +22,8 @@ Game::~Game( )
 void Game::Initialize( )
 {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
 	
 	m_pLevel = new Level();
 }
@@ -60,10 +62,13 @@ void Game::Draw( ) const
 {
 	BaseGame::Draw();
 	ClearBackground( );
+	glDepthFunc(GL_LESS);
 	//m_pLevel->DrawLevel();
 	Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
-	int leaf{ m_pLevel->getBSP(pos, true) };
+	int leaf{ utils::GetBSP(pos, true, m_pLevel->GetBSPtree()) };
 	m_pLevel->traverseBSP(leaf, pos);
+
+	glDepthFunc(GL_ALWAYS);
 
 	float width{ GetWindow().width };
 	float uiWidth{ m_UI->GetWidth() };

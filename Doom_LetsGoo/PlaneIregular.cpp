@@ -24,13 +24,15 @@ PlaneIregular::PlaneIregular()
 	:width{},
 	height{},
 	m_colour{},
+	m_texIDX{},
 	m_amoountOfPoints{}
 {
 
 }
 
-PlaneIregular::PlaneIregular(std::vector<Vector2f> vertexes, int colour, int height)
-	:m_colour{ colour },
+PlaneIregular::PlaneIregular(std::vector<Vector2f> vertexes, int idx, int height)
+	:m_colour{ },
+	m_texIDX{ idx },
 	m_amoountOfPoints{ int(vertexes.size()) }
 {
 	for (int index{}; index < vertexes.size(); index++) {
@@ -90,6 +92,11 @@ void PlaneIregular::PopPoint(int popIndex)
 {
 	m_pPointsArr.erase(m_pPointsArr.begin() + popIndex);
 	m_amoountOfPoints-=1;
+}
+
+int PlaneIregular::GetTexIdx()
+{
+	return m_texIDX;
 }
 
 void PlaneIregular::DrawPlane(const Texture& texture) {

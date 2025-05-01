@@ -9,7 +9,7 @@ class Plane
 {
 public:
 	Plane();
-	Plane(Vector3f& position, Vector3f& width, Vector3f& height, int colour);
+	Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx);
 	virtual ~Plane();
 	virtual void UpdatePlane(const DoomCamera& eyeObject, float elapsSec);
 	void DrawPlane(const Texture& texture);
@@ -20,8 +20,9 @@ public:
 	void SetActionBools(uint16_t actionBit);
 	float planeOfset2{ 50.f };
 	float planeOfset{ 400.f };
-	int m_colour;
+	int m_colour{};
 	bool IsDoor();
+	int GetTexIdx();
 	virtual void Triggered();
 protected:
 	Vector3f m_Location;
@@ -36,6 +37,7 @@ private:
 	bool m_bSoundBlock{};
 	bool m_bNotOnAutoMap{};
 	bool m_bAlwaysOnAUtoMap{};
+	int m_TextureIndex;
 	
 	Vector3f m_Width;
 	Vector3f m_Height;

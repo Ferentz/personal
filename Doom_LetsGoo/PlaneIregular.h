@@ -13,7 +13,7 @@ class PlaneIregular
 {
 public:
 	PlaneIregular();
-	PlaneIregular(std::vector<Vector2f> vertexes, int colour, int height);
+	PlaneIregular(std::vector<Vector2f> vertexes, int texIndx, int height);
 	void UpdatePlane(const DoomCamera& eyeObject);
 	void DrawPlane(const Texture& texture);
 	//void DrawPlane(const int colour);
@@ -22,6 +22,7 @@ public:
 	int GetAmountPoints() const;
 	void insertPoint(int insertPos, point2D_3D& point);
 	void PopPoint(int popIndex);
+	int GetTexIdx();
 	
 	//point3f getLocation();
 	//int getClosestPointIndex();
@@ -31,7 +32,7 @@ public:
 	int m_colour;
 
 private:
-
+	int m_texIDX;
 	Vector3f width;
 	Vector3f height;
 	int* m_ConcaveSequence{};
