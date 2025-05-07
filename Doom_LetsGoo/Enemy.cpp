@@ -18,12 +18,10 @@ Enemy::Enemy(Vector2f pos, float height, std::string folder)
 	std::string path = "POSS";
 	for (const auto& entry : fs::directory_iterator(folder))
 	{
-		std::cout << entry.path() << std::endl;
 		std::string path{ entry.path().string() };
 		std::string name{ entry.path().filename().string() };
 		std::string suffic{ entry.path().filename().string().erase(name.size() - 4, name.size() - 1) };
 		suffic.erase(0, 4);
-		std::cout << suffic << std::endl;
 		m_MonsterTextureSuffixes.push_back(suffic);
 		m_pMonsterTexture.emplace_back(Texture(path));
 	}

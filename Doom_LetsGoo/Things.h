@@ -13,6 +13,7 @@ public:
 	virtual void DrawThing(Texture* tex);
 	Vector2f m_StartPos;
 	float m_Height;
+	int m_SubsectorIndex{};
 	utils::ThingsEnum m_Type;
 	point2D_3D m_location;
 	Navigator* m_pNavigator;

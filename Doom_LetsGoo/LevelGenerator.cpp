@@ -281,14 +281,14 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 
 			std::string ceilingTex = utils::convertToCharString(&sectorsImported.data[sector][ReadSectors::ceilingTexture]); //&sidesImported.data[sideDef][ReadSides::upperTexture]);
 			std::string floorTex = utils::convertToCharString(&sectorsImported.data[sector][ReadSectors::floorTexture]);
-			std::cout << "\n";
+			
 			int ceilIdx = nameMap.find(ceilingTex)->second;
 			int floorIdx = nameMap.find(floorTex)->second;
 
 
 			if (sectorsImported.data[sector][ReadSectors::tag] != 0)
 			{
-				std::cout << sectorsImported.data[sector][ReadSectors::tag] << std::endl;
+				//std::cout << sectorsImported.data[sector][ReadSectors::tag] << std::endl;
 			}
 			if (sectorsImported.data[sector][ReadSectors::tag] == 1)
 			{
@@ -365,7 +365,7 @@ void LevelGenerator::MakeWalls(const float SCALE)
 		int sideDef{ linesImported.data[line][ReadLines::frontSide] };
 		if (linesImported.data[line][ReadLines::sectorTag] != 0)
 		{
-			std::cout << linesImported.data[line][ReadLines::sectorTag] << std::endl;
+			//std::cout << linesImported.data[line][ReadLines::sectorTag] << std::endl;
 		}
 		
 		int sector{ sidesImported.data[sideDef][ReadSides::sector] };
@@ -417,7 +417,6 @@ void LevelGenerator::MakeWalls(const float SCALE)
 			}
 		}
 		else if (middleTexture.find("-") == std::string::npos) {
-			std::cout << middleTexture;
 			std::string door{ "DOOR3" };
 			int idx = nameMap.find(middleTexture)->second;
 			linePerWall.push_back(line);
@@ -457,7 +456,6 @@ void LevelGenerator::GenerateLevel()
 	std::vector<Vector2f> startingBox{ Vector2f{left, top},Vector2f{right, top},Vector2f{right, bottom },Vector2f{left, bottom} };
 	std::vector<Line> sliceLines;
 	int* sectorPerSubsector{ new int[sectorSegsImported.rows * 2] };
-	std::cout << "--" << std::endl;
 	//the sectors have a tag
 	ConstructSubSectors(startingBox, sliceLines, nodesImported.rows - 1, nodesImported.rows - 1,
 		SCALE, sectorPerSubsector);
@@ -577,11 +575,9 @@ void LevelGenerator::SeamFixSubsectors(const int* sectorPerSubsector)
 void LevelGenerator::ReadThings()
 {
 
-	std::cout << "amount of things" << thingsImported.colums << std::endl;
-	std::cout << "amount of things" << thingsImported.rows << std::endl;
 	for (int thing{}; thing < thingsImported.rows; thing++)
 	{
-		std::cout << thingsImported.data[thing][ReadThings::type] << std::endl;
+		//std::cout << thingsImported.data[thing][ReadThings::type] << std::endl;
 		if (thingsImported.data[thing][ReadThings::type] == 5 ||
 			thingsImported.data[thing][ReadThings::type] == 40 ||
 			thingsImported.data[thing][ReadThings::type] == 13 ||
@@ -938,6 +934,7 @@ void LevelGenerator::AdjustThings()
 		r_BSPleafs[leafIndex].thingIndexes.push_back(thingIndex);
 		float zPos = r_BSPleafs[leafIndex].floorheight;
 		r_Things[thingIndex]->m_location.point3D.z = zPos;
+		r_Things[thingIndex]->m_SubsectorIndex = leafIndex;
 	}
 }
 

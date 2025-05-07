@@ -20,9 +20,10 @@ public:
 	//void DrawLevel() const override;
 	void traverseBSP(int leaf, Vector2f pos);
 	void DrawLevel();
+	void LineOfSight();
 	void UpdateLevel( DoomCamera& eyeObject, float elapsedSec);
 	void CollisionCHeck( DoomCamera& player, const int node) ;
-	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameter)const;
+	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst, bool isPlayer)const;
 	bool crossesBSPborder(Vector2f& pos, Vector2f& nextPos, const int node) const;
 	int GetLeafWallAmount(const int leaf) const;
 	float GetFloorOfLeaf(const int leaf) const;
@@ -53,5 +54,7 @@ private:
 	// we need a vector to store what line a wall belongs to
 	std::vector<int> m_LinePerWall;
 	std::set<int> m_tags[2];
+
+	int m_EnemyToDraw{};
 };
 

@@ -9,7 +9,7 @@
 
 
 DoomCamera::DoomCamera(const Rectf& window)
-	:m_Pos{ 242.325, - 406.4 ,10 },
+	:m_Pos{ 1056, -3616 ,10 },
 	m_projDist{ 2.0f },
 	m_angleOffset{ 0 },
 	m_lookVector{ 0,0 },
@@ -28,92 +28,10 @@ void DoomCamera::pushPosition()
 // we want a function that receives the level as a const
 int DoomCamera::ColideWLevel(const Level* pLevel)
 {
-	/*
-	const int MaxIterations = 10;
-	const float Epsilon = 0.01f;
-
-	Vector3f curPos = m_Pos;
-	Vector3f nextPos = m_NextPos;
-
-	int iterations = 0;
-	bool hitSomething = true;
-	int hitWal{ -1 };
-	float NextHeight{};
-	while (hitSomething && iterations < MaxIterations)
-	{
-		hitSomething = false;
-
-		Vector2f cur2D{ curPos.x, curPos.y };
-		int leaf = pLevel->getBSP(cur2D, true);
-		float floorHeight = pLevel->GetFloorOfLeaf(leaf);
-		NextHeight = floorHeight;
-		//nextPos.z = floorHeight;
-
-		Vector3f moveVec = nextPos - curPos;
-		if (moveVec.Length() < Epsilon)
-			break;
-
-		Vector3f moveDirNorm = moveVec.Normalized();
-
-		for (int i = 0; i < pLevel->GetLeafWallAmount(leaf); ++i)
-		{
-			Plane* wall{ pLevel->GetWallFromLeaf(leaf, i) };
-		
-			Vector2f impactPoint2D, wallNormal2D;
-			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * m_charDIameter, impactPoint2D, wallNormal2D))
-			{
-				if (wall->IsDoor())
-				{
-					pLevel->TriggerDoor(leaf, i);
-				}
-				if (hitWal == -1)
-				{
-					hitWal = i;
-				}
-				
-				Vector3f wallNormal3D(wallNormal2D.x, wallNormal2D.y, 0.0f);
-
-				Vector3f fullMove = nextPos - curPos;
-				Vector3f slideVec = fullMove - wallNormal3D * (fullMove.DotProduct(wallNormal3D));
-
-				if (slideVec.Length() < Epsilon)
-				{
-					nextPos = curPos;
-				}
-				else
-				{
-					nextPos = curPos + slideVec;
-				}
-
-				// Update next floor height after wall slide
-				Vector2f next2D{ nextPos.x, nextPos.y };
-				int newLeaf = pLevel->getBSP(next2D, true);
-				NextHeight = pLevel->GetFloorOfLeaf(newLeaf);
-
-				hitSomething = true;
-				//break;
-			}
-		}
-
-		++iterations;
-	}
-
-	if (iterations >= MaxIterations)
-	{
-		m_NextPos = m_Pos;
-	}
-	else {
-		m_NextPos.x = nextPos.x;
-		m_NextPos.y = nextPos.y;
-		m_FLoorHeigt = NextHeight;
-	}
-	// Final corrected position after all slides
-	
-
-	return hitWal;
-	*/
-	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter);
+	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter, true);
 }
+
+
 //
 //void DoomCamera::ColideWLevel(const Level* pLevel)
 //{
@@ -447,7 +365,7 @@ void DoomCamera::CalculateLookAtVector() { // why is it like this? because with 
 	m_lookVector.y = sin(m_angleOffset);
 }
 
-Vector2f DoomCamera::GetLookAtVector() {
+Vector2f DoomCamera::GetLookAtVector() const {
 	return m_lookVector;
 }
 

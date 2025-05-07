@@ -35,7 +35,6 @@ Level::Level()
 		float zPos = m_BSPleafs[leafIndex].floorheight;
 		r_Things[thingIndex]->m_location.point3D.z = zPos;
 	}*/
-	std::cout << "made";
 }
 
 Level::~Level() {
@@ -77,6 +76,17 @@ void Level::traverseBSP(int leaf, Vector2f pos)
 	std::stack<int> nodeStack;
 	nodeStack.push(startLeaf);
 
+	//for (int thingNum{}; thingNum <r_Things.size(); thingNum++)
+	//{
+	//	//int thingIndex{ m_BSPleafs[leafIndex].thingIndexes[thingNum] };
+
+	//	r_Things[thingNum]->DrawThing(m_pThingTexture);
+
+
+	//}
+
+	//r_Things[m_EnemyToDraw]->DrawThing(m_pThingTexture);
+
 	//while stack is not empty:
 	while (nodeStack.size() > 0)
 	{
@@ -86,7 +96,6 @@ void Level::traverseBSP(int leaf, Vector2f pos)
 		{
 			continue;
 		}
-		//std::cout << current << std::endl;
 		if (current < 0)
 		{
 
@@ -98,7 +107,10 @@ void Level::traverseBSP(int leaf, Vector2f pos)
 			for (int thingNum{}; thingNum < m_BSPleafs[leafIndex].thingIndexes.size(); thingNum++)
 			{
 				int thingIndex{ m_BSPleafs[leafIndex].thingIndexes[thingNum] };
+				
 				r_Things[thingIndex]->DrawThing(m_pThingTexture);
+				
+				
 			}
 			int floorTexIdx{ m_pFloorsNCeilings[leafIndex * 2].GetTexIdx()};
 			int ceilTexIdx{ m_pFloorsNCeilings[leafIndex * 2 + 1].GetTexIdx() };
@@ -259,13 +271,13 @@ void Level::DrawLevel()
 	}
 }
 
+
+
 void Level::UpdateLevel(DoomCamera& eyeObject, float elapsedSec)
 {
 	m_interval += elapsedSec;
 	for (int i = 0; i < m_pPlanes.size(); ++i) {
-		//planes[i].PlaneCollision(Eye);
 		m_pPlanes[i]->UpdatePlane(eyeObject, elapsedSec);
-		//m_pPlanes[i].PlaneCollision(eyeObject);
 	}
 
 	// we wanna implememnt the raycast
@@ -273,30 +285,44 @@ void Level::UpdateLevel(DoomCamera& eyeObject, float elapsedSec)
 
 
 	for (int i = 0; i < m_pFloorsNCeilings.size(); ++i) {
-		//for (int i = m_subSectorToDraw * 2; i < m_subSectorToDraw * 2 + 2; ++i) {
-			//planes[i].PlaneCollision(Eye);
 		m_pFloorsNCeilings[i].UpdatePlane(eyeObject);
 	}
-
-	for (int i{ 0 }; i < r_Things.size(); i++)
+	
+	for (int ThingLevelIndex{ 0 }; ThingLevelIndex < r_Things.size(); ThingLevelIndex++)
 	{
-		r_Things[i]->UpdateThing(eyeObject, elapsedSec);
-		if (r_Things[i]->m_pNavigator != nullptr)
-		{
-			Vector3f nextPos{ r_Things[i]->m_pNavigator->GetNextPos(eyeObject.m_Pos, m_BSP, elapsedSec) };
-			ColideWLevel(r_Things[i]->m_pNavigator->m_Pos, nextPos, r_Things[i]->m_pNavigator->m_Pos.z, 20);
-			r_Things[i]->m_pNavigator->PushPosition(nextPos);
-		}
-	}
+		r_Things[ThingLevelIndex]->UpdateThing(eyeObject, elapsedSec);
 
-	//CollisionCHeck(eyeObject, m_BSP.size() - 1);
-	//if (m_interval >= 5) {
-	//	for (int i = m_subSectorToDraw * 2; i < m_subSectorToDraw * 2 + 2; ++i) {
-	//		//planes[i].PlaneCollision(Eye);
-	//		m_pFloorsNCeilings[i].getPoints();
-	//	}
-	//	m_interval = 0;
-	//}
+		if (r_Things[ThingLevelIndex]->m_pNavigator != nullptr)
+		{
+			r_Things[ThingLevelIndex]->m_pNavigator->CalcNextPos(eyeObject.m_Pos, m_pPlanes, elapsedSec) ;
+			int subSector{ r_Things[ThingLevelIndex]->m_pNavigator->ColideWLevel(this) };
+			Vector3f nextPos{ r_Things[ThingLevelIndex]->m_pNavigator->GetNextPos()};
+			Vector2f next2D{ nextPos.x, nextPos.y };
+			int subSector2 = utils::GetBSP(next2D, true, m_BSP);
+			int originalThingSubSector{ r_Things[ThingLevelIndex]->m_SubsectorIndex };
+			if (subSector2 != originalThingSubSector)
+			{
+				for (int localIndex{}; localIndex < m_BSPleafs[originalThingSubSector].thingIndexes.size(); localIndex++)
+				{
+					if (m_BSPleafs[originalThingSubSector].thingIndexes[localIndex] == ThingLevelIndex)
+					{
+						std::cout << "swithcing" << std::endl;
+						int temp = m_BSPleafs[originalThingSubSector].thingIndexes[localIndex];
+						m_BSPleafs[originalThingSubSector].thingIndexes[localIndex] =
+							m_BSPleafs[originalThingSubSector].thingIndexes.back();
+						m_BSPleafs[originalThingSubSector].thingIndexes.pop_back();
+						m_BSPleafs[subSector2].thingIndexes.push_back(ThingLevelIndex);
+						r_Things[ThingLevelIndex]->m_SubsectorIndex = subSector2;
+						break;
+					}
+				}
+			}
+			r_Things[ThingLevelIndex]->m_pNavigator->PushPosition();
+			
+		}
+		
+	}
+	
 }
 
 float Level::GetFloorOfLeaf(const int leaf) const
@@ -341,7 +367,7 @@ void Level::CollisionCHeck(DoomCamera& player, const int node)
 	}
 }
 
-int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight, const float charDiameter) const
+int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight, const float charDiameter, const bool isPlayer) const
 {
 	const int MaxIterations = 10;
 	const float Epsilon = 0.01f;
@@ -353,28 +379,73 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 	bool hitSomething = true;
 	int hitWal{ -1 };
 	float NextHeight{};
+	Vector2f cur2D{ curPos.x, curPos.y };
+	int leaf{ utils::GetBSP(cur2D, true, m_BSP) };
+	int newLeaf{ leaf };
 	while (hitSomething && iterations < MaxIterations)
 	{
 		hitSomething = false;
 
-		Vector2f cur2D{ curPos.x, curPos.y };
-		int leaf = utils::GetBSP(cur2D, true, m_BSP);
-		float floorHeight = GetFloorOfLeaf(leaf);
-		NextHeight = floorHeight;
-		//nextPos.z = floorHeight;
+		cur2D = Vector2f{curPos.x, curPos.y }; // we get the curent 2d pos
+		leaf = utils::GetBSP(cur2D, true, m_BSP); // we get the subsector in which that position is
+		float floorHeight = GetFloorOfLeaf(leaf); // we get the floorehight of that leaf
+		NextHeight = floorHeight; // asuming all foes well, that will be the next floorheight
 
-		Vector3f moveVec = nextPos - curPos;
-		if (moveVec.Length() < Epsilon)
+		Vector3f moveVec = nextPos - curPos; // we get the direction in which the character is moving
+		if (moveVec.Length() < Epsilon) // if the amount he's trying to move is too small, dont move
+		{
+			r_nextPos = pos;
 			break;
+		}
+			
 
-		Vector3f moveDirNorm = moveVec.Normalized();
+		Vector3f moveDirNorm = moveVec.Normalized(); // normalized direction
+		//for (int wallIndex{}; wallIndex < m_pPlanes.size(); wallIndex++)
+		//{
+		//	Plane* wall{ m_pPlanes[wallIndex]};
 
+		//	Vector2f reflectionPoint, wallNormal2D;
+		//	if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
+		//	{
+		//		if (wall->IsDoor())
+		//		{
+		//			//TriggerDoor(leaf, i);
+		//		}
+		//		if (hitWal == -1)
+		//		{
+		//			//hitWal = i;
+		//		}
+
+		//		Vector3f wallNormal3D(wallNormal2D.x, wallNormal2D.y, 0.0f);
+
+		//		Vector3f fullMove = nextPos - curPos;
+		//		Vector3f slideVec = fullMove - wallNormal3D * (fullMove.DotProduct(wallNormal3D));
+
+		//		if (slideVec.Length() < Epsilon)
+		//		{
+		//			nextPos = curPos;
+		//		}
+		//		else
+		//		{
+		//			nextPos = curPos + slideVec;
+		//		}
+
+		//		// Update next floor height after wall slide
+		//		Vector2f next2D{ nextPos.x, nextPos.y };
+		//		newLeaf = utils::GetBSP(next2D, true, m_BSP);
+		//		NextHeight = GetFloorOfLeaf(newLeaf);
+
+		//		hitSomething = true;
+		//		//break;
+		//	}
+		//}
+		
 		for (int i = 0; i < GetLeafWallAmount(leaf); ++i)
 		{
 			Plane* wall{ GetWallFromLeaf(leaf, i) };
 
-			Vector2f impactPoint2D, wallNormal2D;
-			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, impactPoint2D, wallNormal2D))
+			Vector2f reflectionPoint, wallNormal2D;
+			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
 			{
 				if (wall->IsDoor())
 				{
@@ -401,30 +472,32 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 
 				// Update next floor height after wall slide
 				Vector2f next2D{ nextPos.x, nextPos.y };
-				int newLeaf = utils::GetBSP(next2D, true, m_BSP);
+				newLeaf = utils::GetBSP(next2D, true, m_BSP);
 				NextHeight = GetFloorOfLeaf(newLeaf);
 
 				hitSomething = true;
 				//break;
 			}
 		}
-
+		
 		++iterations;
 	}
 
 	if (iterations >= MaxIterations)
 	{
 		r_nextPos = pos;
+		return leaf;
 	}
 	else {
 		r_nextPos.x = nextPos.x;
 		r_nextPos.y = nextPos.y;
 		floorHeight = NextHeight;
+		return newLeaf;
 	}
 	// Final corrected position after all slides
 
 
-	return hitWal;
+	
 
 }
 

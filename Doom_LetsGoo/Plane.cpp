@@ -18,7 +18,8 @@ Plane::Plane()
 	:m_Location{},
 	m_Width{},
 	m_Height{},
-	m_TextureIndex{}
+	m_TextureIndex{},
+	m_Normal{}
 {
 
 }
@@ -26,7 +27,8 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 	:m_Location{ position },
 	m_Width{ width },
 	m_Height{ height },
-	m_TextureIndex{ texIdx }
+	m_TextureIndex{ texIdx },
+	m_Normal{ m_Width.CrossProduct(m_Height).x,m_Width.CrossProduct(m_Height).y }
 {
 	for (int index{}; index < 4; index++) {
 		m_Points[index] = {};
@@ -59,10 +61,22 @@ void Plane::UpdatePlane(const DoomCamera& eyeObject, float elapsSec) {
 	for (int index{}; index < 4; index++) {
 		m_Points[index].point2D = eyeObject.PerspCalc(m_Points[index], m_Points[index].point3D);
 	}
+	
+	if (m_Normal.DotProduct(eyeObject.GetLookAtVector()) < 0)
+	{
+		m_IsVisible = true;
+	}
+	else
+	{
+		m_IsVisible = false;
+	}
 }
 
 void Plane::DrawPlane(const Texture& texture) {
 	//the negine, open gl might not be set up to draw for 3D
+	/*if (m_IsVisible) // no way to tell the normal when loading the level
+	{
+	}*/
 	bool isVisible{ false };
 	for (int index{}; index < 4; index++) {
 		if (m_Points[index].amIVisible) {
@@ -73,9 +87,9 @@ void Plane::DrawPlane(const Texture& texture) {
 
 		Vector3f planesCompArr3D[4];
 		for (int index{}; index < 4; index++) {
-			planesCompArr3D[index] = Vector3f{ 
+			planesCompArr3D[index] = Vector3f{
 				m_Points[index].point2D.x, m_Points[index].point2D.y,
-				-m_Points[index].Dist3D * 0.0001f 
+				-m_Points[index].Dist3D * 0.0001f
 			}; // need to explicitly call it a vector3f
 		}
 
@@ -110,11 +124,11 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 		pos, nextPos,
 		hitInfo))
 	{
-		std::cout << m_bBlock << std::endl;
-		std::cout << m_bBlockMonster << std::endl;
-		std::cout << m_bSecret << std::endl;
-		std::cout << m_bSoundBlock << std::endl;
-		std::cout << std::endl;
+		//std::cout << m_bBlock << std::endl;
+		//std::cout << m_bBlockMonster << std::endl;
+		//std::cout << m_bSecret << std::endl;
+		//std::cout << m_bSoundBlock << std::endl;
+		//std::cout << std::endl;
 		if (m_bBlockMonster)
 		{
 			std::cout << "activate door" << std::endl;
@@ -131,23 +145,26 @@ bool Plane::PlaneCollision(DoomCamera& eyeObject) {
 }
 
 bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
-	Vector2f& returnPos, Vector2f& outNormal)
+	Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer) const
 {
 	float top = m_Location.z + m_Height.z;
 	float bottom = m_Location.z;
-	float topUse = std::max(top, bottom);
+	float topUse = std::max(top, bottom); // some walls are created upside down
 	float bottomUse = std::min(top, bottom);
-
-	if (nextPos3D.z > topUse || nextPos3D.z < bottomUse)
+	//
+	if(((pos3D.z > topUse && isPlayer) ||
+		//(((bottomUse > pos3D.z + 40) && (topUse < pos3D.z + 20)) && !isPlayer )||
+		pos3D.z < bottomUse)) // if the player is above or below, if a monster and the ledge is bigger than the step height
+	{
 		return false;
+	}
+		
 
 	Vector2f pos{ pos3D.x, pos3D.y };
 	Vector2f nextPos{ nextPos3D.x, nextPos3D.y };
 
-	Vector2f wallVerts[] = {
-		Vector2f{ m_Points[0].point3D.x, m_Points[0].point3D.y },
-		Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y }
-	};
+	Vector2f wallVerts[2]{};
+	GetWallVerts(wallVerts);
 
 	utils::HitInfo hitInfo{};
 	if (utils::Raycast(wallVerts, 2, pos, nextPos, hitInfo))
@@ -251,3 +268,8 @@ void Plane::Triggered()
 //	return false;
 //}
 
+void Plane::GetWallVerts(Vector2f wallVerts[]) const 
+{
+	wallVerts[0] = Vector2f{ m_Points[0].point3D.x, m_Points[0].point3D.y };
+	wallVerts[1] = Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y };
+}

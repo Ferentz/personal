@@ -29,7 +29,7 @@ public:
 
 	bool IsLookingAtMe(const Vector3f crosspoints[])const;
 	void CalculateLookAtVector();
-	Vector2f GetLookAtVector();
+	Vector2f GetLookAtVector() const;
 
 private:
 	const Rectf& m_Window;

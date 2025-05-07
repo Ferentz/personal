@@ -22,7 +22,6 @@ void Door::Opening()
 	{
 		m_Points[point].point3D.z += (m_speed * m_direction);
 		m_Location.z += (m_speed * m_direction);
-		std::cout << m_direction << std::endl;
 		if (m_Points[point].point3D.z < lowestHeight)
 		{
 			lowestHeight = m_Points[point].point3D.z;
@@ -44,9 +43,9 @@ void Door::Triggered()
 	m_opening = true;
 }
 
-bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal)
+bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer)
 {
-	if (Plane::PlaneCollision(pos3D, nextPos3D, returnPos, outNormal))
+	if (Plane::PlaneCollision(pos3D, nextPos3D, returnPos, outNormal, isPlayer))
 	{
 		//triggered();
 		m_opening = true;
