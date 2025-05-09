@@ -176,7 +176,7 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		std::cout << std::endl;*/
 		if (m_bBlock)
 		{
-			std::cout << "activate door" << std::endl;
+			//std::cout << "activate door" << std::endl;
 		}
 		// Get approach vector
 		Vector2f moveDir = (nextPos - pos).Normalized();

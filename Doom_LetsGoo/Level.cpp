@@ -294,30 +294,34 @@ void Level::UpdateLevel(DoomCamera& eyeObject, float elapsedSec)
 
 		if (r_Things[ThingLevelIndex]->m_pNavigator != nullptr)
 		{
-			r_Things[ThingLevelIndex]->m_pNavigator->CalcNextPos(eyeObject.m_Pos, m_pPlanes, elapsedSec) ;
-			int subSector{ r_Things[ThingLevelIndex]->m_pNavigator->ColideWLevel(this) };
-			Vector3f nextPos{ r_Things[ThingLevelIndex]->m_pNavigator->GetNextPos()};
-			Vector2f next2D{ nextPos.x, nextPos.y };
-			int subSector2 = utils::GetBSP(next2D, true, m_BSP);
-			int originalThingSubSector{ r_Things[ThingLevelIndex]->m_SubsectorIndex };
-			if (subSector2 != originalThingSubSector)
+			if (!r_Things[ThingLevelIndex]->m_pNavigator->m_IsShooting)
 			{
-				for (int localIndex{}; localIndex < m_BSPleafs[originalThingSubSector].thingIndexes.size(); localIndex++)
+				r_Things[ThingLevelIndex]->m_pNavigator->CalcNextPos(eyeObject.m_Pos, m_pPlanes, elapsedSec);
+				int subSector{ r_Things[ThingLevelIndex]->m_pNavigator->ColideWLevel(this) };
+				Vector3f nextPos{ r_Things[ThingLevelIndex]->m_pNavigator->GetNextPos() };
+				Vector2f next2D{ nextPos.x, nextPos.y };
+				int subSector2 = utils::GetBSP(next2D, true, m_BSP);
+				int originalThingSubSector{ r_Things[ThingLevelIndex]->m_SubsectorIndex };
+				if (subSector2 != originalThingSubSector)
 				{
-					if (m_BSPleafs[originalThingSubSector].thingIndexes[localIndex] == ThingLevelIndex)
+					for (int localIndex{}; localIndex < m_BSPleafs[originalThingSubSector].thingIndexes.size(); localIndex++)
 					{
-						std::cout << "swithcing" << std::endl;
-						int temp = m_BSPleafs[originalThingSubSector].thingIndexes[localIndex];
-						m_BSPleafs[originalThingSubSector].thingIndexes[localIndex] =
-							m_BSPleafs[originalThingSubSector].thingIndexes.back();
-						m_BSPleafs[originalThingSubSector].thingIndexes.pop_back();
-						m_BSPleafs[subSector2].thingIndexes.push_back(ThingLevelIndex);
-						r_Things[ThingLevelIndex]->m_SubsectorIndex = subSector2;
-						break;
+						if (m_BSPleafs[originalThingSubSector].thingIndexes[localIndex] == ThingLevelIndex)
+						{
+							//std::cout << "swithcing" << std::endl;
+							int temp = m_BSPleafs[originalThingSubSector].thingIndexes[localIndex];
+							m_BSPleafs[originalThingSubSector].thingIndexes[localIndex] =
+								m_BSPleafs[originalThingSubSector].thingIndexes.back();
+							m_BSPleafs[originalThingSubSector].thingIndexes.pop_back();
+							m_BSPleafs[subSector2].thingIndexes.push_back(ThingLevelIndex);
+							r_Things[ThingLevelIndex]->m_SubsectorIndex = subSector2;
+							break;
+						}
 					}
 				}
+				r_Things[ThingLevelIndex]->m_pNavigator->PushPosition();
+
 			}
-			r_Things[ThingLevelIndex]->m_pNavigator->PushPosition();
 			
 		}
 		
@@ -367,6 +371,15 @@ void Level::CollisionCHeck(DoomCamera& player, const int node)
 	}
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="pos"></param>
+/// <param name="r_nextPos"></param>
+/// <param name="floorHeight"></param>
+/// <param name="charDiameter"></param>
+/// <param name="isPlayer"></param>
+/// <returns></returns>
 int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight, const float charDiameter, const bool isPlayer) const
 {
 	const int MaxIterations = 10;
@@ -402,7 +415,7 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 		Vector3f moveDirNorm = moveVec.Normalized(); // normalized direction
 		//for (int wallIndex{}; wallIndex < m_pPlanes.size(); wallIndex++)
 		//{
-		//	Plane* wall{ m_pPlanes[wallIndex]};
+		//	Plane* wall{ m_pPlanes.at(wallIndex)};
 
 		//	Vector2f reflectionPoint, wallNormal2D;
 		//	if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
@@ -425,25 +438,26 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 		//		{
 		//			nextPos = curPos;
 		//		}
-		//		else
+		//		else if(isPlayer)
 		//		{
 		//			nextPos = curPos + slideVec;
 		//		}
 
 		//		// Update next floor height after wall slide
-		//		Vector2f next2D{ nextPos.x, nextPos.y };
-		//		newLeaf = utils::GetBSP(next2D, true, m_BSP);
-		//		NextHeight = GetFloorOfLeaf(newLeaf);
+		//		//Vector2f next2D{ nextPos.x, nextPos.y };
+		//		//newLeaf = utils::GetBSP(next2D, true, m_BSP);
+		//		//NextHeight = GetFloorOfLeaf(newLeaf);
 
-		//		hitSomething = true;
+		//		//hitSomething = true;
 		//		//break;
 		//	}
 		//}
-		
+
+		// THIS IS THE BSP COLISION
 		for (int i = 0; i < GetLeafWallAmount(leaf); ++i)
 		{
 			Plane* wall{ GetWallFromLeaf(leaf, i) };
-
+			
 			Vector2f reflectionPoint, wallNormal2D;
 			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
 			{
@@ -480,6 +494,7 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 			}
 		}
 		
+
 		++iterations;
 	}
 
@@ -526,6 +541,7 @@ Plane* Level::GetWallFromLeaf(const int leaf, const int wallIdx) const
 void Level::TriggerDoor(const int leaf, const int wallIdx) const
 {
 	const int wallIndex{ m_BSPleafs[leaf].wallIndexes[wallIdx] };
+	m_pPlanes.at(wallIndex)->Triggered();
 	if (m_pPlanes.at(wallIndex + 1)->IsDoor())
 	{
 		m_pPlanes.at(wallIndex + 1)->Triggered();

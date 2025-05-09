@@ -30,8 +30,11 @@ public:
 	bool IsLookingAtMe(const Vector3f crosspoints[])const;
 	void CalculateLookAtVector();
 	Vector2f GetLookAtVector() const;
+	void ChangeHealth(int damageOheal);
+	int GetHealth() const;
 
 private:
+	int m_health{ 100 };
 	const Rectf& m_Window;
 	int m_charDIameter{ 20 };
 	int m_charHeight{ 40 };

@@ -170,6 +170,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PlaneIregular.cpp" />
     <ClCompile Include="Things.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DoomCamera.h" />
@@ -184,6 +185,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="PlaneIregular.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Things.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="walltextures.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

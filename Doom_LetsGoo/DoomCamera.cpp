@@ -10,6 +10,7 @@
 
 DoomCamera::DoomCamera(const Rectf& window)
 	:m_Pos{ 1056, -3616 ,10 },
+	m_NextPos{ m_Pos },
 	m_projDist{ 2.0f },
 	m_angleOffset{ 0 },
 	m_lookVector{ 0,0 },
@@ -367,6 +368,16 @@ void DoomCamera::CalculateLookAtVector() { // why is it like this? because with 
 
 Vector2f DoomCamera::GetLookAtVector() const {
 	return m_lookVector;
+}
+
+void DoomCamera::ChangeHealth(int damageOheal)
+{
+	m_health += damageOheal;
+}
+
+int DoomCamera::GetHealth() const
+{
+	return m_health;
 }
 
 void DoomCamera::rayy()

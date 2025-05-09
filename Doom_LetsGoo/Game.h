@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "Level.h"
 #include "DoomCamera.h"
+class UI;
 class Game : public BaseGame
 {
 public:
@@ -33,8 +34,11 @@ private:
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
-	
-	Texture* m_UI;
+	float leftBound{ 268 };
+	float bottomBounf{ 38 };
+	float scale{ 2 };
+	//Texture* m_UI;
+	UI* m_pUI{};
 	Level* m_pLevel{};
 	DoomCamera m_Camera;
 	float m_WindowWidth;

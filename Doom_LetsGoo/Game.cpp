@@ -2,14 +2,16 @@
 #include "Game.h"
 #include <ios>
 #include <iostream>
+#include "UI.h"
 
 // need to start thinking on ui
 
-Game::Game( const Window& window ) 
+Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Camera{ GetViewPort()},
-	m_WindowWidth{window.width},
-	m_UI{ new Texture{"STBAR_converted.png"} }
+	m_Camera{ GetViewPort() },
+	m_WindowWidth{ window.width },
+	m_pUI{ new UI{} }
+	//m_UI{ new Texture{"STBAR_converted.png"} }
 {
 	Initialize();
 }
@@ -17,6 +19,7 @@ Game::Game( const Window& window )
 Game::~Game( )
 {
 	Cleanup( );
+	delete m_pUI;
 }
 
 void Game::Initialize( )
@@ -60,22 +63,33 @@ void Game::Update( float elapsedSec )
 
 void Game::Draw( ) const
 {
+	
+
 	BaseGame::Draw();
 	ClearBackground( );
 	glDepthFunc(GL_LESS);
+
+	//------UI propper
+	//UI myUI{};
+	m_pUI->DrawUI(GetWindow().width, bottomBounf, leftBound, scale, 124);
+
+	//------gameplay
 	//m_pLevel->DrawLevel();
 	Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
 	int leaf{ utils::GetBSP(pos, true, m_pLevel->GetBSPtree()) };
 	m_pLevel->traverseBSP(leaf, pos);
 
-	glDepthFunc(GL_ALWAYS);
-
+	//------UI old
+	//glDepthFunc(GL_ALWAYS);
+	m_Camera.GetHealth();
 	float width{ GetWindow().width };
-	float uiWidth{ m_UI->GetWidth() };
-	float ratio{ uiWidth / width };
+	//float uiWidth{ m_UI->GetWidth() };
+	//float ratio{ uiWidth / width };
 
-	Rectf hi{ 0, 0, width, m_UI->GetHeight()/ratio};
-	m_UI->Draw(hi);
+	//Rectf hi{ 0, 0, width, m_UI->GetHeight()/ratio};
+	//m_UI->Draw(hi);
+
+	
 
 }
 
@@ -86,33 +100,45 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 	switch (key)
 	{
 	case SDLK_LEFT:
+		leftBound--;
+		std::cout << leftBound << " leftOffset" << std::endl;
 		//g_eyePos.x = g_eyePos.x + increment;
-		m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		//m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		//m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 
 		break;
 	case SDLK_RIGHT:
+		leftBound++;
+		std::cout << leftBound << " leftOffset" << std::endl;
 		//g_eyePos.x = g_eyePos.x - increment;
-		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		//m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		//m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_UP:
+		bottomBounf++;
+		std::cout << bottomBounf << " bottomOffset" << std::endl;
 		//g_eyePos.z = g_eyePos.z + increment;
 		//Eye.m_eyePos.x = Eye.m_eyePos.x + Eye.getLookkVector().x;
 		//Eye.m_eyePos.y = Eye.m_eyePos.y + Eye.getLookkVector().y;
-		m_pLevel->m_subSectorToDraw++;
+		//m_pLevel->m_subSectorToDraw++;
 		break;
 	case SDLK_DOWN:
+		bottomBounf--;
+		std::cout << bottomBounf << " bottomOffset" << std::endl;
 		//g_eyePos.z = g_eyePos.z - increment;
-		m_pLevel->m_subSectorToDraw--;
+		//m_pLevel->m_subSectorToDraw--;
 		break;
 	case SDLK_a:
-		m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		scale--;
+		std::cout << scale << " scale" << std::endl;
+		//m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		//m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_d:
-		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		scale++;
+		std::cout << scale << " scale" << std::endl;
+		//m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
+		//m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_w:
 		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().x;

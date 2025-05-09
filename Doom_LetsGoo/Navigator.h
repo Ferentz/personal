@@ -17,6 +17,9 @@ public:
 	float m_timer{};
 	float m_Speed{1};
 	float m_size{ 20 };
+	bool m_hasLineOfSight{};
+	bool m_IsShooting{ false };
+	bool m_CanShootAgain{ true };
 	void CalcNextPos( const Vector3f& playerPos, const std::vector<Plane*>& r_pPlanes, float elapsSec);
 	Vector3f GetNextPos() const;
 	Vector3f GetPos() const;

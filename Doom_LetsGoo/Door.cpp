@@ -45,6 +45,7 @@ void Door::Triggered()
 
 bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer)
 {
+	std::cout << "testing door" << std::endl;
 	if (Plane::PlaneCollision(pos3D, nextPos3D, returnPos, outNormal, isPlayer))
 	{
 		//triggered();
