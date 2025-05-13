@@ -34,6 +34,7 @@ private:
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
+	void EnterLevel();
 	float leftBound{ 268 };
 	float bottomBounf{ 38 };
 	float scale{ 2 };
@@ -42,4 +43,12 @@ private:
 	Level* m_pLevel{};
 	DoomCamera m_Camera;
 	float m_WindowWidth;
+	enum class GameState
+	{
+		menu,
+		alive,
+		dead,
+		won
+	};
+	GameState m_State{};
 };

@@ -2,11 +2,16 @@
 #include "Door.h"
 #include <iostream>
 
-Door::Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, float upperHeight, float lowerHeight)
+Door::Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, float upperHeight, float lowerHeight, bool isExit)
 	:Plane{  position,  width,  height, colour },
 	m_upperHeight {upperHeight},
-	m_lowerHeight{lowerHeight}
+	m_lowerHeight{lowerHeight},
+	m_IsExit{ isExit }
 {
+	if (m_IsExit)
+	{
+		std::cout << "MADE THE EXIT" << std::endl;
+	}
 	std::cout << "door made" << std::endl;
 }
 
@@ -38,9 +43,14 @@ void Door::Opening()
 	}
 }
 
-void Door::Triggered()
+bool Door::Triggered()
 {
+	if (m_IsExit)
+	{
+		return true;
+	}
 	m_opening = true;
+	return false;
 }
 
 bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer)

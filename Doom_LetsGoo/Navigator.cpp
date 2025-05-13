@@ -13,6 +13,10 @@ Navigator::Navigator(Vector3f& pos)
 
 void Navigator::CalcNextPos( const Vector3f& playerPos,  const std::vector<Plane*>& r_pPlanes, float elapsSec)
 {
+	if (!m_Alive || m_Dying)
+	{
+		return;
+	}
 	seesPlayer = false;
 	Vector3f PlayDirec{ playerPos - m_Pos };
 	if (PlayDirec.Length() < m_detectRadius)
@@ -49,16 +53,37 @@ Vector3f Navigator::GetPos() const
 
 int Navigator::ColideWLevel(const Level* pLevel)
 {
-	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_NextPos.z, m_charDiameter, false);
+	if (!m_Alive || m_Dying)
+	{
+		return false;
+	}
+	bool exit{ false };
+	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_NextPos.z, m_charDiameter, false, exit);
 }
 
 void Navigator::PushPosition()
 {
+	if (!m_Alive || m_Dying)
+	{
+		return;
+	}
 	m_Pos = m_NextPos;
 	m_EyePos = Vector3f{ m_NextPos.x, m_NextPos.y, m_NextPos.z + m_charHeightr };
 }
 
-bool Navigator::HasLineOfSight(const std::vector <Plane*>  r_pPlanes, const Vector3f& PlayerPos)
+bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos)
+{
+	if (!m_Alive || m_Dying)
+	{
+		return false;
+	}
+	m_hasLineOfSight = HasLineOfSight(r_pPlanes, PlayerPos, m_EyePos);
+	return m_hasLineOfSight;
+	
+
+}
+
+bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos, const Vector3f& objectPos)
 {
 	bool hasLineOfSight{ true };
 	for (int wallIndex{}; wallIndex < r_pPlanes.size(); wallIndex++)
@@ -66,12 +91,11 @@ bool Navigator::HasLineOfSight(const std::vector <Plane*>  r_pPlanes, const Vect
 		const Plane* wall{ r_pPlanes[wallIndex] };
 		Vector2f returnPos{};
 		Vector2f outNormal{};
-		if (wall->Plane::PlaneCollision(m_EyePos, PlayerPos, returnPos, outNormal, true))
+		if (wall->Plane::PlaneCollision(objectPos, PlayerPos, returnPos, outNormal, true))
 		{
 			hasLineOfSight = false;
 			break;
 		}
 	}
-	m_hasLineOfSight = hasLineOfSight;
 	return hasLineOfSight;
 }

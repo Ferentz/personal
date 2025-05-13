@@ -4,6 +4,7 @@
 class DoomCamera;
 class Texture;
 class Navigator;
+class HealthManager;
 class Thing
 {
 public:
@@ -17,5 +18,6 @@ public:
 	utils::ThingsEnum m_Type;
 	point2D_3D m_location;
 	Navigator* m_pNavigator;
+	HealthManager* m_pHealthInteractor;
 };
 

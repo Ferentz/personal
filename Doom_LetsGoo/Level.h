@@ -14,27 +14,32 @@ class Enemy;
 class Level final
 {
 public:
-	Level();
+	Level(DoomCamera& player);
 	~Level();
 	//void UpdateLevel(float elapsedSec) override;
 	//void DrawLevel() const override;
 	void traverseBSP(int leaf, Vector2f pos);
 	void DrawLevel();
-	void LineOfSight();
+	//void LineOfSight();
 	void UpdateLevel( DoomCamera& eyeObject, float elapsedSec);
+	void UpdateThings(DoomCamera& eyeObject, float elapsedSec);
 	void CollisionCHeck( DoomCamera& player, const int node) ;
-	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst, bool isPlayer)const;
+	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst, bool isPlayer, bool& exit)const;
 	bool crossesBSPborder(Vector2f& pos, Vector2f& nextPos, const int node) const;
 	int GetLeafWallAmount(const int leaf) const;
 	float GetFloorOfLeaf(const int leaf) const;
 	Plane* GetWallFromLeaf(int leaf, int wallIdx) const;
-	void TriggerDoor(const int leaf, const int wallIdx) const;
+	bool TriggerDoor(const int leaf, const int wallIdx) const;
 	float m_interval{};
 	int m_subSectorToDraw{};
 	bool IsInSet(int object);
 	const std::vector<BSPnode>& GetBSPtree() const;
+	std::vector <Thing*>& GetThings();
+	std::vector <Plane*>& GetWalls();
+	bool GetCleared();
 private:
 
+	bool m_isCleared{false};
 	//added vars
 	Texture* m_pWallTexture{};
 	Texture* m_pFloorTexture{};
@@ -49,7 +54,7 @@ private:
 	// so now, 
 	int m_floorsNCeilingsAmount{};
 	std::vector <PlaneIregular> m_pFloorsNCeilings{};
-	std::vector <Thing*> r_Things{};
+	std::vector <Thing*> m_pThings{};
 
 	// we need a vector to store what line a wall belongs to
 	std::vector<int> m_LinePerWall;

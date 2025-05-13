@@ -23,7 +23,7 @@ public:
 	int m_colour{};
 	bool IsDoor();
 	int GetTexIdx();
-	virtual void Triggered();
+	virtual bool Triggered();
 	void GetWallVerts(Vector2f wallVerts[]) const;
 protected:
 	Vector3f m_Location;

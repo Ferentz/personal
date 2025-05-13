@@ -7,15 +7,19 @@
 
 #include "DoomCamera.h"
 #include "Navigator.h"
+#include "Interactor.h"
 
 
 namespace fs = std::filesystem;
+HealthManager* Enemy::pPlayerHealth{};
 
-Enemy::Enemy(Vector2f pos, float height, std::string folder)
+Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
 	:Thing{ pos, height , utils::ThingsEnum::Zombieman }
 {
 	m_pNavigator = new Navigator(m_location.point3D);
-	std::string path = "POSS";
+	m_pHealthInteractor = new HealthManager(20);
+	//m_pInteractor = new Interactor();
+	//std::string path = "POSS";
 	for (const auto& entry : fs::directory_iterator(folder))
 	{
 		std::string path{ entry.path().string() };
@@ -30,44 +34,84 @@ Enemy::Enemy(Vector2f pos, float height, std::string folder)
 Enemy::~Enemy()
 {
 	delete m_pNavigator;
+	delete m_pHealthInteractor;
 	m_pNavigator = nullptr;
+	m_pHealthInteractor = nullptr;
 }
 
 void Enemy::UpdateThing(const DoomCamera& eyeObject, float elapsSec)
 {
-	if (m_pNavigator->m_hasLineOfSight &&
-		!m_pNavigator -> m_IsShooting &&
-		m_pNavigator->m_CanShootAgain)
+	if (m_pNavigator->m_Alive)
 	{
-		m_pNavigator->m_IsShooting = true;
-		m_timer = 0;
-		m_TexIndex = 0;
-	}
-	m_timer += elapsSec;
-	if (m_timer >= 0.5)
-	{
-		if (m_pNavigator->m_IsShooting)
+		if (m_pNavigator->m_hasLineOfSight &&
+			!m_pNavigator->m_IsShooting &&
+			m_pNavigator->m_CanShootAgain)
 		{
-			
-			if (m_TexIndex >= 1)
+			m_pNavigator->m_IsShooting = true;
+
+			m_timer = 0;
+			m_TexIndex = 0;
+		}
+		m_timer += elapsSec;
+		if (m_timer >= 0.5)
+		{
+			if (m_pNavigator->m_IsShooting)
 			{
-				m_TexIndex = 0;
-				m_pNavigator->m_IsShooting = false;
+
+				if (m_TexIndex >= 1)
+				{
+					if (m_pNavigator->m_hasLineOfSight)
+					{
+						pPlayerHealth->Harm(5);
+					}
+					//ShootPlayer(&eyeObject);
+					m_TexIndex = 0;
+					m_pNavigator->m_IsShooting = false;
+					m_pNavigator->m_CanShootAgain = false;
+				}
+				m_TexIndex++;
+				m_timer = 0;
+			}
+			else if (m_pNavigator->m_Dying)
+			{
 				m_pNavigator->m_CanShootAgain = false;
+				m_TexIndex++;
+				if (m_TexIndex >= 5)
+				{
+					m_TexIndex = 0;
+				}
+				m_timer = 0;
+				
 			}
-			m_TexIndex++;
-			m_timer = 0;
+			else {
+				m_pNavigator->m_CanShootAgain = true;
+				m_TexIndex++;
+				if (m_TexIndex >= 4)
+				{
+					m_TexIndex = 0;
+				}
+				m_timer = 0;
+			}
 		}
-		else {
-			m_pNavigator->m_CanShootAgain = true;
-			m_TexIndex++;
-			if (m_TexIndex >= 4)
+		if (m_pHealthInteractor->GetHeath() <= 0 && !m_pNavigator->m_Dying)
+		{
+			m_timer = 0;
+			m_pNavigator->m_Dying = true;
+		}
+		if (m_pNavigator->m_Dying)
+		{
+			int index = m_TexIndex + (7 * 5);
+			if (index == (7 * 5) + 4)
 			{
-				m_TexIndex = 0;
+				m_pNavigator->m_Alive = false;
+				
+				m_pNavigator->m_Dying = false;
+
 			}
-			m_timer = 0;
 		}
+		
 	}
+
 	Thing::UpdateThing(eyeObject, elapsSec);
 	
 	//m_location.point2D = eyeObject.PerspCalc(m_location, m_location.point3D);
@@ -75,10 +119,10 @@ void Enemy::UpdateThing(const DoomCamera& eyeObject, float elapsSec)
 
 void Enemy::DrawThing(Texture* tex)
 {
-	float scale{ 0.001 };
+	/*float scale{ 0.001 };
 	float width{ m_pMonsterTexture[m_TexIndex].GetWidth() / (m_location.Dist3D * scale) };
 	float height{ m_Height / (m_location.Dist3D * scale) };
-	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };
+	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };*/
 	//utils::SetColor(1, 1, 1, 1);
 	//utils::DrawRect(dest);
 	int index{ m_TexIndex * 5 };
@@ -86,5 +130,27 @@ void Enemy::DrawThing(Texture* tex)
 	{
 		index += (4 * 5);
 	}
+	if (m_pNavigator->m_Dying)
+	{
+		index = m_TexIndex + (7 * 5);
+	}
+	if (!m_pNavigator->m_Alive)
+	{
+		index = (7 * 5) + 4;
+	}
+	float scale{ 0.001 };
+	float width{ m_pMonsterTexture[index].GetWidth() / (m_location.Dist3D * scale) };
+	float height{ m_pMonsterTexture[index].GetHeight() / (m_location.Dist3D * scale) };
+	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };
 	m_pMonsterTexture[index].Draw(dest);
 }
+
+void Enemy::AssignPlayer(HealthManager& playerHealth)
+{
+	pPlayerHealth = &playerHealth;
+}
+
+//void Enemy::ShootPlayer(DoomCamera* eyeObject)
+//{
+//	eyeObject-> ChangeHealth(-1);
+//}

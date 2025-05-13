@@ -152,9 +152,10 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	float topUse = std::max(top, bottom); // some walls are created upside down
 	float bottomUse = std::min(top, bottom);
 	//
-	if(((pos3D.z > topUse && isPlayer) ||
-		//(((bottomUse > pos3D.z + 40) && (topUse < pos3D.z + 20)) && !isPlayer )||
-		pos3D.z < bottomUse)) // if the player is above or below, if a monster and the ledge is bigger than the step height
+	if(
+		((pos3D.z > topUse) || (pos3D.z < bottomUse)) ||
+		((nextPos3D.z > topUse) || (nextPos3D.z < bottomUse))//&& isPlayer) ||
+		) // if the player is above or below, if a monster and the ledge is bigger than the step height
 	{
 		return false;
 	}
@@ -226,8 +227,9 @@ int Plane::GetTexIdx()
 {
 	return m_TextureIndex;
 }
-void Plane::Triggered()
+bool Plane::Triggered()
 {
+	return false;
 }
 //
 //bool Plane::PlaneCollision(DoomCamera& eyeObject) {

@@ -8,7 +8,8 @@ Thing::Thing(Vector2f pos, float height, utils::ThingsEnum type)
 	m_Height{ height },
 	m_Type{ type },
 	m_location{ pos.x, pos.y, 0 },
-	m_pNavigator{nullptr}
+	m_pNavigator{nullptr},
+	m_pHealthInteractor{nullptr}
 {
 }
 

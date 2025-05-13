@@ -4,13 +4,15 @@
 #include <set>
 #include <map>
 
+class DoomCamera;
 class LevelGenerator final
 {
 public:
 	LevelGenerator(std::vector<BSPnode>& p_BSPtree, std::vector<BSPleafeNode>& p_BSPleafs,
 		std::vector <Plane*>& p_Planes, std::vector <PlaneIregular>& p_FloorsNCeilings,
 		std::set<int>& tags1, std::set<int>& tags2, std::vector <Thing*>& things,
-		std::vector<Texture>& m_Textures, std::map<std::string, int>& map);
+		std::vector<Texture>& m_Textures, std::map<std::string, int>& map,
+		DoomCamera& player);
 	void GetTextureStructs();
 	void AddFnCTextures();
 private:
@@ -87,6 +89,8 @@ private:
 	std::vector<Texture>& textures;
 
 	std::map<std::string, int>& nameMap;
+
+	DoomCamera* m_pPlayer;
 
 	//enum ReadVertexes {
 	//	x = 0,

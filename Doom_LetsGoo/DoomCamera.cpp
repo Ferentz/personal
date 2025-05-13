@@ -3,18 +3,24 @@
 #include <iostream>
 #include "Level.h"
 #include "Plane.h"
+#include "Things.h"
+#include "Navigator.h"
 //#include "game.h"
 
 // next we need to work on jump
 
+// get the trigger event in game to shoot.
+//then conect to get the level things ad check if smth gets hit
 
 DoomCamera::DoomCamera(const Rectf& window)
-	:m_Pos{ 1056, -3616 ,10 },
+	:
 	m_NextPos{ m_Pos },
 	m_projDist{ 2.0f },
 	m_angleOffset{ 0 },
 	m_lookVector{ 0,0 },
-	m_Window{window}
+	m_Window{window},
+	m_HealthManager{500},
+	m_WeaponManager{}
 {
 }
 
@@ -27,9 +33,11 @@ void DoomCamera::pushPosition()
 // perhaps the player can have a reference to the level.
 // then the player, in collision calls eveything.
 // we want a function that receives the level as a const
-int DoomCamera::ColideWLevel(const Level* pLevel)
+bool DoomCamera::ColideWLevel(const Level* pLevel)
 {
-	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter, true);
+	bool exit{ false };
+	pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter, true, exit);
+	return exit;
 }
 
 
@@ -298,7 +306,6 @@ void DoomCamera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) 
 		invisible.point2D = Point2D;
 	}
 	//utils::Raycast(LINE_SEGMENT, CENTER, m_MousePos, hitInfo)
-
 }
 
 void DoomCamera::VelocCalc(float elapsedSec)
@@ -336,6 +343,32 @@ void DoomCamera::PerspCalc(point2D_3D& pointStruct1, point2D_3D& pointStruct2) c
 	//now we need to find the intersectionPoint with 
 }
 
+void DoomCamera::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
+{
+	for (Thing*& object : thingsToShoot)
+	{
+		if (object->m_pHealthInteractor != nullptr) // if it has health
+		{
+			bool lineOfSight{ false };
+			if (object->m_pNavigator != nullptr)
+			{
+				lineOfSight = object->m_pNavigator->m_hasLineOfSight;
+			}
+
+			if(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, object->m_location.point3D))
+			{
+				int shootRange{ 100 };
+				if (object->m_location.point2D.x < windowWidth / 2 + shootRange && object->m_location.point2D.x > windowWidth / 2 - shootRange)
+				{
+					object->m_pHealthInteractor->Harm(m_WeaponManager.GetDamageOutput());
+					std::cout << "HIT" << std::endl;
+				}
+				
+			}
+		}
+	}
+}
+
 bool DoomCamera::IsLookingAtMe(const Vector3f crosspoints[])const {
 	//Vector3f crosResult{};
 	Vector3f crosA{crosspoints[1].CrossProduct(crosspoints[0])}; //crosspoints[1].x - crosspoints[0].x, crosspoints[1].y - crosspoints[0].y, crosspoints[1].z - crosspoints[0].z };
@@ -366,18 +399,16 @@ void DoomCamera::CalculateLookAtVector() { // why is it like this? because with 
 	m_lookVector.y = sin(m_angleOffset);
 }
 
+void DoomCamera::ResetPos()
+{
+	m_Pos.x = m_StartPos.x;
+	m_Pos.y = m_StartPos.y;
+	m_Pos.z = m_StartPos.z;
+
+}
+
 Vector2f DoomCamera::GetLookAtVector() const {
 	return m_lookVector;
-}
-
-void DoomCamera::ChangeHealth(int damageOheal)
-{
-	m_health += damageOheal;
-}
-
-int DoomCamera::GetHealth() const
-{
-	return m_health;
 }
 
 void DoomCamera::rayy()

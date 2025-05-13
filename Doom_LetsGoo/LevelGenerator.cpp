@@ -7,6 +7,7 @@
 #include "PlaneIregular.h"
 #include "LevelGenerator.h"
 #include "Texture.h"
+#include "DoomCamera.h"
 //#include "LevelGenerator.h"
 
 /*
@@ -21,7 +22,8 @@ the level just wants the bsp tree, the walls, the floors. and that's it basicaly
 
 LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BSPleafeNode>& p_BSPleafs_p,
 	std::vector <Plane*>& p_Planes_p, std::vector <PlaneIregular>& p_FloorsNCeilings_p, std::set<int>& tags1, std::set<int>& tags2,
-	std::vector <Thing*>& things, std::vector<Texture>& m_Textures, std::map<std::string, int>& map)
+	std::vector <Thing*>& things, std::vector<Texture>& m_Textures, std::map<std::string, int>& map,
+	DoomCamera& player)
 	:vertexesImported{ utils::ReadLMP("VERTEXES.lmp", VERTEXCOLUMS) },
 	linesImported{ utils::ReadLMP("LINEDEFS.lmp", LINECOLUMS) },
 	sidesImported{ utils::ReadLMP("SIDEDEFS.lmp", SIDECOLUMS) },
@@ -37,7 +39,8 @@ LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BS
 	r_tags{ tags1 , tags2 },
 	r_Things{things},
 	textures{ m_Textures },
-	nameMap{ map }
+	nameMap{ map },
+	m_pPlayer{ &player }
 {
 	GenerateLevel();
 }
@@ -56,7 +59,13 @@ bool WillBeDoor(uint16_t actionBit)
 void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, const float SCALE, int idx)
 {
 
-	
+	bool isExit{ false };
+	/*std::cout << "flag ----------" << linesImported.data[line][ReadLines::actionSpecial] << std::endl;
+	if (linesImported.data[line][ReadLines::flags] == 36)
+	{
+		
+		isExit = true;
+	}*/
 	
 	int vertex1 = int(linesImported.data[line][ReadLines::vertex1]);
 	int vertex2 = int(linesImported.data[line][ReadLines::vertex2]);
@@ -88,7 +97,12 @@ void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, 
 	}
 	if (WillBeDoor(linesImported.data[line][ReadLines::actionSpecial]))
 	{
-		r_Planes.push_back(new Door{ location, width, height, idx, ceilingHeight, floorHeight });
+		if (linesImported.data[line][ReadLines::actionSpecial] == 11)
+		{
+			std::cout << "found 36 ----------" << std::endl;
+			isExit = true;
+		}
+		r_Planes.push_back(new Door{ location, width, height, idx, ceilingHeight, floorHeight, isExit });
 	}
 	else
 	{
@@ -384,10 +398,9 @@ void LevelGenerator::MakeWalls(const float SCALE)
 			int sector2{ GetSectorFromLine(line, true) };
 			float ceilingHeight2 = sectorsImported.data[sector2][ReadSectors::ceilingHeight] / SCALE;
 			float floorHeight2 = sectorsImported.data[sector2][ReadSectors::floorHeight] / SCALE;
-
+			
 			if (upperTexture.find("-") == std::string::npos)
 			{
-				std::string door{ "DOOR3" };
 				int idx = nameMap.find(upperTexture)->second;
 				linePerWall.push_back(line);
 				AddPlane(line, ceilingHeight2, ceilingHeight, SCALE, idx);
@@ -395,7 +408,6 @@ void LevelGenerator::MakeWalls(const float SCALE)
 			}
 			if (middleTexture.find("-") == std::string::npos)
 			{
-				std::string door{ "DOOR3" };
 				int idx = nameMap.find(middleTexture)->second;
 				float floorHeight2Use{ floorHeight };
 				if (floorHeight < floorHeight2) {
@@ -410,14 +422,13 @@ void LevelGenerator::MakeWalls(const float SCALE)
 			}
 			if (lowerTexture.find("-") == std::string::npos)
 			{
-				std::string door{ "DOOR3" };
 				int idx = nameMap.find(lowerTexture)->second;
 				linePerWall.push_back(line);
 				AddPlane(line, floorHeight2, floorHeight, SCALE, idx);
 			}
 		}
-		else if (middleTexture.find("-") == std::string::npos) {
-			std::string door{ "DOOR3" };
+		else if (middleTexture.find("-") == std::string::npos)
+		{
 			int idx = nameMap.find(middleTexture)->second;
 			linePerWall.push_back(line);
 			AddPlane(line, floorHeight, ceilingHeight, SCALE, idx);
@@ -574,7 +585,6 @@ void LevelGenerator::SeamFixSubsectors(const int* sectorPerSubsector)
 
 void LevelGenerator::ReadThings()
 {
-
 	for (int thing{}; thing < thingsImported.rows; thing++)
 	{
 		//std::cout << thingsImported.data[thing][ReadThings::type] << std::endl;
@@ -915,7 +925,7 @@ void LevelGenerator::ReadThings()
 		
 		if (type == utils::ThingType::monster)
 		{
-			r_Things.emplace_back(new Enemy{ position, float(height), sprite });
+			r_Things.emplace_back(new Enemy{ position, float(height), sprite});
 		}
 		else
 		{
@@ -923,6 +933,7 @@ void LevelGenerator::ReadThings()
 		}
 		
 }
+	Enemy::AssignPlayer(m_pPlayer->m_HealthManager);
 }
 
 void LevelGenerator::AdjustThings()

@@ -1,19 +1,23 @@
 #pragma once
 #include "utils.h"
 #include <vector>
-
+#include "HealthManager.h"
+#include "WeaponManager.h"
 //class Window;
 class Level;
-
+class Thing;
+class Plane;
+//class HealthManager;
 class DoomCamera final
 {
 public:
-	Vector3f m_Pos;
+	Vector3f m_StartPos{ 1056, -3616 ,10 };
+	Vector3f m_Pos{ 1056, -3616 ,10 };
 	Vector3f m_NextPos;
 	std::vector<Vector2f> m_Walls;
 	float m_projDist;
 	void pushPosition();
-	int ColideWLevel(const Level* pLevel);
+	bool ColideWLevel(const Level* pLevel);
 	float m_angleOffset;
 	void rayy();
 	DoomCamera(const Rectf& window);
@@ -26,14 +30,16 @@ public:
 	float m_vericalVelocity{};
 	void VelocCalc(float elapsedSec);
 	float m_FLoorHeigt{};
-
+	void Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth);
 	bool IsLookingAtMe(const Vector3f crosspoints[])const;
 	void CalculateLookAtVector();
+	void ResetPos();
 	Vector2f GetLookAtVector() const;
-	void ChangeHealth(int damageOheal);
-	int GetHealth() const;
+	HealthManager m_HealthManager;
+	WeaponManager m_WeaponManager;
 
 private:
+	
 	int m_health{ 100 };
 	const Rectf& m_Window;
 	int m_charDIameter{ 20 };

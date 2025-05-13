@@ -28,16 +28,42 @@ void Game::Initialize( )
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
 	
-	m_pLevel = new Level();
+	m_pLevel = new Level(m_Camera);
 }
 
 void Game::Cleanup( )
 {
-	delete m_pLevel;
+	if (m_pLevel != nullptr)
+	{
+		delete m_pLevel;
+	}
+	
 }
 
 void Game::Update( float elapsedSec )
 {
+	switch (m_State)
+	{
+	case Game::GameState::menu:
+		break;
+	case Game::GameState::alive:
+		m_pLevel->UpdateLevel(m_Camera, elapsedSec);
+		if(m_Camera.ColideWLevel(m_pLevel))
+		{
+			m_State = GameState::won;
+		}
+		m_Camera.VelocCalc(elapsedSec);
+		m_Camera.pushPosition();
+		if (m_Camera.m_HealthManager.GetHeath() <= 0)
+		{
+			m_State = GameState::dead;
+		}
+		break;
+	case Game::GameState::dead:
+		break;
+	default:
+		break;
+	}
 	// Check keyboard state
 	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
 	//if ( pStates[SDL_SCANCODE_RIGHT] )
@@ -48,41 +74,44 @@ void Game::Update( float elapsedSec )
 	//{
 	//	std::cout << "Left and up arrow keys are down\n";
 	//}
-	m_pLevel->UpdateLevel(m_Camera, elapsedSec);
-	int subSector{ m_Camera.ColideWLevel(m_pLevel) };
-	m_Camera.VelocCalc(elapsedSec);
-	m_Camera.pushPosition();
-	// preferably, we want to just say "player, colide!" and the player then checks where it is in the bsp tree etc
-	// perhaps we first gather all the input, and then check it agianst 
-	/*if (wal >= 0)
-	{
-		m_pLevel.
-	}*/
-
+	
+	
 }
 
 void Game::Draw( ) const
 {
-	
-
 	BaseGame::Draw();
-	ClearBackground( );
+	ClearBackground();
 	glDepthFunc(GL_LESS);
+	switch (m_State)
+	{
+	case Game::GameState::menu:
+		break;
+	case Game::GameState::alive:
+		{
+		//------UI propper
+		//UI myUI{};
+		m_pUI->DrawUI(GetWindow().width, bottomBounf, leftBound, scale, m_Camera.m_HealthManager.GetHeath());
 
-	//------UI propper
-	//UI myUI{};
-	m_pUI->DrawUI(GetWindow().width, bottomBounf, leftBound, scale, 124);
+		//------gameplay
+		//m_pLevel->DrawLevel();
+		Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
+		int leaf{ utils::GetBSP(pos, true, m_pLevel->GetBSPtree()) };
+		m_pLevel->traverseBSP(leaf, pos);
 
-	//------gameplay
-	//m_pLevel->DrawLevel();
-	Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
-	int leaf{ utils::GetBSP(pos, true, m_pLevel->GetBSPtree()) };
-	m_pLevel->traverseBSP(leaf, pos);
+		//------UI old
+		//glDepthFunc(GL_ALWAYS);
+		//m_Camera.GetHealth();
+		//float width{ GetWindow().width };
+		}
+		break;
+	case Game::GameState::dead:
+		break;
+	default:
+		break;
+	}
 
-	//------UI old
-	//glDepthFunc(GL_ALWAYS);
-	m_Camera.GetHealth();
-	float width{ GetWindow().width };
+	
 	//float uiWidth{ m_UI->GetWidth() };
 	//float ratio{ uiWidth / width };
 
@@ -224,24 +253,39 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
 {
 	//std::cout << "MOUSEBUTTONDOWN event: ";
-	//switch ( e.button )
-	//{
-	//case SDL_BUTTON_LEFT:
-	//	std::cout << " left button " << std::endl;
-	//	break;
-	//case SDL_BUTTON_RIGHT:
-	//	std::cout << " right button " << std::endl;
-	//	break;
-	//case SDL_BUTTON_MIDDLE:
-	//	std::cout << " middle button " << std::endl;
-	//	break;
-	//}
+	switch ( e.button )
+	{
+	case SDL_BUTTON_LEFT:
+		switch (m_State)
+		{
+		case Game::GameState::menu:
+			m_State = GameState::alive;
+			EnterLevel();
+			break;
+		case Game::GameState::alive:
+			m_Camera.Shoot(m_pLevel->GetThings(), m_pLevel->GetWalls(), m_WindowWidth);
+			break;
+		case GameState::won:
+
+		case Game::GameState::dead:
+			m_State = GameState::menu;
+			break;
+		default:
+			break;
+		}
+		
+		break;
+	case SDL_BUTTON_RIGHT:
+		break;
+	case SDL_BUTTON_MIDDLE:
+		break;
+	}
 	
 }
 
 void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 {
-	std::cout << "MOUSEBUTTONUP event: ";
+	/*std::cout << "MOUSEBUTTONUP event: ";
 	switch ( e.button )
 	{
 	case SDL_BUTTON_LEFT:
@@ -253,7 +297,7 @@ void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 	case SDL_BUTTON_MIDDLE:
 		std::cout << " middle button " << std::endl;
 		break;
-	}
+	}*/
 }
 
 void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)
@@ -269,10 +313,32 @@ void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)
 
 void Game::ClearBackground( ) const
 {
-	glClearColor( 0.0f, 0.0f, 0.3f, 1.0f );
+	switch (m_State)
+	{
+	case Game::GameState::menu:
+		glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
+		break;
+	case Game::GameState::alive:
+		glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
+	break;
+	case GameState::won:
+		glClearColor(0.0f, 0.3f, 0.0f, 1.0f);
+		break;
+	case Game::GameState::dead:
+		glClearColor(0.3f, 0.0f, 0.0f, 1.0f);
+		break;
+	default:
+		glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
+		break;
+	}
+	
 	//glClear( GL_COLOR_BUFFER_BIT );
 	//glClearDepthf(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-
+void Game::EnterLevel()
+{
+	m_Camera.m_HealthManager.FullHealth();
+	m_Camera.ResetPos();
+}

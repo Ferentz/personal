@@ -4,8 +4,6 @@
 
 UI::UI()
 	:m_pUI{ new Texture{"STBAR_converted.png"} },
-	//numRed/STTMINUS.png
-	m_pStripe{ new Texture{"numRed/STTMINUS.png"} },
 	m_pNumbers{ new Texture{"numRed/STTNUM0.png"} ,
 	new Texture{"numRed/STTNUM1.png"},
 	new Texture{"numRed/STTNUM2.png"},
@@ -18,17 +16,7 @@ UI::UI()
 	new Texture{"numRed/STTNUM9.png"},
 	new Texture{"numRed/STTPRCNT.png"},
 	new Texture{"numRed/STTMINUS.png"}
-	},
-	m_pOne{ new Texture{"numRed/STTNUM1.png"} },
-	m_pTwo{ new Texture{"numRed/STTNUM2.png"} },
-	m_pThree{ new Texture{"numRed/STTNUM3.png"} },
-	m_pFour{ new Texture{"numRed/STTNUM4.png"} },
-	m_pFive{ new Texture{"numRed/STTNUM5.png"} },
-	m_pSix{ new Texture{"numRed/STTNUM6.png"} },
-	m_pSeven{ new Texture{"numRed/STTNUM7.png"} },
-	m_pEight{ new Texture{"numRed/STTNUM8.png"} },
-	m_pNine{ new Texture{"numRed/STTNUM9.png"} },
-	m_pPercent{ new Texture{"numRed/STTPRCNT.png"} }
+	}
 {
 }
 
@@ -39,18 +27,7 @@ UI::~UI()
 		delete m_pNumbers[index];
 	}
 	delete m_pUI;
-	delete m_pStripe;
-	//delete m_pZero;
-	delete m_pOne;
-	delete m_pTwo;
-	delete m_pThree;
-	delete m_pFour;
-	delete m_pFive;
-	delete m_pSix;
-	delete m_pSeven;
-	delete m_pEight;
-	delete m_pNine;
-	delete m_pPercent;
+
 }
 
 void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float scale, int health)
@@ -70,12 +47,12 @@ void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float sc
 			glScalef(scale, scale, 0.f);
 			glRotatef(0.f, 0.f, 0.f, 1.f);
 
-			numOffset -= m_pPercent->GetWidth();
-			m_pPercent->Draw(
+			numOffset -= m_pNumbers[10]->GetWidth();
+			m_pNumbers[10]->Draw(
 				Rectf{ numOffset,
 				0.f,
-				m_pPercent->GetWidth(),
-				m_pPercent->GetHeight()
+				m_pNumbers[10]->GetWidth(),
+				m_pNumbers[10]->GetHeight()
 				}
 			);
 			for (int devisor{ 1 }; devisor <= 150; devisor *= 10)
