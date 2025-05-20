@@ -18,9 +18,9 @@ Thing::~Thing()
 {
 }
 
-void Thing::UpdateThing(const PLayer& eyeObject, float elapsSec)
+void Thing::UpdateThing(const PLayer& player, float elapsSec)
 {
-	m_location.point2D = eyeObject.PerspCalc(m_location);
+	m_location.point2D = player.GetCamera().PerspCalc(m_location);
 }
 
 void Thing::DrawThing(Texture* tex)

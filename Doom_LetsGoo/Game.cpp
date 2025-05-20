@@ -226,16 +226,9 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 		//SDL_WarpMouseInWindow
 	}
 	
-	//g_offset = ((mouseX - g_WindowWidth / 2) * 1)/100;
-	m_Camera.m_angleOffset += mouseX / 100;
-
-	if (m_Camera.m_angleOffset > M_PI) {
-		m_Camera.m_angleOffset = -M_PI + (int(m_Camera.m_angleOffset * 100) % int(M_PI * 100)) / 100.f;
-	}
-	if (m_Camera.m_angleOffset < -M_PI) {
-		m_Camera.m_angleOffset = M_PI + (int(m_Camera.m_angleOffset * 100) % int(-M_PI * 100)) / 100.f;
-	}
-	m_Camera.CalculateLookAtVector();
+	
+	m_Camera.Turn(mouseX / 100);
+	
 }
 
 void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
@@ -292,8 +285,8 @@ void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)
 
 	float increment{ 10.f };
 	//Eye.m_eyePos.y = Eye.m_eyePos.y + increment * e.y;
-	m_Camera.m_NextPos.x += cos(m_Camera.m_angleOffset) * e.y * increment;
-	m_Camera.m_NextPos.y -= sin(m_Camera.m_angleOffset) * e.y * increment;
+	m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().x * e.y * increment;
+	m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().y * e.y * increment;
 
 
 }

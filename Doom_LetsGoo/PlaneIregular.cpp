@@ -41,13 +41,13 @@ PlaneIregular::PlaneIregular(std::vector<Vector2f> vertexes, int idx, int height
 	}
 }
 
-void PlaneIregular::UpdatePlane(const PLayer& eyeObject) {
+void PlaneIregular::UpdatePlane(const PLayer& player) {
 
 	//so, when updating, we can get the offseto fo the point. and, we can project the texture along world space then.
 
 	for (int index{ 0 }; index < m_amoountOfPoints; index++) {
 		//std::cout << index << std::endl;
-		m_pPointsArr[index].point2D = eyeObject.PerspCalc(m_pPointsArr[index]);
+		m_pPointsArr[index].point2D = player.GetCamera().PerspCalc(m_pPointsArr[index]);
 		if (m_pPointsArr[index].Angle[2] > M_PI * 0.5f || m_pPointsArr[index].Angle[2] < - M_PI * 0.5f) {
 			m_pPointsArr[index].amIVisible = false;
 		}

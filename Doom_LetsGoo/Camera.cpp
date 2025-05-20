@@ -150,7 +150,7 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 
 const Vector2f Camera::MakeLookAtVector() const
 {
-	return Vector2f{ cos(m_angleOffset), sin(m_angleOffset) };
+	return Vector2f{float( cos(m_angleOffset)), float(sin(m_angleOffset)) };
 }
 
 void Camera::TurnCamera(float offset)
