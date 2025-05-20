@@ -12,7 +12,11 @@ class Enemy final: public Thing
 {
 public:
 	Enemy(Vector2f& pos, float height, std::string& folder);
-	virtual ~Enemy() override;
+	Enemy(const Enemy& toCopy);
+	Enemy(Enemy&& toMove) noexcept;
+	Enemy& operator=(const Enemy& rhs);
+	Enemy& operator=(Enemy&& rhs) noexcept;
+	virtual ~Enemy() noexcept override ;
 	virtual void UpdateThing(const PLayer& eyeObject, float elapsSec) override;
 	virtual void DrawThing(Texture* tex) override;
 
@@ -22,12 +26,13 @@ public:
 
 	//void ColideWLevel(const Level* pLevel);
 private:
-
-	int m_TexIndex{ 0 };
-	float m_timer{};
+	void LoadTextures();
+	int m_TexIndex;
+	float m_timer;
 	
 	std::vector <Texture> m_pMonsterTexture{};
-	std::vector <std::string> m_MonsterTextureSuffixes{};
-	Vector2f m_direction{};
+	std::vector <std::string> m_MonsterTexturePaths{};
+	Vector2f m_direction;
 };
+
 

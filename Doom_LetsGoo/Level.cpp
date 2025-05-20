@@ -23,6 +23,51 @@ Level::Level(PLayer& player)
 	LevelGenerator gen{ m_BSP, m_BSPleafs,m_pPlanes, m_pFloorsNCeilings, m_tags[0], m_tags[1], m_pThings, m_Textures, m_NameMap, player };// m_pPlanes, m_pFloorsNCeilings};
 }
 
+
+Level::Level(Level&& toMove) noexcept
+	:m_isCleared{ toMove.m_isCleared }
+{
+	m_pThingTexture = toMove.m_pThingTexture;
+	toMove.m_pThingTexture = nullptr;
+	m_Textures = std::move(toMove.m_Textures);
+	m_NameMap = std::move(toMove.m_NameMap);
+	m_BSP = std::move(toMove.m_BSP);
+	m_BSPleafs = std::move(toMove.m_BSPleafs);
+	m_PlaneAmount = toMove.m_PlaneAmount;
+	m_pPlanes = std::move(toMove.m_pPlanes);
+	m_floorsNCeilingsAmount = toMove.m_floorsNCeilingsAmount;
+	m_pFloorsNCeilings = std::move(toMove.m_pFloorsNCeilings);
+	m_pThings = std::move(toMove.m_pThings);
+	m_LinePerWall = std::move(toMove.m_LinePerWall);
+	for (int i{}; i < 2; i++)
+	{
+		m_tags[i] = std::move(toMove.m_tags[i]);
+	}
+}
+
+
+Level& Level::operator=(Level&& rhs) noexcept
+{
+	m_isCleared = rhs.m_isCleared ;
+	m_pThingTexture = rhs.m_pThingTexture;
+	rhs.m_pThingTexture = nullptr;
+	m_Textures = std::move(rhs.m_Textures);
+	m_NameMap = std::move(rhs.m_NameMap);
+	m_BSP = std::move(rhs.m_BSP);
+	m_BSPleafs = std::move(rhs.m_BSPleafs);
+	m_PlaneAmount = rhs.m_PlaneAmount;
+	m_pPlanes = std::move(rhs.m_pPlanes);
+	m_floorsNCeilingsAmount = rhs.m_floorsNCeilingsAmount;
+	m_pFloorsNCeilings = std::move(rhs.m_pFloorsNCeilings);
+	m_pThings = std::move(rhs.m_pThings);
+	m_LinePerWall = std::move(rhs.m_LinePerWall);
+	for (int i{}; i < 2; i++)
+	{
+		m_tags[i] = std::move(rhs.m_tags[i]);
+	}
+	return *this;
+}
+
 Level::~Level() {
 	// some instructions
 	for (int i{}; i < m_pPlanes.size(); i++)

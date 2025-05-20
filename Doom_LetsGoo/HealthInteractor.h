@@ -6,7 +6,6 @@ class HealthInteractor final : public Interactor
 {
 public:
 	HealthInteractor(float healAmount, bool affectsArmour = false, bool affectsMax = false);
-	virtual ~HealthInteractor() override;
 	virtual void Interact() override;
 	static void AssignPlayer(HealthManager& playerHealth);
 private:

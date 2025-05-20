@@ -54,9 +54,7 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 	}
 
 }
-Plane::~Plane()
-{
-}
+
 void Plane::UpdatePlane(const PLayer& player, float elapsSec) {
 	for (int index{}; index < 4; index++) {
 		m_Points[index].point2D = player.GetCamera().PerspCalc(m_Points[index]);

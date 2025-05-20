@@ -8,10 +8,6 @@ Interactor::Interactor()
 {
 }
 
-Interactor::~Interactor()
-{
-}
-
 void Interactor::AssignPlayer(PLayer& player)
 {
 	HealthInteractor::AssignPlayer(player.m_HealthManager);

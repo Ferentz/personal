@@ -14,30 +14,93 @@ namespace fs = std::filesystem;
 HealthManager* Enemy::pPlayerHealth{};
 
 Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
-	:Thing{ pos, height , utils::ThingsEnum::Zombieman, folder }
+	:Thing{ pos, height , utils::ThingsEnum::Zombieman, folder },
+	m_TexIndex{},
+	m_timer{},
+	m_direction{}
 {
 	m_pNavigator = new Navigator(m_location.point3D);
-	m_pHealthInteractor = new HealthManager(20);
+	m_pHealthManager = new HealthManager(20);
 	//m_pInteractor = new Interactor();
 	//std::string path = "POSS";
 	for (const auto& entry : fs::directory_iterator(folder))
 	{
 		std::string path{ entry.path().string() };
-		std::string name{ entry.path().filename().string() };
+		/*std::string name{ entry.path().filename().string() };
 		std::string suffic{ entry.path().filename().string().erase(name.size() - 4, name.size() - 1) };
-		suffic.erase(0, 4);
-		m_MonsterTextureSuffixes.push_back(suffic);
+		suffic.erase(0, 4);*/
 		m_pMonsterTexture.emplace_back(Texture(path));
 	}
+	LoadTextures();
+}
+
+Enemy::Enemy(const Enemy& toCopy)
+	:Thing{ Thing(toCopy) },
+	m_TexIndex{ toCopy.m_TexIndex },
+	m_timer{ toCopy.m_timer },
+	m_direction{ toCopy.m_direction }
+{
+	m_MonsterTexturePaths.reserve(toCopy.m_MonsterTexturePaths.size());
+	for (const std::string& suffix : toCopy.m_MonsterTexturePaths)
+	{
+		m_MonsterTexturePaths.push_back(suffix);
+	}
+
+	LoadTextures();
+}
+
+// try this
+Enemy::Enemy(Enemy&& toMove) noexcept
+	:Thing( Thing( toMove ) ),
+	m_TexIndex{ std::move( toMove.m_TexIndex ) },
+	m_timer{ std::move( toMove.m_timer )},
+	m_direction{ std::move( toMove.m_direction ) }
+{
+	m_pMonsterTexture = std::move(toMove.m_pMonsterTexture);
+	m_MonsterTexturePaths = std::move(toMove.m_MonsterTexturePaths);
 }
 
 Enemy::~Enemy()
 {
 	delete m_pNavigator;
-	delete m_pHealthInteractor;
+	delete m_pHealthManager;
 	m_pNavigator = nullptr;
-	m_pHealthInteractor = nullptr;
+	m_pHealthManager = nullptr;
 }
+
+Enemy& Enemy::operator=(const Enemy& rhs)
+{
+	if (&rhs != this) 
+	{
+		m_TexIndex = rhs.m_TexIndex;
+		m_timer = rhs.m_timer;
+		m_direction = rhs.m_direction;
+
+		m_pMonsterTexture.clear();
+		m_MonsterTexturePaths.clear();
+		m_MonsterTexturePaths.reserve(rhs.m_MonsterTexturePaths.size());
+		for (const std::string& path : rhs.m_MonsterTexturePaths)
+		{
+			m_MonsterTexturePaths.push_back(path);
+		}
+		LoadTextures();
+	}
+	return *this; 
+}
+Enemy& Enemy::operator=(Enemy&& rhs) noexcept
+{
+	if (&rhs != this)
+	{
+		m_TexIndex = rhs.m_TexIndex;
+		m_timer = rhs.m_timer;
+		m_direction = rhs.m_direction;
+		m_pMonsterTexture = std::move(rhs.m_pMonsterTexture);
+		m_MonsterTexturePaths = std::move(rhs.m_MonsterTexturePaths);
+	}
+	return *this;
+}
+
+
 
 void Enemy::UpdateThing(const PLayer& eyeObject, float elapsSec)
 {
@@ -92,7 +155,7 @@ void Enemy::UpdateThing(const PLayer& eyeObject, float elapsSec)
 				m_timer = 0;
 			}
 		}
-		if (m_pHealthInteractor->GetHeath() <= 0 && !m_pNavigator->m_Dying)
+		if (m_pHealthManager->GetHeath() <= 0 && !m_pNavigator->m_Dying)
 		{
 			m_timer = 0;
 			m_pNavigator->m_Dying = true;
@@ -147,6 +210,15 @@ void Enemy::DrawThing(Texture* tex)
 void Enemy::AssignPlayer(HealthManager& playerHealth)
 {
 	pPlayerHealth = &playerHealth;
+}
+
+void Enemy::LoadTextures()
+{
+	m_pMonsterTexture.reserve(m_MonsterTexturePaths.size());
+	for (const std::string& path : m_MonsterTexturePaths)
+	{
+		m_pMonsterTexture.emplace_back(Texture(path));
+	}
 }
 
 //void Enemy::ShootPlayer(DoomCamera* eyeObject)

@@ -16,7 +16,6 @@ PLayer::PLayer(const Rectf& window)
 	:
 	m_NextPos{ m_Pos },
 	m_lookVector{ 0,0 },
-	m_Window{window},
 	m_HealthManager{500},
 	m_WeaponManager{},
 	m_Camera{ window , m_Pos}
@@ -58,7 +57,7 @@ void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 	thingsICanShoot.reserve(maxAmout);
 	for (Thing*& object : thingsToShoot)
 	{
-		if (object->m_pHealthInteractor != nullptr) // if it has health
+		if (object->m_pHealthManager != nullptr) // if it has health
 		{
 			bool lineOfSight{ false };
 			if (object->m_pNavigator != nullptr)

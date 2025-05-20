@@ -9,8 +9,9 @@
 #include "Texture.h"
 
 PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string sprite)
-	:m_Type{ type },
-	Thing{ pos , height , type , sprite }
+	:Thing{ pos , height , type , sprite },
+	m_Type{ type },
+	m_FilePath{ "pickUps/" + sprite + "A0.png" }
 {
 	//m_pInteractor = new Interactor{};
 	// assigns the interactor
@@ -18,7 +19,7 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 	std::string name{ entry.path().filename().string() };
 	std::string suffic{ entry.path().filename().string().erase(name.size() - 4, name.size() - 1) };
 	suffic.erase(0, 4);*/
-	m_pTex = new Texture{ "pickUps/" + sprite + "A0.png" };
+	m_pTex = new Texture{ m_FilePath };
 
 	switch (type)
 	{
@@ -101,6 +102,52 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 	default:
 		break;
 	}
+}
+
+PowerUp::PowerUp(const PowerUp& toCopy)
+	:Thing( Thing(toCopy)),
+	m_Type{ toCopy.m_Type },
+	m_FilePath{ toCopy.m_FilePath }
+{
+	m_PickedUp = toCopy.m_PickedUp;
+	m_pTex = new Texture{ m_FilePath };
+	m_pInteractor = toCopy.m_pInteractor;
+}
+
+PowerUp::PowerUp(PowerUp&& toMove) noexcept
+	:Thing(Thing(toMove)),
+	m_Type{ std::move(toMove.m_Type) },
+	m_FilePath{ std::move(toMove.m_FilePath )}
+{
+	m_PickedUp = std::move(toMove.m_PickedUp);
+	m_pTex = toMove.m_pTex;
+	toMove.m_pTex = nullptr;
+	m_pInteractor = std::move(toMove.m_pInteractor);
+}
+
+PowerUp& PowerUp::operator=(const PowerUp& rhs)
+{
+	m_PickedUp = rhs.m_PickedUp;
+	m_Type = rhs.m_Type;
+	m_FilePath = rhs.m_FilePath;
+	if (m_pTex != nullptr)
+	{
+		delete m_pTex;
+	}
+	m_pTex = new Texture{ m_FilePath };
+	m_pInteractor = rhs.m_pInteractor;
+	return *this;
+}
+
+PowerUp& PowerUp::operator=(PowerUp&& rhs) noexcept
+{
+	m_PickedUp = std::move(rhs.m_PickedUp);
+	m_Type = std::move(rhs.m_Type);
+	m_FilePath = std::move(rhs.m_FilePath);
+	m_pTex = rhs.m_pTex;
+	rhs.m_pTex = nullptr;
+	m_pInteractor = std::move(rhs.m_pInteractor);
+	return *this;
 }
 
 PowerUp::~PowerUp()

@@ -10,7 +10,12 @@ class Plane
 public:
 	Plane();
 	Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx);
-	virtual ~Plane();
+	Plane(const Plane& toCopy) = default;
+	Plane(Plane&& toMove) = default;
+	Plane& operator=(const Plane& rhs) = default;
+	Plane& operator=(Plane&& rhs) = default;
+	virtual ~Plane() = default;
+	
 	virtual void UpdatePlane(const PLayer& eyeObject, float elapsSec);
 	void DrawPlane(const Texture& texture) const;
 	//verb in ervey function, plus, since we're already in plane class, no "plane" needed

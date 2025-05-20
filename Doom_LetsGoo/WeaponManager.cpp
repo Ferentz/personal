@@ -105,7 +105,7 @@ void WeaponManager::Shoot(Thing* object, float windowWidth)
 		std::cout << "SHOOT" << std::endl;
 		if (object->GetLocationPoint().point2D.x < windowWidth / 2 + shootRange && object->GetLocationPoint().point2D.x > windowWidth / 2 - shootRange)
 		{
-			object->m_pHealthInteractor->Harm(GetDamageOutput());
+			object->m_pHealthManager->Harm(GetDamageOutput());
 		}
 		(*p_UsedAmo)--;
 	}

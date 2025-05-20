@@ -9,14 +9,39 @@ Thing::Thing(Vector2f pos, float height, utils::ThingsEnum type, std::string spr
 	m_Type{ type },
 	m_location{ pos.x, pos.y, 0 },
 	m_pNavigator{nullptr},
-	m_pHealthInteractor{nullptr},
+	m_pHealthManager{nullptr},
 	m_pInteractor{nullptr}
 {
 }
 
-Thing::~Thing()
+Thing::Thing(const Thing& toCopy) 
+	:m_StartPos{ toCopy.m_StartPos },
+	m_Height{ toCopy.m_Height },
+	m_Type{ toCopy.m_Type },
+	m_location{ toCopy.m_location }
 {
+	m_SubsectorIndex = toCopy.m_SubsectorIndex;
 }
+
+Thing::Thing(Thing&& rhs) noexcept
+	:m_StartPos{ rhs.m_StartPos },
+	m_Height{ rhs.m_Height },
+	m_Type{ rhs.m_Type },
+	m_location{ rhs.m_location }
+{
+	m_SubsectorIndex = rhs.m_SubsectorIndex;
+}
+
+Thing& Thing::operator=(const Thing& rhs)
+{
+	m_StartPos = rhs.m_StartPos;
+	m_Height = rhs.m_Height;
+	m_Type = rhs.m_Type;
+	m_location = rhs.m_location;
+	m_SubsectorIndex = rhs.m_SubsectorIndex;
+	return *this;
+}
+
 
 void Thing::UpdateThing(const PLayer& player, float elapsSec)
 {

@@ -10,9 +10,6 @@ Door::Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, fl
 {
 }
 
-Door::~Door()
-{
-}
 
 void Door::Opening()
 {

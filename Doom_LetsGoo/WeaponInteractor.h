@@ -8,8 +8,6 @@ class WeaponInteractor final : public Interactor
 {
 public:
 	WeaponInteractor(int pickedupAmount, WeaponType type, bool isWeapon = false);
-	
-	virtual ~WeaponInteractor() override;
 	virtual void Interact() override;
 	static void AssignPlayer(WeaponManager& playerWeapon);
 

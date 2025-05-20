@@ -40,7 +40,6 @@ public:
 
 private:
 	Camera m_Camera;
-	const Rectf& m_Window;
 
 	int m_charDIameter{ 20 };
 	int m_charHeight{ 40 };

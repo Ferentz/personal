@@ -3,15 +3,15 @@
 class Door final: public Plane
 {
 public:
-	Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, float upperHeight, float lowerHeight, bool isExit);
-	virtual ~Door();
+	Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour,
+		float upperHeight, float lowerHeight, bool isExit);
 	virtual bool Triggered() override;
 	bool PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer);
 	virtual void UpdatePlane(const PLayer& eyeObject, float elapsSec) override;
 private:
 	void Opening();
-	bool m_IsExit;
+	const bool m_IsExit;
 	float m_lowerHeight{};
 	float m_upperHeight{};
 

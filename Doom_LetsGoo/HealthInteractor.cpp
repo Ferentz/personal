@@ -12,9 +12,6 @@ HealthInteractor::HealthInteractor(float healAmount, bool affectsArmour, bool af
 {
 }
 
-HealthInteractor::~HealthInteractor()
-{
-}
 
 void HealthInteractor::Interact()
 {

@@ -11,9 +11,6 @@ WeaponInteractor::WeaponInteractor(int pickedupAmount, WeaponType type, bool isW
 {
 }
 
-WeaponInteractor::~WeaponInteractor()
-{
-}
 
 void WeaponInteractor::Interact()
 {

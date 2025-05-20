@@ -135,7 +135,7 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 	Vector2f result{};
 	if (Vector2f::doIntersect(Vector2f{ -1000.f,0.f }, Vector2f{ 1000.f,0.f }, visible2D, invisible2D, result))
 	{
-		atan2(result.x, result.y);
+		//atan2(result.x, result.y);
 		float hightDist_invis{ invisible.point3D.z - m_Pos.z };
 		float yAngle_invis = float(atan2(hightDist_invis, newXDist_invis));
 

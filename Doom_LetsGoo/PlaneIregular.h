@@ -39,7 +39,6 @@ private:
 	bool m_concave{};
 	std::vector<point2D_3D> m_pPointsArr;
 	int m_amoountOfPoints;
-	int m_triangleIndexAmount;
 };
 
 

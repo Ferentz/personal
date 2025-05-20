@@ -10,8 +10,13 @@ class Interactor;
 class Thing
 {
 public:
-	Thing(Vector2f pos, float height, utils::ThingsEnum type, std::string sprite);
-	virtual ~Thing();
+	Thing( Vector2f pos, float height, utils::ThingsEnum type, std::string sprite );
+	Thing( const Thing& toCopy );
+	Thing( Thing&& rhs ) noexcept;
+	virtual ~Thing() = default;
+	Thing& operator=(const Thing& rhs);
+	Thing& operator=(Thing&& rhs) = delete;
+
 	virtual void UpdateThing(const PLayer& eyeObject, float elapsSec);
 	virtual void DrawThing(Texture* tex);
 	Vector2f GetStartPos() const;
@@ -20,9 +25,9 @@ public:
 	const point2D_3D& GetLocationPoint() const;
 	void SetPosHeight(float height);
 
-	Navigator* m_pNavigator;
-	HealthManager* m_pHealthInteractor;
-	Interactor* m_pInteractor;
+	Navigator* m_pNavigator{};
+	HealthManager* m_pHealthManager{};
+	Interactor* m_pInteractor{};
 
 protected:
 	Vector2f m_StartPos;

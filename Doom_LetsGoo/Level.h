@@ -15,10 +15,13 @@ class Level final
 {
 public:
 	Level(PLayer& player);
+	Level(const Level& toCopy) = delete;
+	Level(Level&& toMove) noexcept;
+	Level& operator=(const Level& rhs) = delete;
+	Level& operator=(Level&& rhs) noexcept;
 	~Level();
 
 	void DrawLevelBSP(int leaf, Vector2f pos);
-	void DrawLevelUnordered() const;
 	void UpdateLevel( PLayer& eyeObject, float elapsedSec);
 	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst,
 		bool isPlayer, bool& exit)const;
