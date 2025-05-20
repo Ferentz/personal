@@ -4,9 +4,9 @@
 #include "Texture.h"
 #include "Utils.h"
 #include "Level.h"
-#include "DoomCamera.h"
+#include "PLayer.h"
 class UI;
-class Game : public BaseGame
+class Game final: public BaseGame
 {
 public:
 	explicit Game( const Window& window );
@@ -41,7 +41,7 @@ private:
 	//Texture* m_UI;
 	UI* m_pUI{};
 	Level* m_pLevel{};
-	DoomCamera m_Camera;
+	PLayer m_Camera;
 	float m_WindowWidth;
 	enum class GameState
 	{

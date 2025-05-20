@@ -4,17 +4,17 @@
 
 
 class Texture;
-class DoomCamera;
+class PLayer;
 class Plane
 {
 public:
 	Plane();
 	Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx);
 	virtual ~Plane();
-	virtual void UpdatePlane(const DoomCamera& eyeObject, float elapsSec);
-	void DrawPlane(const Texture& texture);
+	virtual void UpdatePlane(const PLayer& eyeObject, float elapsSec);
+	void DrawPlane(const Texture& texture) const;
 	//verb in ervey function, plus, since we're already in plane class, no "plane" needed
-	bool PlaneCollision(DoomCamera& eyeObject); // unused
+	bool PlaneCollision(PLayer& eyeObject); // unused
 	virtual bool PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer) const;
 	void SetActionBools(uint16_t actionBit);

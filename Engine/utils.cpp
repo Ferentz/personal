@@ -935,7 +935,6 @@ void utils::ReadPatchData(std::vector<int8_t> data, int basePatchDataIndex,
 		patch.xOffset = (data[curPatchIndex] << 8) + data[curPatchIndex + 1]; //(boolVar3 << 8) + boolVar4
 		patch.yOffset = (data[curPatchIndex + 2] << 8) + data[curPatchIndex + 2 + 1];
 		patch.patchNum = (data[curPatchIndex + 4] << 8) + data[curPatchIndex + 4 + 1];
-		std::cout << "patch " << patch.patchNum << ", " << patch.xOffset << ", " << patch.yOffset << std::endl;
 		patches.push_back(patch);
 	}
 }

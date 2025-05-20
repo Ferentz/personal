@@ -6,7 +6,7 @@
 #include "structs.h"
 #include <set>
 
-class DoomCamera;
+class PLayer;
 class Plane;
 class PlaneIregular;
 class Thing;
@@ -14,35 +14,30 @@ class Enemy;
 class Level final
 {
 public:
-	Level(DoomCamera& player);
+	Level(PLayer& player);
 	~Level();
-	//void UpdateLevel(float elapsedSec) override;
-	//void DrawLevel() const override;
-	void traverseBSP(int leaf, Vector2f pos);
-	void DrawLevel();
-	//void LineOfSight();
-	void UpdateLevel( DoomCamera& eyeObject, float elapsedSec);
-	void UpdateThings(DoomCamera& eyeObject, float elapsedSec);
-	void CollisionCHeck( DoomCamera& player, const int node) ;
-	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst, bool isPlayer, bool& exit)const;
-	bool crossesBSPborder(Vector2f& pos, Vector2f& nextPos, const int node) const;
-	int GetLeafWallAmount(const int leaf) const;
-	float GetFloorOfLeaf(const int leaf) const;
-	Plane* GetWallFromLeaf(int leaf, int wallIdx) const;
-	bool TriggerDoor(const int leaf, const int wallIdx) const;
-	float m_interval{};
-	int m_subSectorToDraw{};
-	bool IsInSet(int object);
+
+	void DrawLevelBSP(int leaf, Vector2f pos);
+	void DrawLevelUnordered() const;
+	void UpdateLevel( PLayer& eyeObject, float elapsedSec);
+	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst,
+		bool isPlayer, bool& exit)const;
 	const std::vector<BSPnode>& GetBSPtree() const;
 	std::vector <Thing*>& GetThings();
 	std::vector <Plane*>& GetWalls();
 	bool GetCleared();
+
 private:
+	void DrawLeaf(int leafIndex);
+	void UpdateThings(PLayer& eyeObject, float elapsedSec);
+	void SwapThingSubsector(const int originalThingSubSector, const int subSector2, const int ThingLevelIndex);
+	float GetFloorOfLeaf(const int leaf) const;
+	int GetLeafWallAmount(const int leaf) const;
+	Plane* GetWallFromLeaf(int leaf, int wallIdx) const;
+	bool TriggerDoor(const int leaf, const int wallIdx) const;
 
 	bool m_isCleared{false};
 	//added vars
-	Texture* m_pWallTexture{};
-	Texture* m_pFloorTexture{};
 	Texture* m_pThingTexture{};
 	std::vector<Texture> m_Textures{};
 	std::map<std::string, int> m_NameMap{};

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "DoomCamera.h"
+#include "PLayer.h"
 #include <iostream>
 #include "Level.h"
 #include "Plane.h"
@@ -12,7 +12,7 @@
 // get the trigger event in game to shoot.
 //then conect to get the level things ad check if smth gets hit
 
-DoomCamera::DoomCamera(const Rectf& window)
+PLayer::PLayer(const Rectf& window)
 	:
 	m_NextPos{ m_Pos },
 	m_projDist{ 2.0f },
@@ -20,11 +20,12 @@ DoomCamera::DoomCamera(const Rectf& window)
 	m_lookVector{ 0,0 },
 	m_Window{window},
 	m_HealthManager{500},
-	m_WeaponManager{}
+	m_WeaponManager{},
+	m_Camera{ window , m_Pos}
 {
 }
 
-void DoomCamera::pushPosition()
+void PLayer::pushPosition()
 {
 	m_Pos = m_NextPos;
 }
@@ -33,7 +34,7 @@ void DoomCamera::pushPosition()
 // perhaps the player can have a reference to the level.
 // then the player, in collision calls eveything.
 // we want a function that receives the level as a const
-bool DoomCamera::ColideWLevel(const Level* pLevel)
+bool PLayer::ColideWLevel(const Level* pLevel)
 {
 	bool exit{ false };
 	pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter, true, exit);
@@ -68,7 +69,6 @@ bool DoomCamera::ColideWLevel(const Level* pLevel)
 //	{
 //		if (whileDepth > 0)
 //		{
-//			std::cout << whileDepth << std::endl;
 //		}
 //		
 //		Vector3f interPosNorm{ Vector3f{nextPos - curPos}.Normalized() };
@@ -108,10 +108,10 @@ bool DoomCamera::ColideWLevel(const Level* pLevel)
 // else check what the next one is and if the collision makes sense.
 // the we just safe the node, and if it's negative, we can save it.
 
-Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) const {
-	//std::cout << m_Window.width << std::endl;
+Vector2f PLayer::PerspCalc(point2D_3D& pointStruc) const {
 	const float DEVISION = m_Window.width / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
 	const float SCALE{ 1.5f };
+	Vector3f point{ pointStruc.point3D };
 	float yDist{ point.y - m_Pos.y };
 	float hightDist{ point.z - m_Pos.z };
 	float xDist{ (point.x - m_Pos.x) };
@@ -184,66 +184,8 @@ Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc, const Vector3f& point) co
 
 }
 
-Vector2f DoomCamera::PerspCalc(point2D_3D& pointStruc) const {
-	//std::cout << m_Window.width << std::endl;
-	const float DEVISION = m_Window.width / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
-	const float SCALE{ 1.f };
 
-	const Vector3f point{ pointStruc.point3D };
-
-	float yDist{ point.y - m_Pos.y };
-	float hightDist{ point.z - m_Pos.z };
-	float xDist{ (point.x - m_Pos.x) };
-	float floorDist{};
-	floorDist = sqrt(xDist * xDist + yDist * yDist);
-
-	float xAngle{ float(atan2(yDist, xDist)) };
-	float yAngle{};
-
-
-	// se we got our originl angle, but we wanna calculate it according to the x axes. so, we rotate it with the negative offset
-	float newXAngle = xAngle + (m_angleOffset);
-
-	if (newXAngle < -M_PI) {
-		newXAngle = newXAngle + 2 * M_PI;
-	}
-	if (newXAngle > M_PI) {
-		newXAngle = newXAngle - 2 * M_PI;
-	}
-	float diagonalDist{ float(sqrt(xDist * xDist + yDist * yDist)) };
-	pointStruc.Dist3D = float(sqrt(diagonalDist * diagonalDist + hightDist * hightDist));
-	float newXDist = cos(newXAngle) * diagonalDist; // should be good. cos times hypotheneus
-	float newYDist = sin(newXAngle) * diagonalDist;
-
-	yAngle = float(atan2(hightDist, newXDist));
-
-	pointStruc.Angle[0] = xAngle;
-	pointStruc.Angle[1] = yAngle;
-	pointStruc.prevAngle[0] = pointStruc.Angle[0];
-	pointStruc.prevAngle[1] = pointStruc.Angle[1];
-
-	Vector2f Point2D{};
-	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
-
-	//the following code serves to map the points when they are passing behind you, as -pi would be all the wway to the left, and pi all the way to the right.
-	// When the point passed behind you, you dont want it to jump from left to right
-	// this is only releveant if it's posiblt to move through walls. to be tested if it's still necesary when you can walk through the level.
-
-	Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + m_Window.width / 2;
-	pointStruc.Angle[2] = (newXAngle)*m_projDist;
-
-	if (pointStruc.Angle[2] > M_PI * 0.5f || pointStruc.Angle[2] < -M_PI * 0.5f) {
-		pointStruc.amIVisible = false;
-	}
-	else {
-		pointStruc.amIVisible = true;
-	}
-
-	return Point2D;
-
-}
-
-void DoomCamera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) const
+void PLayer::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) const
 {
 	// we will need, the visible point and the invisible point
 	
@@ -308,7 +250,7 @@ void DoomCamera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) 
 	//utils::Raycast(LINE_SEGMENT, CENTER, m_MousePos, hitInfo)
 }
 
-void DoomCamera::VelocCalc(float elapsedSec)
+void PLayer::VelocCalc(float elapsedSec)
 {
 	m_vericalVelocity -= (m_GRAVITY * elapsedSec);
 	m_NextPos.z = m_Pos.z + m_vericalVelocity;
@@ -322,29 +264,12 @@ void DoomCamera::VelocCalc(float elapsedSec)
 	
 }
 
-void DoomCamera::PerspCalc(point2D_3D& pointStruct1, point2D_3D& pointStruct2) const {
-	//pointStruct1.point2D = PerspCalc(pointStruct1);
-	//pointStruct2.point2D = PerspCalc(pointStruct2);
-
-	// if one of them is visible, nd the other isnt
-	if (pointStruct1.amIVisible != pointStruct2.amIVisible) {
-		// we wanna recalculate the 2d of the invisible one as the intersection point between x and the line
-		if (pointStruct1.amIVisible)
-		{
-			intersecCalc(pointStruct1, pointStruct2);
-		}
-		else
-		{
-			// we calculate point 1
-			intersecCalc(pointStruct2, pointStruct1);
-		}
-	}
-	// so, they've been calculated.
-	//now we need to find the intersectionPoint with 
-}
-
-void DoomCamera::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
+void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
 {
+	std::vector<Thing*> thingsICanShoot{};
+	const int maxAmout{ 5 };
+	int count{1};
+	thingsICanShoot.reserve(maxAmout);
 	for (Thing*& object : thingsToShoot)
 	{
 		if (object->m_pHealthInteractor != nullptr) // if it has health
@@ -355,51 +280,82 @@ void DoomCamera::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plan
 				lineOfSight = object->m_pNavigator->m_hasLineOfSight;
 			}
 
-			if(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, object->m_location.point3D))
+			if(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, object->GetLocationPoint().point3D))
 			{
-				int shootRange{ 100 };
-				if (object->m_location.point2D.x < windowWidth / 2 + shootRange && object->m_location.point2D.x > windowWidth / 2 - shootRange)
+				thingsICanShoot.push_back(object);
+				count++;
+				if (count == maxAmout)
 				{
-					object->m_pHealthInteractor->Harm(m_WeaponManager.GetDamageOutput());
-					std::cout << "HIT" << std::endl;
+					break;
 				}
+				m_WeaponManager.Shoot(object, windowWidth);
 				
 			}
 		}
 	}
 }
 
-bool DoomCamera::IsLookingAtMe(const Vector3f crosspoints[])const {
-	//Vector3f crosResult{};
-	Vector3f crosA{crosspoints[1].CrossProduct(crosspoints[0])}; //crosspoints[1].x - crosspoints[0].x, crosspoints[1].y - crosspoints[0].y, crosspoints[1].z - crosspoints[0].z };
-	Vector3f crosb{ crosspoints[2].CrossProduct(crosspoints[0]) };//crosspoints[2].x - crosspoints[0].x, crosspoints[2].y - crosspoints[0].y, crosspoints[2].z - crosspoints[0].z };
-	//crosspoints[0]
+void PLayer::Jump()
+{
+	if (m_Standing)
+	{
+		m_Standing = false;
+		m_vericalVelocity = 4;
+	}
+}
 
-		//void crossProduct(int vect_A[], int vect_B[], int cross_P[])
+void PLayer::MoveForward()
+{
+	m_NextPos.x += GetLookAtVector().x;
+	m_NextPos.y -= GetLookAtVector().y;
+}
+
+void PLayer::MoveBackward()
+{
+	m_NextPos.x -= GetLookAtVector().x;
+	m_NextPos.y += GetLookAtVector().y;
+}
+
+void PLayer::MoveLeft()
+{
+	m_NextPos.x += -GetLookAtVector().y;
+	m_NextPos.y -= GetLookAtVector().x;
+}
+
+void PLayer::MoveRight()
+{
+	m_NextPos.x += GetLookAtVector().y;
+	m_NextPos.y -= -GetLookAtVector().x;
+}
+
+void PLayer::Turn(float offset)
+{
+	m_Camera.TurnCamera(offset);
+	m_lookVector = m_Camera.MakeLookAtVector();
+}
+
+bool PLayer::IsLookingAtMe(const Vector3f crosspoints[])const {
+
+	Vector3f crosA{crosspoints[1].CrossProduct(crosspoints[0])}; 
+	Vector3f crosb{ crosspoints[2].CrossProduct(crosspoints[0]) };
 
 	Vector3f crosResult{crosA.CrossProduct(crosb)};
-	/*crosResult.x = crosA.y * crosb.z - crosA.z * crosb.y;
-	crosResult.y = crosA.z * crosb.x - crosA.x * crosb.z;
-	crosResult.z = crosA.x * crosb.y - crosA.y * crosb.x;*/
+	Vector3f eyeVec{ m_Pos.CrossProduct(crosspoints[0]) }; 
 
-	//int dotProduct(int vect_A[], int vect_B[])
-	Vector3f eyeVec{ m_Pos.CrossProduct(crosspoints[0]) }; //m_eyePos.x - crosspoints[0].x, m_eyePos.y - crosspoints[0].y, m_eyePos.z - crosspoints[0].z };
-
-	float dotResult = crosResult.DotProduct(eyeVec); //crosResult.x * eyeVec.x + crosResult.y * eyeVec.y + crosResult.z * eyeVec.z;
+	float dotResult = crosResult.DotProduct(eyeVec); 
 
 	if (dotResult < 0) {
 		return false;
 	}
 	return true;
-
 }
 
-void DoomCamera::CalculateLookAtVector() { // why is it like this? because with the minecraft boat you also dont want the player to move in the direction you are looking
+void PLayer::CalculateLookAtVector() { // why is it like this? because with the minecraft boat you also dont want the player to move in the direction you are looking
 	m_lookVector.x = cos(m_angleOffset);
 	m_lookVector.y = sin(m_angleOffset);
 }
 
-void DoomCamera::ResetPos()
+void PLayer::ResetPos()
 {
 	m_Pos.x = m_StartPos.x;
 	m_Pos.y = m_StartPos.y;
@@ -407,23 +363,6 @@ void DoomCamera::ResetPos()
 
 }
 
-Vector2f DoomCamera::GetLookAtVector() const {
+Vector2f PLayer::GetLookAtVector() const {
 	return m_lookVector;
-}
-
-void DoomCamera::rayy()
-{
-	utils::HitInfo hitInfo{};
-	Vector2f pos{ m_Pos.x, m_Pos.y };
-	Vector2f nextPos{ m_NextPos.x, m_NextPos.y };
-	if (utils::Raycast(m_Walls,
-		pos,
-		nextPos,
-		hitInfo))
-	{
-		const Vector2f RAY{ pos - nextPos };
-		const Vector2f REFLECTION{ RAY.Reflect(hitInfo.normal) };
-		// basicaly, we want the colision to happen before the character gets moved.
-		// so, if there is hit info, it needs to be checked.
-	}
 }

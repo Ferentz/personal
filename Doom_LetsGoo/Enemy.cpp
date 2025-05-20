@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <iostream>
 
-#include "DoomCamera.h"
+#include "PLayer.h"
 #include "Navigator.h"
 #include "Interactor.h"
 
@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 HealthManager* Enemy::pPlayerHealth{};
 
 Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
-	:Thing{ pos, height , utils::ThingsEnum::Zombieman }
+	:Thing{ pos, height , utils::ThingsEnum::Zombieman, folder }
 {
 	m_pNavigator = new Navigator(m_location.point3D);
 	m_pHealthInteractor = new HealthManager(20);
@@ -39,7 +39,7 @@ Enemy::~Enemy()
 	m_pHealthInteractor = nullptr;
 }
 
-void Enemy::UpdateThing(const DoomCamera& eyeObject, float elapsSec)
+void Enemy::UpdateThing(const PLayer& eyeObject, float elapsSec)
 {
 	if (m_pNavigator->m_Alive)
 	{
@@ -57,7 +57,6 @@ void Enemy::UpdateThing(const DoomCamera& eyeObject, float elapsSec)
 		{
 			if (m_pNavigator->m_IsShooting)
 			{
-
 				if (m_TexIndex >= 1)
 				{
 					if (m_pNavigator->m_hasLineOfSight)

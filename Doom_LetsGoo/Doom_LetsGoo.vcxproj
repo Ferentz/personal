@@ -158,10 +158,12 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DoomCamera.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HealthInteractor.cpp" />
     <ClCompile Include="HealthManager.cpp" />
     <ClCompile Include="Interactor.cpp" />
     <ClCompile Include="Level.cpp" />
@@ -171,15 +173,19 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PlaneIregular.cpp" />
+    <ClCompile Include="PowerUp.cpp" />
     <ClCompile Include="Things.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="WeaponInteractor.cpp" />
     <ClCompile Include="WeaponManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DoomCamera.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Door.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="HealthInteractor.h" />
     <ClInclude Include="HealthManager.h" />
     <ClInclude Include="Interactor.h" />
     <ClInclude Include="Level.h" />
@@ -188,10 +194,12 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="pch.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PlaneIregular.h" />
+    <ClInclude Include="PowerUp.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Things.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="walltextures.h" />
+    <ClInclude Include="WeaponInteractor.h" />
     <ClInclude Include="WeaponManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

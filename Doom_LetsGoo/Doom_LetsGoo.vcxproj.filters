@@ -24,7 +24,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DoomCamera.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
@@ -63,6 +63,18 @@
     <ClCompile Include="WeaponManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PowerUp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HealthInteractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponInteractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -71,7 +83,7 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DoomCamera.h">
+    <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
@@ -114,6 +126,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WeaponManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerUp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthInteractor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WeaponInteractor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

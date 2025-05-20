@@ -5,7 +5,7 @@
 #include <vector> // For vector operations if needed
 #include <utils.h>
 #include "Texture.h"
-#include "DoomCamera.h"
+#include "PLayer.h"
 
 const Color4f RED{ 1.0f, 0.0f, 0.0f, 1.0f };
 const Color4f WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -41,13 +41,13 @@ PlaneIregular::PlaneIregular(std::vector<Vector2f> vertexes, int idx, int height
 	}
 }
 
-void PlaneIregular::UpdatePlane(const DoomCamera& eyeObject) {
+void PlaneIregular::UpdatePlane(const PLayer& eyeObject) {
 
 	//so, when updating, we can get the offseto fo the point. and, we can project the texture along world space then.
 
 	for (int index{ 0 }; index < m_amoountOfPoints; index++) {
 		//std::cout << index << std::endl;
-		m_pPointsArr[index].point2D = eyeObject.PerspCalc(m_pPointsArr[index], m_pPointsArr[index].point3D);
+		m_pPointsArr[index].point2D = eyeObject.PerspCalc(m_pPointsArr[index]);
 		if (m_pPointsArr[index].Angle[2] > M_PI * 0.5f || m_pPointsArr[index].Angle[2] < - M_PI * 0.5f) {
 			m_pPointsArr[index].amIVisible = false;
 		}
@@ -99,7 +99,8 @@ int PlaneIregular::GetTexIdx()
 	return m_texIDX;
 }
 
-void PlaneIregular::DrawPlane(const Texture& texture) {
+void PlaneIregular::DrawPlane(const Texture& texture) const
+{
 	bool show{ false };
 	for (int index{}; index < m_amoountOfPoints; index++) {
 		if (m_pPointsArr[index].amIVisible) {

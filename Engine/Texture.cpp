@@ -21,7 +21,6 @@ Texture::Texture(const WallTexture& wallTex)
 {
 	
 	CreateFromImages(wallTex.patches);
-	std::cout << "made";
 }
 
 Texture::Texture( const std::string& text, TTF_Font *pFont, const Color4f& textColor )

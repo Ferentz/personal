@@ -78,6 +78,10 @@ bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vec
 		return false;
 	}
 	m_hasLineOfSight = HasLineOfSight(r_pPlanes, PlayerPos, m_EyePos);
+	/*if (m_hasLineOfSight)
+	{
+		std::cout << "i can see through walls";
+	}*/
 	return m_hasLineOfSight;
 	
 

@@ -5,7 +5,7 @@
 #include <vector> // For vector operations if needed
 #include <utils.h>
 #include "Texture.h"
-#include "DoomCamera.h"
+#include "PLayer.h"
 
 const Color4f RED{ 1.0f, 0.0f, 0.0f, 1.0f };
 const Color4f WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -57,9 +57,9 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 Plane::~Plane()
 {
 }
-void Plane::UpdatePlane(const DoomCamera& eyeObject, float elapsSec) {
+void Plane::UpdatePlane(const PLayer& eyeObject, float elapsSec) {
 	for (int index{}; index < 4; index++) {
-		m_Points[index].point2D = eyeObject.PerspCalc(m_Points[index], m_Points[index].point3D);
+		m_Points[index].point2D = eyeObject.PerspCalc(m_Points[index]);
 	}
 	
 	if (m_Normal.DotProduct(eyeObject.GetLookAtVector()) < 0)
@@ -72,7 +72,8 @@ void Plane::UpdatePlane(const DoomCamera& eyeObject, float elapsSec) {
 	}
 }
 
-void Plane::DrawPlane(const Texture& texture) {
+void Plane::DrawPlane(const Texture& texture) const
+{
 	//the negine, open gl might not be set up to draw for 3D
 	/*if (m_IsVisible) // no way to tell the normal when loading the level
 	{
@@ -96,7 +97,8 @@ void Plane::DrawPlane(const Texture& texture) {
 		texture.DrawTexturePersp(planesCompArr3D);
 	}
 }
-bool Plane::PlaneCollision(DoomCamera& eyeObject) {
+
+bool Plane::PlaneCollision(PLayer& eyeObject) {
 
 	float top{ m_Location.z + m_Height.z };
 	float bottom{ m_Location.z };

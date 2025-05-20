@@ -2,12 +2,14 @@
 #include <iostream>
 #include "Things.h"
 #include "Enemy.h"
+#include "Interactor.h"
+#include "PowerUp.h"
 #include "Plane.h"
 #include "Door.h"
 #include "PlaneIregular.h"
 #include "LevelGenerator.h"
 #include "Texture.h"
-#include "DoomCamera.h"
+#include "PLayer.h"
 //#include "LevelGenerator.h"
 
 /*
@@ -23,7 +25,7 @@ the level just wants the bsp tree, the walls, the floors. and that's it basicaly
 LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BSPleafeNode>& p_BSPleafs_p,
 	std::vector <Plane*>& p_Planes_p, std::vector <PlaneIregular>& p_FloorsNCeilings_p, std::set<int>& tags1, std::set<int>& tags2,
 	std::vector <Thing*>& things, std::vector<Texture>& m_Textures, std::map<std::string, int>& map,
-	DoomCamera& player)
+	PLayer& player)
 	:vertexesImported{ utils::ReadLMP("VERTEXES.lmp", VERTEXCOLUMS) },
 	linesImported{ utils::ReadLMP("LINEDEFS.lmp", LINECOLUMS) },
 	sidesImported{ utils::ReadLMP("SIDEDEFS.lmp", SIDECOLUMS) },
@@ -40,7 +42,7 @@ LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BS
 	r_Things{things},
 	textures{ m_Textures },
 	nameMap{ map },
-	m_pPlayer{ &player }
+	m_pPlayer{ player }
 {
 	GenerateLevel();
 }
@@ -60,12 +62,6 @@ void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, 
 {
 
 	bool isExit{ false };
-	/*std::cout << "flag ----------" << linesImported.data[line][ReadLines::actionSpecial] << std::endl;
-	if (linesImported.data[line][ReadLines::flags] == 36)
-	{
-		
-		isExit = true;
-	}*/
 	
 	int vertex1 = int(linesImported.data[line][ReadLines::vertex1]);
 	int vertex2 = int(linesImported.data[line][ReadLines::vertex2]);
@@ -99,7 +95,6 @@ void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, 
 	{
 		if (linesImported.data[line][ReadLines::actionSpecial] == 11)
 		{
-			std::cout << "found 36 ----------" << std::endl;
 			isExit = true;
 		}
 		r_Planes.push_back(new Door{ location, width, height, idx, ceilingHeight, floorHeight, isExit });
@@ -279,9 +274,7 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 				segsImported, vertexesImported);
 
 			int seg = sectorSegsImported.data[subSector][1];
-			//if (subSector == 15) {
-				//std::cout << " seg " << seg << std::endl;
-			//}
+			
 			int lineI = segsImported.data[seg][3]; // it just gets the first line. we need the rest too
 
 			int orienttion = segsImported.data[seg][4]; //these are curently magic numbers. they are derived from the file structure, im thinking of putting them in an enumerator
@@ -302,7 +295,6 @@ void LevelGenerator::ConstructSubSectors(const std::vector<Vector2f>& boundingBo
 
 			if (sectorsImported.data[sector][ReadSectors::tag] != 0)
 			{
-				//std::cout << sectorsImported.data[sector][ReadSectors::tag] << std::endl;
 			}
 			if (sectorsImported.data[sector][ReadSectors::tag] == 1)
 			{
@@ -377,10 +369,7 @@ void LevelGenerator::MakeWalls(const float SCALE)
 		}
 
 		int sideDef{ linesImported.data[line][ReadLines::frontSide] };
-		if (linesImported.data[line][ReadLines::sectorTag] != 0)
-		{
-			//std::cout << linesImported.data[line][ReadLines::sectorTag] << std::endl;
-		}
+		
 		
 		int sector{ sidesImported.data[sideDef][ReadSides::sector] };
 
@@ -497,7 +486,6 @@ void LevelGenerator::GenerateLevel()
 	AdjustThings();
 	//std::vector<PatchData> patches{};
 	//utils::ReadTexLMP("TEXTURE1.lmp", patches);
-	//std::cout << "hi";
 }
 
 void LevelGenerator::SeamFixSubsectors(const int* sectorPerSubsector)
@@ -587,16 +575,14 @@ void LevelGenerator::ReadThings()
 {
 	for (int thing{}; thing < thingsImported.rows; thing++)
 	{
-		//std::cout << thingsImported.data[thing][ReadThings::type] << std::endl;
-		if (thingsImported.data[thing][ReadThings::type] == 5 ||
+		/*if (thingsImported.data[thing][ReadThings::type] == 5 ||
 			thingsImported.data[thing][ReadThings::type] == 40 ||
 			thingsImported.data[thing][ReadThings::type] == 13 ||
 			thingsImported.data[thing][ReadThings::type] == 38 ||
 			thingsImported.data[thing][ReadThings::type] == 6 ||
 			thingsImported.data[thing][ReadThings::type] == 39)
 		{
-			std::cout << "key found";
-		}
+		}*/
 		Vector2f position{ float(thingsImported.data[thing][ReadThings::xPos]),
 							float(thingsImported.data[thing][ReadThings::yPos]) };
 		utils::ThingsEnum thingType{ utils::ThingsEnum(thingsImported.data[thing][ReadThings::type]) };
@@ -613,80 +599,7 @@ void LevelGenerator::ReadThings()
 		float speedScale{1.};
 		int speed{1};
 
-		/*switch (thingType)
-		{
-		case ThingsEnum::defaultThing:
-			std::cout << "defaultThing" << std::endl;
-			break;
-		case ThingsEnum::playerStart:
-			std::cout << "playerStart" << std::endl;
-			break;
-		case ThingsEnum::player2Start:
-			std::cout << "defaultThing" << std::endl;
-			break;
-		case ThingsEnum::player3Start:
-			std::cout << "defaultThing" << std::endl;
-			break;
-		case ThingsEnum::player4Start:
-			break;
-		case ThingsEnum::ShotgunGuy:
-			std::cout << "defaultThing" << std::endl;
-			break;
-		case ThingsEnum::BloodyMess:
-			std::cout << "defaultThing" << std::endl;
-			break;
-		case ThingsEnum::DeathmatchStart:
-			std::cout << "defaultThing" << std::endl;
-			break;
-		case ThingsEnum::BloodyMess2:
-			break;
-		case ThingsEnum::DeadPlayer:
-			break;
-		case ThingsEnum::PoolOfBloodAndFlesh:
-			break;
-		case ThingsEnum::Candelabra:
-			break;
-		case ThingsEnum::TallTechnoColumn:
-			break;
-		case ThingsEnum::Shotgun:
-			break;
-		case ThingsEnum::Chaingun:
-			break;
-		case ThingsEnum::RocketLauncher:
-			break;
-		case ThingsEnum::Clip:
-			break;
-		case ThingsEnum::shotgunShells4:
-			break;
-		case ThingsEnum::Stimpack:
-			break;
-		case ThingsEnum::Medikit:
-			break;
-		case ThingsEnum::HealthBonus:
-			break;
-		case ThingsEnum::ArmorBonus:
-			break;
-		case ThingsEnum::Armor:
-			break;
-		case ThingsEnum::Megaarmor:
-			break;
-		case ThingsEnum::FloorLamp:
-			break;
-		case ThingsEnum::ExplodingBarrel:
-			break;
-		case ThingsEnum::BoxOfRockets:
-			break;
-		case ThingsEnum::BoxOfBullets:
-			break;
-		case ThingsEnum::BoxOfShotgunShells:
-			break;
-		case ThingsEnum::Imp:
-			break;
-		case ThingsEnum::Zombieman:
-			break;
-		default:
-			break;
-		}*/
+		
 
 		/*sprite = "";
 		sequence = "";
@@ -751,7 +664,7 @@ void LevelGenerator::ReadThings()
 			properties = "MO*";
 			type = utils::ThingType::monster;
 			break;
-			//---------------------------------------------
+			//--------------------------------------------- MONSTER
 		case utils::ThingsEnum::BloodyMess:
 			radius = 20;
 			height = 16;
@@ -780,7 +693,7 @@ void LevelGenerator::ReadThings()
 			sequence = "A";
 			type = utils::ThingType::deco;
 			break;
-			//---------------------------------------------
+			//--------------------------------------------- DECORATION
 		case utils::ThingsEnum::Candelabra:
 			radius = 16;
 			height = 16;
@@ -805,7 +718,7 @@ void LevelGenerator::ReadThings()
 			properties = "O";
 			type = utils::ThingType::obstacle;
 			break;
-		case utils::ThingsEnum::ExplodingBarrel:
+		case utils::ThingsEnum::ExplodingBarrel: // THIS ONE EXPLODES
 			radius = 10;
 			height = 42;
 			sprite = "BAR1";
@@ -813,7 +726,7 @@ void LevelGenerator::ReadThings()
 			properties = "O*";
 			type = utils::ThingType::obstacle;
 			break;
-			//---------------------------------------------
+			//--------------------------------------------- WEAPONS
 		case utils::ThingsEnum::Shotgun:
 			radius = 20;
 			height = 16;
@@ -838,7 +751,7 @@ void LevelGenerator::ReadThings()
 			properties = "WP";
 			type = utils::ThingType::weapon;
 			break;
-			//---------------------------------------------
+			//--------------------------------------------- PICKUP
 		case utils::ThingsEnum::Clip:
 			radius = 20;
 			height = 16;
@@ -922,30 +835,40 @@ void LevelGenerator::ReadThings()
 			type = utils::ThingType::artifact;
 			break;
 		}
-		
-		if (type == utils::ThingType::monster)
+		//utils::ThingType::ammunition
+		//utils::ThingType::artifact
+		//utils::ThingType::powerUp
+		switch (type)
 		{
-			r_Things.emplace_back(new Enemy{ position, float(height), sprite});
+		case utils::ThingType::ammunition:
+			
+		case utils::ThingType::artifact:
+			
+		case utils::ThingType::powerUp:
+			r_Things.emplace_back(new PowerUp{ position, float(height), thingType, sprite });
+			break;
+		case utils::ThingType::monster:
+			r_Things.emplace_back(new Enemy{ position, float(height), sprite });
+			break;
+		default:
+			r_Things.emplace_back(new Thing{ position, float(height), thingType , sprite });
+			break;
 		}
-		else
-		{
-			r_Things.emplace_back( new Thing{ position, float(height), thingType });
-		}
-		
-}
-	Enemy::AssignPlayer(m_pPlayer->m_HealthManager);
+	}
+	Enemy::AssignPlayer(m_pPlayer.m_HealthManager);
+	Interactor::AssignPlayer(m_pPlayer);
 }
 
 void LevelGenerator::AdjustThings()
 {
 	for (int thingIndex{}; thingIndex < r_Things.size(); thingIndex++)
 	{
-		Vector2f positionThing{ r_Things[thingIndex]->m_StartPos };
+		Vector2f positionThing{ r_Things[thingIndex]->GetStartPos()};
 		int leafIndex{ utils::GetBSP(positionThing, true, r_BSPtree) };
 		r_BSPleafs[leafIndex].thingIndexes.push_back(thingIndex);
 		float zPos = r_BSPleafs[leafIndex].floorheight;
-		r_Things[thingIndex]->m_location.point3D.z = zPos;
-		r_Things[thingIndex]->m_SubsectorIndex = leafIndex;
+		r_Things[thingIndex]->SetPosHeight( zPos );
+		r_Things[thingIndex]->SetSubsectorIndex( leafIndex);
 	}
 }
 

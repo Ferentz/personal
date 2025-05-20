@@ -8,11 +8,6 @@ Door::Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, fl
 	m_lowerHeight{lowerHeight},
 	m_IsExit{ isExit }
 {
-	if (m_IsExit)
-	{
-		std::cout << "MADE THE EXIT" << std::endl;
-	}
-	std::cout << "door made" << std::endl;
 }
 
 Door::~Door()
@@ -55,7 +50,6 @@ bool Door::Triggered()
 
 bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer)
 {
-	std::cout << "testing door" << std::endl;
 	if (Plane::PlaneCollision(pos3D, nextPos3D, returnPos, outNormal, isPlayer))
 	{
 		//triggered();
@@ -65,7 +59,7 @@ bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vect
 	return false;
 }
 
-void Door::UpdatePlane(const DoomCamera& eyeObject, float elapsSec)
+void Door::UpdatePlane(const PLayer& eyeObject, float elapsSec)
 {
 	if (m_opening)
 	{

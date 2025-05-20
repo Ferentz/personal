@@ -6,16 +6,16 @@
 #include <utils.h>
 #include <vector>
 
-class DoomCamera;
+class PLayer;
 class Texture;
 
-class PlaneIregular
+class PlaneIregular final
 {
 public:
 	PlaneIregular();
 	PlaneIregular(std::vector<Vector2f> vertexes, int texIndx, int height);
-	void UpdatePlane(const DoomCamera& eyeObject);
-	void DrawPlane(const Texture& texture);
+	void UpdatePlane(const PLayer& eyeObject);
+	void DrawPlane(const Texture& texture) const;
 	//void DrawPlane(const int colour);
 	void printPoints() const;
 	point2D_3D GetPoint(int index) const;

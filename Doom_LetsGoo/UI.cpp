@@ -30,7 +30,8 @@ UI::~UI()
 
 }
 
-void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float scale, int health)
+void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float scale,
+	int health, int armor, int amo)
 {
 	//float width{ GetWindow().width };
 	float uiWidth{ m_pUI->GetWidth() };
@@ -42,58 +43,16 @@ void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float sc
 	{
 		glPushMatrix(); // adds a clean matrix for the image to exist in
 		{
-			float numOffset{};
-			glTranslatef(leftOffset, bottomOfset, 0.f); //moves the image space 
-			glScalef(scale, scale, 0.f);
+			//float numOffset{};
+			glTranslatef(m_HealthLeftOffset, m_mainStatBottomOffset, 0.f); //moves the image space 
+			glScalef(m_MainStatScale, m_MainStatScale, 0.f);
 			glRotatef(0.f, 0.f, 0.f, 1.f);
 
-			numOffset -= m_pNumbers[10]->GetWidth();
-			m_pNumbers[10]->Draw(
-				Rectf{ numOffset,
-				0.f,
-				m_pNumbers[10]->GetWidth(),
-				m_pNumbers[10]->GetHeight()
-				}
-			);
-			for (int devisor{ 1 }; devisor <= 150; devisor *= 10)
-			{
-				int index{ GetDigit(health, devisor) };
-				//m_pNumbers[index]
-				numOffset -= m_pNumbers[index]->GetWidth();
-				m_pNumbers[index]->Draw(
-					Rectf{ numOffset,
-					0.f,
-					m_pNumbers[index]->GetWidth(),
-					m_pNumbers[index]->GetHeight()
-					}
-				);
-			}
-			//int index{ GetDigit(health, 1) };
-			////m_pNumbers[index]
-			//numOffset -= m_pNumbers[index]->GetWidth();
-			//m_pNumbers[index]->Draw(
-			//	Rectf{ numOffset,
-			//	0.f,
-			//	m_pNumbers[index]->GetWidth(),
-			//	m_pNumbers[index]->GetHeight()
-			//	}
-			//);
-			//numOffset -= m_pZero->GetWidth();
-			//m_pZero->Draw(
-			//	Rectf{ numOffset,
-			//	0.f,
-			//	m_pZero->GetWidth(),
-			//	m_pZero->GetHeight()
-			//	}
-			//);
-			//numOffset -= m_pZero->GetWidth();
-			//m_pZero->Draw(
-			//	Rectf{ numOffset,
-			//	0.f,
-			//	m_pZero->GetWidth(),
-			//	m_pZero->GetHeight()
-			//	}
-			//);
+			PrintNumber(health, true);
+			glTranslatef(m_ArmourLeftOffset, 0, 0.f);
+			PrintNumber(armor, true);
+			glTranslatef(m_AmoLeftOffset, 0, 0.f);
+			PrintNumber(amo, false);
 		}
 		glPopMatrix(); // goe out of imge space
 
@@ -122,4 +81,34 @@ int UI::GetDigit(int number, int index) {
 		return devisor % 10;
 	}
 	return devisor;
+}
+
+void UI::PrintNumber(int number, bool percent)
+{
+	float numOffset{};
+	if (percent)
+	{
+		numOffset -= m_pNumbers[10]->GetWidth();
+		m_pNumbers[10]->Draw(
+			Rectf{ numOffset,
+			0.f,
+			m_pNumbers[10]->GetWidth(),
+			m_pNumbers[10]->GetHeight()
+			}
+		);
+	}
+	
+	for (int devisor{ 1 }; devisor <= 150; devisor *= 10)
+	{
+		int index{ GetDigit(number, devisor) };
+		//m_pNumbers[index]
+		numOffset -= m_pNumbers[index]->GetWidth();
+		m_pNumbers[index]->Draw(
+			Rectf{ numOffset,
+			0.f,
+			m_pNumbers[index]->GetWidth(),
+			m_pNumbers[index]->GetHeight()
+			}
+		);
+	}
 }

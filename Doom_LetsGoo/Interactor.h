@@ -1,12 +1,13 @@
 #pragma once
-#include "HealthManager.h"
+class PLayer;
+
 class Interactor
 {
 public:
-	Interactor(HealthManager& playerHealthManager);
-	void Interact();
+	Interactor();
+	virtual ~Interactor();
+	virtual void Interact() = 0;
+	static void AssignPlayer(PLayer& player);
 private:
-	//m_
-
 };
 

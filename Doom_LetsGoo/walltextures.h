@@ -8,7 +8,8 @@ struct WallTexture {
 	WallTexture(std::string name, int x, int y) {}
 	std::vector<Patch> patches{};
 };
-void hi() {
+
+void WallTextureData() {
 
 	std::vector<WallTexture> walltextures{};
 	walltextures.reserve(150);

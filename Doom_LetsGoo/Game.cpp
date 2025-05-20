@@ -91,13 +91,15 @@ void Game::Draw( ) const
 		{
 		//------UI propper
 		//UI myUI{};
-		m_pUI->DrawUI(GetWindow().width, bottomBounf, leftBound, scale, m_Camera.m_HealthManager.GetHeath());
+		m_pUI->DrawUI(GetWindow().width, bottomBounf, leftBound, scale,
+			m_Camera.m_HealthManager.GetHeath(), m_Camera.m_HealthManager.GetArmour(),
+			m_Camera.m_WeaponManager.GetAmo());
 
 		//------gameplay
-		//m_pLevel->DrawLevel();
+		//m_pLevel->DrawLevelUnordered();
 		Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
 		int leaf{ utils::GetBSP(pos, true, m_pLevel->GetBSPtree()) };
-		m_pLevel->traverseBSP(leaf, pos);
+		m_pLevel->DrawLevelBSP(leaf, pos);
 
 		//------UI old
 		//glDepthFunc(GL_ALWAYS);
@@ -111,21 +113,17 @@ void Game::Draw( ) const
 		break;
 	}
 
-	
 	//float uiWidth{ m_UI->GetWidth() };
 	//float ratio{ uiWidth / width };
 
 	//Rectf hi{ 0, 0, width, m_UI->GetHeight()/ratio};
 	//m_UI->Draw(hi);
 
-	
-
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
 	SDL_Keycode key = e.keysym.sym;
-	//std::cout << "KEYDOWN event: " << e.keysym.sym << std::endl;
 	switch (key)
 	{
 	case SDLK_LEFT:
@@ -144,52 +142,44 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 		//m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_UP:
-		bottomBounf++;
-		std::cout << bottomBounf << " bottomOffset" << std::endl;
+		//bottomBounf++;
+		//std::cout << bottomBounf << " bottomOffset" << std::endl;
 		//g_eyePos.z = g_eyePos.z + increment;
 		//Eye.m_eyePos.x = Eye.m_eyePos.x + Eye.getLookkVector().x;
 		//Eye.m_eyePos.y = Eye.m_eyePos.y + Eye.getLookkVector().y;
 		//m_pLevel->m_subSectorToDraw++;
 		break;
 	case SDLK_DOWN:
-		bottomBounf--;
-		std::cout << bottomBounf << " bottomOffset" << std::endl;
+		//bottomBounf--;
+		//std::cout << bottomBounf << " bottomOffset" << std::endl;
 		//g_eyePos.z = g_eyePos.z - increment;
 		//m_pLevel->m_subSectorToDraw--;
 		break;
 	case SDLK_a:
-		scale--;
-		std::cout << scale << " scale" << std::endl;
-		//m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		//m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		//scale--;
+		//std::cout << scale << " scale" << std::endl;
+		m_Camera.MoveLeft();
 		break;
 	case SDLK_d:
-		scale++;
-		std::cout << scale << " scale" << std::endl;
-		//m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		//m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
+		//scale++;
+		m_Camera.MoveRight();
+		//std::cout << scale << " scale" << std::endl;
+		
 		break;
 	case SDLK_w:
-		m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().x;
-		m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().y;
+		m_Camera.MoveForward();
+		
 		break;
 	case SDLK_s:
-		m_Camera.m_NextPos.x -= m_Camera.GetLookAtVector().x;
-		m_Camera.m_NextPos.y += m_Camera.GetLookAtVector().y;
+		m_Camera.MoveBackward();
+		
 		break;
 	case SDLK_q:
-		m_Camera.m_NextPos.z += 1;
 		break;
 	case SDLK_e:
-		m_Camera.m_NextPos.z -= 1;
 		break;
 	case SDLK_SPACE:
-		if (m_Camera.m_Standing)
-		{
-			std::cout << "jump";
-			m_Camera.m_Standing = false;
-			m_Camera.m_vericalVelocity = 4;
-		}
+		m_Camera.Jump();
 		
 		break;
 		//case SDLK_1:
@@ -218,7 +208,6 @@ void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 {
-	//std::cout << "MOUSEMOTION event: " << e.x << ", " << e.y << std::endl;
 	// SAMPLE CODE: print mouse position
 	//const float mouseX{ float(e.x) }; //.xrel
 	const float mouseX{ float(e.xrel) }; //.xrel
@@ -237,7 +226,6 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 		//SDL_WarpMouseInWindow
 	}
 	
-	const float mult = 50 * M_PI / GetViewPort().width;// g_WindowWidth;
 	//g_offset = ((mouseX - g_WindowWidth / 2) * 1)/100;
 	m_Camera.m_angleOffset += mouseX / 100;
 
@@ -252,7 +240,6 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 
 void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
 {
-	//std::cout << "MOUSEBUTTONDOWN event: ";
 	switch ( e.button )
 	{
 	case SDL_BUTTON_LEFT:
@@ -339,6 +326,6 @@ void Game::ClearBackground( ) const
 
 void Game::EnterLevel()
 {
-	m_Camera.m_HealthManager.FullHealth();
+	//m_Camera.m_HealthManager.FullHealth();
 	m_Camera.ResetPos();
 }

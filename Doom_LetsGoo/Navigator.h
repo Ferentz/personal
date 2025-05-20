@@ -1,7 +1,7 @@
 #pragma once
 class Level;
 class Plane;
-class Navigator
+class Navigator final
 {
 public:
 	Navigator(Vector3f& pos);
@@ -13,7 +13,6 @@ public:
 	Vector3f m_NextPos{};
 	int m_charDiameter{ 20 };
 	int m_charHeightr{ 50 };
-	int m_HP{ 10 };
 	float m_timer{};
 	float m_Speed{1};
 	float m_size{ 20 };

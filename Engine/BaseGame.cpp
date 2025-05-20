@@ -247,7 +247,6 @@ void BaseGame::Run()
 						m_Viewport.width = float(e.window.data1);
 						m_Viewport.height = float(e.window.data2);
 						//glViewport(0, 0, m_Viewport.width, m_Viewport.height);
-						//std::cout << m_Window.width << "data" << std::endl;;
 						//_windowEvents.emplace_back(_lastWindowMetrics);
 
 						//_refresh(); // user callback that may be used to repaint the window
