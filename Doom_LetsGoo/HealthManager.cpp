@@ -44,7 +44,6 @@ void HealthManager::FullHealth()
 
 void HealthManager::SetArmour(float damageAbsorption)
 {
-
 	if (m_Armour_DamageAbsorption < damageAbsorption)
 	{
 		m_Armour_DamageAbsorption = damageAbsorption;
@@ -63,4 +62,9 @@ void HealthManager::IncreaseMaxArmour(int amount)
 void HealthManager::IncreaseMaxHealth(int amount)
 {
 	m_MaxHealth += amount;
+}
+
+HealthManager& HealthManager::operator=(const HealthManager& rhs)
+{
+	return *this;
 }

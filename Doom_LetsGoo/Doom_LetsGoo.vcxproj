@@ -174,6 +174,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PlaneIregular.cpp" />
     <ClCompile Include="PowerUp.cpp" />
+    <ClCompile Include="Shootable.cpp" />
     <ClCompile Include="Things.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="WeaponInteractor.cpp" />
@@ -196,6 +197,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="PlaneIregular.h" />
     <ClInclude Include="PowerUp.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Shootable.h" />
     <ClInclude Include="Things.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="walltextures.h" />

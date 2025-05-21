@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <iostream>
 #include "WeaponManager.h"
-#include "Things.h"
+#include "Enemy.h"
 #include "Plane.h"
 #include "Navigator.h"
 #include "HealthManager.h"
@@ -84,7 +84,7 @@ void WeaponManager::PickUpWeapon(WeaponType type)
 	}
 }
 
-void WeaponManager::Shoot(Thing* object, float windowWidth)
+void WeaponManager::Shoot(Shootable* object, float windowWidth)
 {
 	int shootRange{ 100 };
 	int* p_UsedAmo{};
@@ -105,7 +105,7 @@ void WeaponManager::Shoot(Thing* object, float windowWidth)
 		std::cout << "SHOOT" << std::endl;
 		if (object->GetLocationPoint().point2D.x < windowWidth / 2 + shootRange && object->GetLocationPoint().point2D.x > windowWidth / 2 - shootRange)
 		{
-			object->m_pHealthManager->Harm(GetDamageOutput());
+			object->BeShot(GetDamageOutput());
 		}
 		(*p_UsedAmo)--;
 	}

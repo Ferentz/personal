@@ -1,12 +1,12 @@
 #pragma once
-class Thing;
+class Shootable;
 enum class WeaponType {
 	pistol,
 	shotgun,
 	chaingun,
 	rocket
 };
-
+// can also make teh weapon type a class weapen, and then teh manager has objects of that class
 class WeaponManager final
 {
 public:
@@ -15,7 +15,7 @@ public:
 	int GetAmo() const;
 	void AddAmo(int amout, WeaponType type);
 	void PickUpWeapon(WeaponType type);
-	void Shoot(Thing* object, float windowWidth);
+	void Shoot(Shootable* object, float windowWidth);
 
 private:
 	WeaponType m_equipedWeapon{};

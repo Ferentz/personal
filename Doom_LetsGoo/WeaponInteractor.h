@@ -12,7 +12,7 @@ public:
 	static void AssignPlayer(WeaponManager& playerWeapon);
 
 private:
-	int m_PickedupAmount;
+	int m_PickedupAmount;// make clear in name its amo
 	WeaponType m_Type;
 	bool m_IsWeapon;
 	static WeaponManager* m_pPlayerWeapons;

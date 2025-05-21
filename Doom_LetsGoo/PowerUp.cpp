@@ -9,8 +9,7 @@
 #include "Texture.h"
 
 PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string sprite)
-	:Thing{ pos , height , type , sprite },
-	m_Type{ type },
+	:Thing{ pos , height  , sprite },
 	m_FilePath{ "pickUps/" + sprite + "A0.png" }
 {
 	//m_pInteractor = new Interactor{};
@@ -20,7 +19,7 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 	std::string suffic{ entry.path().filename().string().erase(name.size() - 4, name.size() - 1) };
 	suffic.erase(0, 4);*/
 	m_pTex = new Texture{ m_FilePath };
-
+	m_SubClass = ThingSubclass::pickup;
 	switch (type)
 	{
 	case utils::ThingsEnum::Shotgun:
@@ -106,7 +105,6 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 
 PowerUp::PowerUp(const PowerUp& toCopy)
 	:Thing( Thing(toCopy)),
-	m_Type{ toCopy.m_Type },
 	m_FilePath{ toCopy.m_FilePath }
 {
 	m_PickedUp = toCopy.m_PickedUp;
@@ -116,7 +114,6 @@ PowerUp::PowerUp(const PowerUp& toCopy)
 
 PowerUp::PowerUp(PowerUp&& toMove) noexcept
 	:Thing(Thing(toMove)),
-	m_Type{ std::move(toMove.m_Type) },
 	m_FilePath{ std::move(toMove.m_FilePath )}
 {
 	m_PickedUp = std::move(toMove.m_PickedUp);
@@ -127,26 +124,32 @@ PowerUp::PowerUp(PowerUp&& toMove) noexcept
 
 PowerUp& PowerUp::operator=(const PowerUp& rhs)
 {
-	m_PickedUp = rhs.m_PickedUp;
-	m_Type = rhs.m_Type;
-	m_FilePath = rhs.m_FilePath;
-	if (m_pTex != nullptr)
+	if (&rhs != this)
 	{
-		delete m_pTex;
+		Thing::operator=(rhs);
+		m_PickedUp = rhs.m_PickedUp;
+		m_FilePath = rhs.m_FilePath;
+		if (m_pTex != nullptr)
+		{
+			delete m_pTex;
+		}
+		m_pTex = new Texture{ m_FilePath };
+		m_pInteractor = rhs.m_pInteractor;
 	}
-	m_pTex = new Texture{ m_FilePath };
-	m_pInteractor = rhs.m_pInteractor;
 	return *this;
 }
 
 PowerUp& PowerUp::operator=(PowerUp&& rhs) noexcept
 {
-	m_PickedUp = std::move(rhs.m_PickedUp);
-	m_Type = std::move(rhs.m_Type);
-	m_FilePath = std::move(rhs.m_FilePath);
-	m_pTex = rhs.m_pTex;
-	rhs.m_pTex = nullptr;
-	m_pInteractor = std::move(rhs.m_pInteractor);
+	if (&rhs != this)
+	{
+		Thing::operator=(rhs);
+		m_PickedUp = std::move(rhs.m_PickedUp);
+		m_FilePath = std::move(rhs.m_FilePath);
+		m_pTex = rhs.m_pTex;
+		rhs.m_pTex = nullptr;
+		m_pInteractor = std::move(rhs.m_pInteractor);
+	}
 	return *this;
 }
 

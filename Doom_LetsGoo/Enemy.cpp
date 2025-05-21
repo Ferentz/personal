@@ -8,19 +8,21 @@
 #include "PLayer.h"
 #include "Navigator.h"
 #include "Interactor.h"
+#include "Level.h"
 
 
 namespace fs = std::filesystem;
 HealthManager* Enemy::pPlayerHealth{};
 
 Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
-	:Thing{ pos, height , utils::ThingsEnum::Zombieman, folder },
+	:Shootable{ pos, height , folder, 20 },
 	m_TexIndex{},
 	m_timer{},
-	m_direction{}
+	m_direction{},
+	m_pNavigator{ new Navigator(m_location.point3D) }
 {
-	m_pNavigator = new Navigator(m_location.point3D);
-	m_pHealthManager = new HealthManager(20);
+	
+	//m_pHealthManager = new HealthManager(20);
 	//m_pInteractor = new Interactor();
 	//std::string path = "POSS";
 	for (const auto& entry : fs::directory_iterator(folder))
@@ -32,29 +34,31 @@ Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
 		m_pMonsterTexture.emplace_back(Texture(path));
 	}
 	LoadTextures();
+	m_SubClass = ThingSubclass::enemy;
 }
 
 Enemy::Enemy(const Enemy& toCopy)
-	:Thing{ Thing(toCopy) },
+	:Shootable{ Shootable(toCopy) },
 	m_TexIndex{ toCopy.m_TexIndex },
 	m_timer{ toCopy.m_timer },
-	m_direction{ toCopy.m_direction }
+	m_direction{ toCopy.m_direction },
+	m_pNavigator{ new Navigator(*toCopy.m_pNavigator) }
 {
 	m_MonsterTexturePaths.reserve(toCopy.m_MonsterTexturePaths.size());
 	for (const std::string& suffix : toCopy.m_MonsterTexturePaths)
 	{
 		m_MonsterTexturePaths.push_back(suffix);
 	}
-
 	LoadTextures();
 }
 
 // try this
 Enemy::Enemy(Enemy&& toMove) noexcept
-	:Thing( Thing( toMove ) ),
+	:Shootable(Shootable( toMove ) ),
 	m_TexIndex{ std::move( toMove.m_TexIndex ) },
 	m_timer{ std::move( toMove.m_timer )},
-	m_direction{ std::move( toMove.m_direction ) }
+	m_direction{ std::move( toMove.m_direction ) },
+	m_pNavigator{ std::move(toMove.m_pNavigator) }
 {
 	m_pMonsterTexture = std::move(toMove.m_pMonsterTexture);
 	m_MonsterTexturePaths = std::move(toMove.m_MonsterTexturePaths);
@@ -63,46 +67,58 @@ Enemy::Enemy(Enemy&& toMove) noexcept
 Enemy::~Enemy()
 {
 	delete m_pNavigator;
-	delete m_pHealthManager;
+	//delete m_pHealthManager;
 	m_pNavigator = nullptr;
-	m_pHealthManager = nullptr;
+	//m_pHealthManager = nullptr;
 }
 
-Enemy& Enemy::operator=(const Enemy& rhs)
-{
-	if (&rhs != this) 
-	{
-		m_TexIndex = rhs.m_TexIndex;
-		m_timer = rhs.m_timer;
-		m_direction = rhs.m_direction;
+//Enemy& Enemy::operator=(const Enemy& rhs)
+//{
+//	if (&rhs != this) 
+//	{
+//		Shootable::operator=(rhs);
+//		m_TexIndex = rhs.m_TexIndex;
+//		m_timer = rhs.m_timer;
+//		m_direction = rhs.m_direction;
+//
+//		m_pMonsterTexture.clear();
+//		m_MonsterTexturePaths.clear();
+//		m_MonsterTexturePaths.reserve(rhs.m_MonsterTexturePaths.size());
+//		for (const std::string& path : rhs.m_MonsterTexturePaths)
+//		{
+//			m_MonsterTexturePaths.push_back(path);
+//		}
+//		LoadTextures();
+//		*m_pNavigator = *rhs.m_pNavigator;
+//	}
+//	return *this; 
+//}
 
-		m_pMonsterTexture.clear();
-		m_MonsterTexturePaths.clear();
-		m_MonsterTexturePaths.reserve(rhs.m_MonsterTexturePaths.size());
-		for (const std::string& path : rhs.m_MonsterTexturePaths)
-		{
-			m_MonsterTexturePaths.push_back(path);
-		}
-		LoadTextures();
-	}
-	return *this; 
-}
 Enemy& Enemy::operator=(Enemy&& rhs) noexcept
 {
 	if (&rhs != this)
 	{
+		Shootable::operator=(rhs);
 		m_TexIndex = rhs.m_TexIndex;
 		m_timer = rhs.m_timer;
 		m_direction = rhs.m_direction;
 		m_pMonsterTexture = std::move(rhs.m_pMonsterTexture);
 		m_MonsterTexturePaths = std::move(rhs.m_MonsterTexturePaths);
+		m_pNavigator = rhs.m_pNavigator;
+		rhs.m_pNavigator = nullptr;
 	}
 	return *this;
 }
 
+void Enemy::UpdateThing(const PLayer& player, float elapsSec)
+{
+	UpdateTexture(elapsSec);
+	Thing::UpdateThing(player, elapsSec);
+	
+	//m_location.point2D = eyeObject.PerspCalc(m_location, m_location.point3D);
+}
 
-
-void Enemy::UpdateThing(const PLayer& eyeObject, float elapsSec)
+void Enemy::UpdateTexture(float elapsSec)
 {
 	if (m_pNavigator->m_Alive)
 	{
@@ -143,7 +159,7 @@ void Enemy::UpdateThing(const PLayer& eyeObject, float elapsSec)
 					m_TexIndex = 0;
 				}
 				m_timer = 0;
-				
+
 			}
 			else {
 				m_pNavigator->m_CanShootAgain = true;
@@ -166,17 +182,27 @@ void Enemy::UpdateThing(const PLayer& eyeObject, float elapsSec)
 			if (index == (7 * 5) + 4)
 			{
 				m_pNavigator->m_Alive = false;
-				
+
 				m_pNavigator->m_Dying = false;
 
 			}
 		}
-		
-	}
 
-	Thing::UpdateThing(eyeObject, elapsSec);
+	}
+}
+
+bool Enemy::Navigate( Level* pLevel, const PLayer& player, const float elapsSec)
+{
+	if (!m_pNavigator->m_IsShooting && m_pNavigator->m_Alive) // if he is not shooting and alive
+	{
+		m_pNavigator->CalcNextPos(player.m_Pos, pLevel->GetWalls(), elapsSec);
+
+		m_pNavigator->ColideWLevel(pLevel);
 	
-	//m_location.point2D = eyeObject.PerspCalc(m_location, m_location.point3D);
+		m_pNavigator->PushPosition();
+		return true;
+	}
+	return false;
 }
 
 void Enemy::DrawThing(Texture* tex)

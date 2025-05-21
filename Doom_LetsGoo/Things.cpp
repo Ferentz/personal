@@ -3,22 +3,22 @@
 #include "Texture.h"
 #include "PLayer.h"
 
-Thing::Thing(Vector2f pos, float height, utils::ThingsEnum type, std::string sprite)
+Thing::Thing(Vector2f pos, float height, std::string sprite)
 	:m_StartPos{ pos },
 	m_Height{ height },
-	m_Type{ type },
 	m_location{ pos.x, pos.y, 0 },
-	m_pNavigator{nullptr},
-	m_pHealthManager{nullptr},
-	m_pInteractor{nullptr}
+	//m_pNavigator{nullptr},
+	//m_pHealthManager{nullptr},
+	//m_pInteractor{nullptr},
+	m_SubClass{ ThingSubclass::decoration }
 {
 }
 
 Thing::Thing(const Thing& toCopy) 
 	:m_StartPos{ toCopy.m_StartPos },
 	m_Height{ toCopy.m_Height },
-	m_Type{ toCopy.m_Type },
-	m_location{ toCopy.m_location }
+	m_location{ toCopy.m_location },
+	m_SubClass{ toCopy.m_SubClass }
 {
 	m_SubsectorIndex = toCopy.m_SubsectorIndex;
 }
@@ -26,8 +26,8 @@ Thing::Thing(const Thing& toCopy)
 Thing::Thing(Thing&& rhs) noexcept
 	:m_StartPos{ rhs.m_StartPos },
 	m_Height{ rhs.m_Height },
-	m_Type{ rhs.m_Type },
-	m_location{ rhs.m_location }
+	m_location{ rhs.m_location },
+	m_SubClass{ rhs.m_SubClass }
 {
 	m_SubsectorIndex = rhs.m_SubsectorIndex;
 }
@@ -36,9 +36,9 @@ Thing& Thing::operator=(const Thing& rhs)
 {
 	m_StartPos = rhs.m_StartPos;
 	m_Height = rhs.m_Height;
-	m_Type = rhs.m_Type;
 	m_location = rhs.m_location;
 	m_SubsectorIndex = rhs.m_SubsectorIndex;
+	m_SubClass = rhs.m_SubClass;
 	return *this;
 }
 
@@ -83,4 +83,9 @@ const point2D_3D& Thing::GetLocationPoint() const
 void Thing::SetPosHeight(float height)
 {
 	m_location.point3D.z = height;
+}
+
+const ThingSubclass Thing::GetSubClass() const
+{
+	return m_SubClass;
 }

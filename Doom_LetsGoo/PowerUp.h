@@ -16,10 +16,12 @@ public:
 	virtual void UpdateThing(const PLayer& eyeObject, float elapsSec) override;
 	virtual void DrawThing(Texture* tex);
 
+	Interactor* m_pInteractor{};
+
 private:
 	bool m_PickedUp{false};
-	utils::ThingsEnum m_Type;
 	std::string m_FilePath;
 	Texture* m_pTex;
+
 };
 

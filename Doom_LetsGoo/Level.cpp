@@ -204,23 +204,19 @@ void Level::UpdateThings(PLayer& eyeObject, float elapsedSec)
 	{
 		m_pThings[ThingLevelIndex]->UpdateThing(eyeObject, elapsedSec);
 
-		if (m_pThings[ThingLevelIndex]->m_pNavigator != nullptr)
+		if (m_pThings[ThingLevelIndex]->GetSubClass() == ThingSubclass::enemy)
 		{
-			Navigator* thingNavigator{ m_pThings[ThingLevelIndex]->m_pNavigator };
-			if (!thingNavigator->m_IsShooting && thingNavigator->m_Alive) // if he is not shooting and alive
+			Enemy* enemyPtr = static_cast<Enemy*>(m_pThings[ThingLevelIndex]);
+			if (enemyPtr->Navigate(this, eyeObject, elapsedSec)) // if he is not shooting and alive
 			{
-				thingNavigator->CalcNextPos(eyeObject.m_Pos, m_pPlanes, elapsedSec);
-
-				thingNavigator->ColideWLevel(this);
-				const Vector3f nextPos{ thingNavigator->GetNextPos() };
+				const Vector3f nextPos{ enemyPtr->m_pNavigator->GetNextPos() };
 				Vector2f next2D{ nextPos.x, nextPos.y };
 				const int subSector2 = utils::GetBSP(next2D, true, m_BSP);
-				const int originalThingSubSector{ m_pThings[ThingLevelIndex]->GetSubsectorIndex()};
+				const int originalThingSubSector{ enemyPtr->GetSubsectorIndex()};
 				if (subSector2 != originalThingSubSector)
 				{
 					SwapThingSubsector(originalThingSubSector, subSector2, ThingLevelIndex);
 				}
-				thingNavigator->PushPosition();
 			}
 		}
 	}

@@ -11,9 +11,11 @@ public:
 	void SetArmour(float damageAbsorption);
 	void IncreaseMaxArmour(int amount);
 	void IncreaseMaxHealth(int amount);
+
+	HealthManager& operator=(const HealthManager& rhs);
 private:
 	int m_Health;
-	const int m_FullHealth{100};
+	int m_FullHealth{100};
 	int m_MaxHealth{100};
 
 	float m_Armour_DamageAbsorption{0};

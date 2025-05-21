@@ -3,7 +3,8 @@
 #include <iostream>
 #include "Level.h"
 #include "Plane.h"
-#include "Things.h"
+//#include "Things.h"
+#include "Enemy.h"
 #include "Navigator.h"
 //#include "game.h"
 
@@ -57,12 +58,12 @@ void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 	thingsICanShoot.reserve(maxAmout);
 	for (Thing*& object : thingsToShoot)
 	{
-		if (object->m_pHealthManager != nullptr) // if it has health
+		if (object->GetSubClass() == ThingSubclass::enemy || object->GetSubClass() == ThingSubclass::shootable)
 		{
 			bool lineOfSight{ false };
-			if (object->m_pNavigator != nullptr)
+			if (object->GetSubClass() == ThingSubclass::enemy)
 			{
-				lineOfSight = object->m_pNavigator->m_hasLineOfSight;
+				lineOfSight = static_cast <Enemy*> (object)->m_pNavigator->m_hasLineOfSight;
 			}
 
 			if(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, object->GetLocationPoint().point3D))
@@ -73,7 +74,7 @@ void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 				{
 					break;
 				}
-				m_WeaponManager.Shoot(object, windowWidth);
+				m_WeaponManager.Shoot(static_cast <Shootable*> (object), windowWidth);
 				
 			}
 		}

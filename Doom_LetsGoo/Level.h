@@ -47,16 +47,16 @@ private:
 
 	std::vector<BSPnode> m_BSP{};
 	std::vector<BSPleafeNode> m_BSPleafs{};
-	int m_PlaneAmount{};
+	int m_PlaneAmount{}; //remove
 	std::vector <Plane*> m_pPlanes{};
 	// so now, 
-	int m_floorsNCeilingsAmount{};
+	int m_floorsNCeilingsAmount{}; // remove
 	std::vector <PlaneIregular> m_pFloorsNCeilings{};
 	std::vector <Thing*> m_pThings{};
 
 	// we need a vector to store what line a wall belongs to
 	std::vector<int> m_LinePerWall;
-	std::set<int> m_tags[2];
+	std::set<int> m_tags[2]; // name unlear
 
 	int m_EnemyToDraw{};
 };

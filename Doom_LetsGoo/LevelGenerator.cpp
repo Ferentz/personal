@@ -851,7 +851,7 @@ void LevelGenerator::ReadThings()
 			r_Things.emplace_back(new Enemy{ position, float(height), sprite });
 			break;
 		default:
-			r_Things.emplace_back(new Thing{ position, float(height), thingType , sprite });
+			r_Things.emplace_back(new Thing{ position, float(height) , sprite });
 			break;
 		}
 	}

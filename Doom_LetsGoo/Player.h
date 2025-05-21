@@ -18,7 +18,7 @@ public:
 	bool ColideWLevel(const Level* pLevel);
 	void VelocCalc(float elapsedSec);
 
-	void Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth);
+	void Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth); // clean up ref names
 	void Jump();
 	void MoveForward();
 	void MoveBackward();
@@ -48,7 +48,7 @@ private:
 
 	const float m_GRAVITY{ 9.807 };
 	bool m_Standing{ false };
-
+	//name consistency
 	float m_vericalVelocity{};
 	float m_FLoorHeigt{};
 };

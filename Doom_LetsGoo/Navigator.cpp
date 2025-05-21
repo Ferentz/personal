@@ -5,6 +5,8 @@
 #include "Level.h"
 //#include "Level.h"
 
+const Level* Navigator::pLevel{};
+
 Navigator::Navigator(Vector3f& pos)
 	:m_Pos{pos},
 	m_EyePos{ pos .x, pos.y, pos.z + m_charHeightr}
@@ -34,7 +36,7 @@ void Navigator::CalcNextPos( const Vector3f& playerPos,  const std::vector<Plane
 	{
 		m_Direction.x = ((rand() % 20) - 10) / 10.f;
 		m_Direction.y = ((rand() % 20) - 10) / 10.f;
-		m_timer = m_TimeInterval;
+		m_timer = m_TimeIntervalSecs;
 	}
 	m_timer -= elapsSec;
 	m_NextPos = Vector3f{ m_Pos.x + m_Direction.x, m_Pos.y + m_Direction.y, m_Pos.z };
@@ -83,8 +85,6 @@ bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vec
 		std::cout << "i can see through walls";
 	}*/
 	return m_hasLineOfSight;
-	
-
 }
 
 bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos, const Vector3f& objectPos)
@@ -102,4 +102,9 @@ bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vec
 		}
 	}
 	return hasLineOfSight;
+}
+
+void Navigator::SetLevel(const Level* level)
+{
+	pLevel = level;
 }
