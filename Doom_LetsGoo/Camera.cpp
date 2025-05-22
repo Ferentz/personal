@@ -38,10 +38,10 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 
 	yAngle = float(atan2(hightDist, newXDist));
 
-	pointStruc.Angle[0] = xAngle;
-	pointStruc.Angle[1] = yAngle;
-	pointStruc.prevAngle[0] = pointStruc.Angle[0];
-	pointStruc.prevAngle[1] = pointStruc.Angle[1];
+	pointStruc.AngleXYUsed[0] = xAngle;
+	pointStruc.AngleXYUsed[1] = yAngle;
+	pointStruc.prevAngleXY[0] = pointStruc.AngleXYUsed[0];
+	pointStruc.prevAngleXY[1] = pointStruc.AngleXYUsed[1];
 	if (newXDist > 0)
 	{
 		pointStruc.amIVisible = true;
@@ -67,7 +67,7 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 	}
 	else {
 		Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + m_Window.width / 2;
-		pointStruc.Angle[2] = (newXAngle)*m_projDist;
+		pointStruc.AngleXYUsed[2] = (newXAngle)*m_projDist;
 		pointStruc.point2D = Point2D;
 		return Point2D;
 	}
@@ -78,7 +78,7 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 	float result = restAngle * entryAngle / entryAngleRest;
 
 	Point2D.x = SCALE * (result * m_projDist) * DEVISION + m_Window.width / 2;
-	pointStruc.Angle[2] = newXAngle;
+	pointStruc.AngleXYUsed[2] = newXAngle;
 	pointStruc.point2D = Point2D;
 	return Point2D;
 }
@@ -163,4 +163,14 @@ void Camera::TurnCamera(float offset)
 	if (m_angleOffset < -M_PI) {
 		m_angleOffset = M_PI + (int(m_angleOffset * 100) % int(-M_PI * 100)) / 100.f;
 	}
+}
+
+float Camera::GetDistanceFromMidle(float xScreenPos)
+{
+	return xScreenPos - m_Window.width / 2;
+}
+
+float Camera::GetWindowWidth()
+{
+	return m_Window.width;
 }

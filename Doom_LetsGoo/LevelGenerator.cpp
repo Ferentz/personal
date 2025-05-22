@@ -573,6 +573,7 @@ void LevelGenerator::SeamFixSubsectors(const int* sectorPerSubsector)
 
 void LevelGenerator::ReadThings()
 {
+	r_Things.reserve(thingsImported.rows);
 	for (int thing{}; thing < thingsImported.rows; thing++)
 	{
 		/*if (thingsImported.data[thing][ReadThings::type] == 5 ||

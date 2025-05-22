@@ -48,7 +48,7 @@ void PlaneIregular::UpdatePlane(const PLayer& player) {
 	for (int index{ 0 }; index < m_amoountOfPoints; index++) {
 		//std::cout << index << std::endl;
 		m_pPointsArr[index].point2D = player.GetCamera().PerspCalc(m_pPointsArr[index]);
-		if (m_pPointsArr[index].Angle[2] > M_PI * 0.5f || m_pPointsArr[index].Angle[2] < - M_PI * 0.5f) {
+		if (m_pPointsArr[index].AngleXYUsed[2] > M_PI * 0.5f || m_pPointsArr[index].AngleXYUsed[2] < - M_PI * 0.5f) {
 			m_pPointsArr[index].amIVisible = false;
 		}
 		else {

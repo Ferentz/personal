@@ -16,6 +16,7 @@ public:
 	void AddAmo(int amout, WeaponType type);
 	void PickUpWeapon(WeaponType type);
 	void Shoot(Shootable* object, float windowWidth);
+	void Shoot(std::vector<Shootable*> shootables, float windowWidth);
 
 private:
 	WeaponType m_equipedWeapon{};

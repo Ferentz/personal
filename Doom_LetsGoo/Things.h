@@ -30,7 +30,7 @@ public:
 	Vector2f GetStartPos() const;
 	int GetSubsectorIndex() const;
 	void SetSubsectorIndex(int newSubsector);
-	const point2D_3D& GetLocationPoint() const;
+	virtual const point2D_3D& GetLocationPoint() const;
 	void SetPosHeight(float height);
 	const ThingSubclass GetSubClass() const;
 	//prefered enumerator +static cast over checking for nullptr

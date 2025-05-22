@@ -7,6 +7,8 @@ public:
 	void intersecCalc(const point2D_3D& visible, point2D_3D& invisible) const;
 	const Vector2f MakeLookAtVector() const;
 	void TurnCamera(float offset);
+	float GetDistanceFromMidle(float xScreenPos);
+	float GetWindowWidth();
 private:
 	const Rectf& m_Window;
 	const Vector3f& m_Pos;

@@ -13,8 +13,10 @@ public:
 	PowerUp& operator=(const PowerUp& rhs);
 	PowerUp& operator=(PowerUp&& rhs) noexcept;
 	virtual ~PowerUp() override;
+
+	PowerUp(point2D_3D Location);
 	virtual void UpdateThing(const PLayer& eyeObject, float elapsSec) override;
-	virtual void DrawThing(Texture* tex);
+	virtual void DrawThing(Texture* tex) override;
 
 	Interactor* m_pInteractor{};
 

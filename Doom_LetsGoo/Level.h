@@ -27,8 +27,9 @@ public:
 		bool isPlayer, bool& exit)const;
 	const std::vector<BSPnode>& GetBSPtree() const;
 	std::vector <Thing*>& GetThings();
-	std::vector <Plane*>& GetWalls();
+	const std::vector <Plane*>& GetWalls();
 	bool GetCleared();
+	void SpawnWeapon(point2D_3D Location);
 
 private:
 	void DrawLeaf(int leafIndex);

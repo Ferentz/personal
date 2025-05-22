@@ -52,33 +52,40 @@ void PLayer::VelocCalc(float elapsedSec)
 
 void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
 {
-	std::vector<Thing*> thingsICanShoot{};
-	const int maxAmout{ 5 };
-	int count{1};
-	thingsICanShoot.reserve(maxAmout);
+	const int maxAmout{ 20 };
+	int count{ 1 };
+	std::vector<Shootable*> shootables{};
+	std::vector<float> distances{};
+	shootables.reserve(maxAmout);
+	distances.reserve(maxAmout);
 	for (Thing*& object : thingsToShoot)
 	{
 		if (object->GetSubClass() == ThingSubclass::enemy || object->GetSubClass() == ThingSubclass::shootable)
 		{
+			Shootable* pShootable{ static_cast<Shootable*>(object) };
+
 			bool lineOfSight{ false };
-			if (object->GetSubClass() == ThingSubclass::enemy)
+			if (pShootable->GetSubClass() == ThingSubclass::enemy)
 			{
-				lineOfSight = static_cast <Enemy*> (object)->m_pNavigator->m_hasLineOfSight;
+				lineOfSight = static_cast <Enemy*> (pShootable)->m_pNavigator->m_hasLineOfSight;
 			}
 
-			if(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, object->GetLocationPoint().point3D))
+			if( m_Camera.GetDistanceFromMidle(pShootable->GetLocationPoint().point2D.x) < m_Camera.GetWindowWidth()/6 && // if the shootable is in front of you
+				(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, pShootable->GetLocationPoint().point3D))) // and if there is a line of sight
 			{
-				thingsICanShoot.push_back(object);
+				shootables.push_back(pShootable);
+				distances.push_back(pShootable->GetLocationPoint().Dist3D);
 				count++;
 				if (count == maxAmout)
 				{
 					break;
 				}
-				m_WeaponManager.Shoot(static_cast <Shootable*> (object), windowWidth);
+				//m_WeaponManager.Shoot(pShootable, windowWidth);
 				
 			}
 		}
 	}
+	m_WeaponManager.Shoot(shootables, m_Camera.GetWindowWidth());
 }
 
 void PLayer::Jump()
@@ -118,6 +125,21 @@ void PLayer::Turn(float offset)
 {
 	m_Camera.TurnCamera(offset);
 	m_lookVector = m_Camera.MakeLookAtVector();
+}
+
+void PLayer::SwitchWeapon(int weaponIndex)
+{
+	WeaponType weapon{};
+	switch (weaponIndex)
+	{
+	case 1:
+		weapon = WeaponType::pistol;
+		break;
+	case 2:
+		weapon = WeaponType::shotgun;
+		break;
+	}
+	m_WeaponManager.SwitchWeapon(weapon);
 }
 
 

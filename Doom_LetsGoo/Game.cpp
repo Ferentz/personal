@@ -10,7 +10,7 @@ Game::Game(const Window& window)
 	:BaseGame{ window },
 	m_Camera{ GetViewPort() },
 	m_WindowWidth{ window.width },
-	m_pUI{ new UI{} }
+	m_pUI{ new UI{GetViewPort()} }
 	//m_UI{ new Texture{"STBAR_converted.png"} }
 {
 	Initialize();
@@ -126,6 +126,12 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 	SDL_Keycode key = e.keysym.sym;
 	switch (key)
 	{
+	case SDLK_1:
+		m_Camera.SwitchWeapon(1);
+		break;
+	case SDLK_2:
+		m_Camera.SwitchWeapon(2);
+		break;
 	case SDLK_LEFT:
 		leftBound--;
 		std::cout << leftBound << " leftOffset" << std::endl;

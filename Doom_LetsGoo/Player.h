@@ -26,6 +26,8 @@ public:
 	void MoveRight();
 	void Turn(float offset);
 
+	void SwitchWeapon(int weaponIndex);
+
 	bool IsLookingAtMe(const Vector3f crosspoints[])const;
 	void ResetPos();
 	const Vector2f& GetLookAtVector() const;
@@ -46,7 +48,7 @@ private:
 	
 	Vector2f m_lookVector;
 
-	const float m_GRAVITY{ 9.807 };
+	const float m_GRAVITY{ 9.807f };
 	bool m_Standing{ false };
 	//name consistency
 	float m_vericalVelocity{};

@@ -19,22 +19,23 @@ public:
 	Enemy& operator=(Enemy&& rhs) noexcept;
 	virtual ~Enemy() noexcept override ;
 	virtual void UpdateThing(const PLayer& player, float elapsSec) override;
-	void UpdateTexture(float elapsSec);
+	void UpdateEnemy(float elapsSec);
 	bool Navigate(Level* pLevel, const PLayer& player, const float elapsSec);
 	virtual void DrawThing(Texture* tex) override;
-
+	
 	static void AssignPlayer(HealthManager& playerHealth);
 	static HealthManager* pPlayerHealth;
-	//void ShootPlayer(DoomCamera* eyeObject);
 
-	//void ColideWLevel(const Level* pLevel);
 	Navigator* m_pNavigator;
+
 private:
 	void LoadTextures();
 	int m_TexIndex;
 	float m_timer;
+	bool m_IsShooting{ false };
+	bool m_CanShootAgain{ true };
 
-	
+	bool m_SpawnWeapon{ false };
 
 	std::vector <Texture> m_pMonsterTexture{};
 	std::vector <std::string> m_MonsterTexturePaths{};

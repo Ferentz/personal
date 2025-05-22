@@ -152,13 +152,27 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	float topUse = std::max(top, bottom); // some walls are created upside down
 	float bottomUse = std::min(top, bottom);
 	//
-	if(
-		((pos3D.z > topUse) || (pos3D.z < bottomUse)) ||
-		((nextPos3D.z > topUse) || (nextPos3D.z < bottomUse))//&& isPlayer) ||
-		) // if the player is above or below, if a monster and the ledge is bigger than the step height
+	float highPoint = std::max(pos3D.z, nextPos3D.z); // some walls are created upside down
+	float lowPoint = std::min(pos3D.z, nextPos3D.z);
+
+	//if (!isPlayer && lowPoint > topUse && abs(m_Height.z) > 5)
+	//{
+	//	//std::cout << "large ledge" << std::endl;
+	//	return true;
+	//}
+
+	if (lowPoint > topUse || highPoint < bottomUse)
 	{
 		return false;
 	}
+
+	//if(
+	//	((pos3D.z > topUse) || (pos3D.z < bottomUse)) ||
+	//	((nextPos3D.z > topUse) || (nextPos3D.z < bottomUse))//&& isPlayer) ||
+	//	) // if the player is above or below, if a monster and the ledge is bigger than the step height
+	//{
+	//	return false;
+	//}
 		
 
 	Vector2f pos{ pos3D.x, pos3D.y };
@@ -170,15 +184,25 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	utils::HitInfo hitInfo{};
 	if (utils::Raycast(wallVerts, 2, pos, nextPos, hitInfo))
 	{
+		// we wanna get at what distance it is, and then see if the height would be above or below the plane
+		float percentage = hitInfo.lambda;
+		float difference = (nextPos3D.z - pos3D.z) * percentage;
+		float intersectionZ = pos3D.z + difference;
+
+		const float epsilon = 0.01f;
+		if (intersectionZ < bottomUse - epsilon || intersectionZ > topUse + epsilon)
+		{
+			return false;
+		}
 		/*std::cout << m_bBlock << std::endl;
 		std::cout << m_bBlockMonster << std::endl;
 		std::cout << m_bSecret << std::endl;
 		std::cout << m_bSoundBlock << std::endl;
 		std::cout << std::endl;*/
-		if (m_bBlock)
-		{
-			//std::cout << "activate door" << std::endl;
-		}
+		//if (m_bBlock)
+		//{
+		//	//std::cout << "activate door" << std::endl;
+		//}
 		// Get approach vector
 		Vector2f moveDir = (nextPos - pos).Normalized();
 
@@ -197,6 +221,7 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		Vector2f nextPoint2D = hitInfo.intersectPoint - REFLECTION * hitInfo.lambda;
 
 		returnPos = nextPoint2D;
+
 		return true;
 	}
 

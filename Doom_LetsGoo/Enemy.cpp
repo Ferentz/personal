@@ -112,47 +112,83 @@ Enemy& Enemy::operator=(Enemy&& rhs) noexcept
 
 void Enemy::UpdateThing(const PLayer& player, float elapsSec)
 {
-	UpdateTexture(elapsSec);
+	UpdateEnemy(elapsSec);
 	Thing::UpdateThing(player, elapsSec);
 	
 	//m_location.point2D = eyeObject.PerspCalc(m_location, m_location.point3D);
 }
 
-void Enemy::UpdateTexture(float elapsSec)
+void Enemy::UpdateEnemy(float elapsSec)
 {
-	if (m_pNavigator->m_Alive)
-	{
-		if (m_pNavigator->m_hasLineOfSight &&
-			!m_pNavigator->m_IsShooting &&
-			m_pNavigator->m_CanShootAgain)
-		{
-			m_pNavigator->m_IsShooting = true;
 
-			m_timer = 0;
-			m_TexIndex = 0;
-		}
+	if (m_State != ShootableStates::dead)
+	{
+		// add the timer
 		m_timer += elapsSec;
-		if (m_timer >= 0.5)
+		if (m_timer >= 0.5) // the time interval to swithc textures/perform actions
 		{
-			if (m_pNavigator->m_IsShooting)
+			switch (m_State)
 			{
-				if (m_TexIndex >= 1)
+			case ShootableStates::alive:
+			{
+				// if he can shoot ->shoot
+				if (m_pNavigator->m_hasLineOfSight &&
+					!m_IsShooting &&
+					m_CanShootAgain)
 				{
-					if (m_pNavigator->m_hasLineOfSight)
-					{
-						pPlayerHealth->Harm(5);
-					}
-					//ShootPlayer(&eyeObject);
+					m_IsShooting = true;
+					//prime animation to shoot
+					m_timer = 0;
 					m_TexIndex = 0;
-					m_pNavigator->m_IsShooting = false;
-					m_pNavigator->m_CanShootAgain = false;
 				}
-				m_TexIndex++;
-				m_timer = 0;
+
+				// if he's shooting
+				if (m_IsShooting)
+				{
+					// if it's the end of shooting animation
+					if (m_TexIndex >= 1)
+					{
+						// if still has line of sight over player, harm the player 
+						if (m_pNavigator->m_hasLineOfSight)
+						{
+							//pPlayerHealth->Harm(5);
+						}
+						//reset shooting + animation
+						m_TexIndex = 0;
+						m_IsShooting = false;
+						m_CanShootAgain = false;
+					}
+					//continue animation
+					m_TexIndex++;
+					m_timer = 0;
+				}
+
+				else {
+					m_CanShootAgain = true;
+					m_TexIndex++;
+					if (m_TexIndex >= 4)
+					{
+						m_TexIndex = 0;
+					}
+					m_timer = 0;
+				}
+				break;
 			}
-			else if (m_pNavigator->m_Dying)
+			case ShootableStates::harmed:
 			{
-				m_pNavigator->m_CanShootAgain = false;
+				if (m_pHealthManager.GetHeath() <= 0)
+				{
+					m_timer = 0;
+					m_pNavigator->m_Mobile = false;
+					m_State = ShootableStates::dying;
+					break;
+				}
+				m_State = ShootableStates::alive;
+				break;
+			}
+			case ShootableStates::dying:
+			{
+				m_CanShootAgain = false;
 				m_TexIndex++;
 				if (m_TexIndex >= 5)
 				{
@@ -160,40 +196,91 @@ void Enemy::UpdateTexture(float elapsSec)
 				}
 				m_timer = 0;
 
-			}
-			else {
-				m_pNavigator->m_CanShootAgain = true;
-				m_TexIndex++;
-				if (m_TexIndex >= 4)
+				int index = m_TexIndex + (7 * 5);
+				if (index == (7 * 5) + 4)
 				{
-					m_TexIndex = 0;
+					m_State = ShootableStates::dead;
+					m_SpawnWeapon = true;
+
 				}
-				m_timer = 0;
+			}
+			break;
 			}
 		}
-		if (m_pHealthManager->GetHeath() <= 0 && !m_pNavigator->m_Dying)
-		{
-			m_timer = 0;
-			m_pNavigator->m_Dying = true;
-		}
-		if (m_pNavigator->m_Dying)
-		{
-			int index = m_TexIndex + (7 * 5);
-			if (index == (7 * 5) + 4)
-			{
-				m_pNavigator->m_Alive = false;
-
-				m_pNavigator->m_Dying = false;
-
-			}
-		}
-
 	}
+	//if (m_pNavigator->m_Mobile)
+	//{
+	//	if (m_pNavigator->m_hasLineOfSight &&
+	//		!m_IsShooting &&
+	//		m_CanShootAgain)
+	//	{
+	//		m_IsShooting = true;
+	//
+	//		m_timer = 0;
+	//		m_TexIndex = 0;
+	//	}
+	//	m_timer += elapsSec;
+	//	if (m_timer >= 0.5)
+	//	{
+	//		if (m_IsShooting)
+	//		{
+	//			if (m_TexIndex >= 1)
+	//			{
+	//				if (m_pNavigator->m_hasLineOfSight)
+	//				{
+	//					pPlayerHealth->Harm(5);
+	//				}
+	//				//ShootPlayer(&eyeObject);
+	//				m_TexIndex = 0;
+	//				m_IsShooting = false;
+	//				m_CanShootAgain = false;
+	//			}
+	//			m_TexIndex++;
+	//			m_timer = 0;
+	//		}
+	//		else if (m_pNavigator->m_Dying)
+	//		{
+	//			m_CanShootAgain = false;
+	//			m_TexIndex++;
+	//			if (m_TexIndex >= 5)
+	//			{
+	//				m_TexIndex = 0;
+	//			}
+	//			m_timer = 0;
+	//
+	//		}
+	//		else {
+	//			m_CanShootAgain = true;
+	//			m_TexIndex++;
+	//			if (m_TexIndex >= 4)
+	//			{
+	//				m_TexIndex = 0;
+	//			}
+	//			m_timer = 0;
+	//		}
+	//	}
+	//	if (m_pHealthManager.GetHeath() <= 0 && !m_pNavigator->m_Dying)
+	//	{
+	//		m_timer = 0;
+	//		m_pNavigator->m_Dying = true;
+	//	}
+	//	if (m_pNavigator->m_Dying)
+	//	{
+	//		int index = m_TexIndex + (7 * 5);
+	//		if (index == (7 * 5) + 4)
+	//		{
+	//			m_pNavigator->m_Mobile = false;
+	//
+	//			m_SpawnWeapon = true;
+	//
+	//		}
+	//	}
+	//}
 }
 
 bool Enemy::Navigate( Level* pLevel, const PLayer& player, const float elapsSec)
 {
-	if (!m_pNavigator->m_IsShooting && m_pNavigator->m_Alive) // if he is not shooting and alive
+	if (!m_IsShooting && m_pNavigator->m_Mobile) // if he is not shooting and alive
 	{
 		m_pNavigator->CalcNextPos(player.m_Pos, pLevel->GetWalls(), elapsSec);
 
@@ -201,6 +288,11 @@ bool Enemy::Navigate( Level* pLevel, const PLayer& player, const float elapsSec)
 	
 		m_pNavigator->PushPosition();
 		return true;
+	}
+	else if (m_SpawnWeapon)
+	{
+		pLevel->SpawnWeapon(m_location);
+		m_SpawnWeapon = false;
 	}
 	return false;
 }
@@ -214,7 +306,28 @@ void Enemy::DrawThing(Texture* tex)
 	//utils::SetColor(1, 1, 1, 1);
 	//utils::DrawRect(dest);
 	int index{ m_TexIndex * 5 };
-	if (m_pNavigator->m_IsShooting)
+	switch (m_State)
+	{
+	case ShootableStates::alive:
+		if (m_IsShooting)
+		{
+			index += (4 * 5);
+		}
+		break;
+	case ShootableStates::harmed:
+		index = (6 * 5);
+		break;
+	case ShootableStates::dying:
+		index = m_TexIndex + (7 * 5);
+		break;
+	case ShootableStates::dead:
+		index = (7 * 5) + 4;
+		break;
+	default:
+		break;
+	}
+	
+	/*if (m_pNavigator->m_IsShooting)
 	{
 		index += (4 * 5);
 	}
@@ -222,16 +335,18 @@ void Enemy::DrawThing(Texture* tex)
 	{
 		index = m_TexIndex + (7 * 5);
 	}
-	if (!m_pNavigator->m_Alive)
+	if (!m_pNavigator->m_Mobile)
 	{
 		index = (7 * 5) + 4;
-	}
+	}*/
 	float scale{ 0.001 };
 	float width{ m_pMonsterTexture[index].GetWidth() / (m_location.Dist3D * scale) };
 	float height{ m_pMonsterTexture[index].GetHeight() / (m_location.Dist3D * scale) };
 	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };
 	m_pMonsterTexture[index].Draw(dest);
 }
+
+
 
 void Enemy::AssignPlayer(HealthManager& playerHealth)
 {

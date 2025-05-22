@@ -14,13 +14,13 @@ void WeaponManager::SwitchWeapon(WeaponType type)
 	case WeaponType::pistol :
 		if (m_pistolPickedUp)
 		{
-
+			m_equipedWeapon = type;
 		}
 		break;
 	case WeaponType::shotgun:
 		if (m_shotgunPickedUp)
 		{
-
+			m_equipedWeapon = type;
 		}
 		break;
 	default:
@@ -33,11 +33,21 @@ int WeaponManager::GetDamageOutput()
 	switch (m_equipedWeapon)
 	{
 	case WeaponType::pistol:
-		return m_pistolDamage;
+	{
+		int damage{ (rand() % 11) + 5 };
+		//return m_pistolDamage;
+		std::cout << damage;
+		return damage;
 		break;
+	}
 	case WeaponType::shotgun:
-		return m_shotgunDamage;
+	{
+		int damage{ ((rand() % 11) + 5) * ((rand() % 7)+1) };
+		//return m_shotgunDamage;
+		std::cout << damage;
+		return damage;
 		break;
+	}
 	default:
 		return 0;
 		break;
@@ -81,7 +91,9 @@ void WeaponManager::PickUpWeapon(WeaponType type)
 	if (!m_UnlockedWeapons[typeIndex])
 	{
 		m_UnlockedWeapons[typeIndex] = true;
+		m_shotgunPickedUp = true;
 	}
+	m_shotgunPickedUp = true;
 }
 
 void WeaponManager::Shoot(Shootable* object, float windowWidth)
@@ -107,6 +119,86 @@ void WeaponManager::Shoot(Shootable* object, float windowWidth)
 		{
 			object->BeShot(GetDamageOutput());
 		}
-		(*p_UsedAmo)--;
+		//(*p_UsedAmo)--;
+	}
+}
+
+void WeaponManager::Shoot(std::vector<Shootable*> shootables, float windowWidth)
+{
+
+	int shootRange{ 100 };
+	int* p_UsedAmo{};
+	switch (m_equipedWeapon)
+	{
+	case WeaponType::pistol:
+		p_UsedAmo = &m_pistolAmo;
+		break;
+	case WeaponType::shotgun:
+		p_UsedAmo = &m_shotgunAmo;
+		break;
+	default:
+		return;
+	}
+
+	if (*p_UsedAmo > 0)
+	{
+
+		float shootRangeDist{ 1000.f };
+
+		std::vector<float> distances{};
+		distances.reserve(shootables.size());
+		switch (m_equipedWeapon)
+		{
+		case WeaponType::pistol:
+		{
+			(*p_UsedAmo)--;
+			int closest{ -1 };
+			float closestDist{ shootRangeDist };
+			for (int index{}; index < shootables.size(); index++)
+			{
+				if (closestDist > shootables[index]->GetLocationPoint().Dist3D)
+				{
+					closest = index;
+					closestDist = shootables[index]->GetLocationPoint().Dist3D;
+				}
+			}
+
+			if (closest >= 0)
+			{
+				Shoot(shootables[closest], windowWidth);
+			}
+			break;
+		}
+		case WeaponType::shotgun:
+		{
+			(*p_UsedAmo)--;
+			for (int bulletNum{}; bulletNum < 7; bulletNum++)
+			{
+				float bulletX{ rand() % (int(windowWidth / 3)) + windowWidth / 3 };
+
+				int closest{ -1 };
+				float closestDist{ shootRangeDist };
+				for (int index{}; index < shootables.size(); index++)
+				{
+					float xDif{ shootables[index]->GetLocationPoint().point2D.x - bulletX };
+					if (abs(xDif) < windowWidth / 24 &&
+						closestDist > shootables[index]->GetLocationPoint().Dist3D)
+					{
+						closest = index;
+						closestDist = shootables[index]->GetLocationPoint().Dist3D;
+					}
+				}
+
+				if (closest >= 0)
+				{
+					Shoot(shootables[closest], windowWidth);
+				}
+			}
+
+		break;
+	}
+	default:
+		return;
+	}
 	}
 }

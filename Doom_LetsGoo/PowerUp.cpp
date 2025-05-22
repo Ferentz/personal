@@ -160,6 +160,19 @@ PowerUp::~PowerUp()
 	m_pInteractor = nullptr;
 }
 
+PowerUp::PowerUp(point2D_3D Location)
+	:Thing{ Vector2f{Location.point3D.x, Location.point3D.y} , 20  , "SHOT" },
+	m_FilePath{ "pickUps/SHOTA0.png" }
+{
+	m_pTex = new Texture{ m_FilePath };
+	m_SubClass = ThingSubclass::pickup;
+
+	m_pInteractor = new WeaponInteractor{
+			4,
+			WeaponType::shotgun,
+			true };
+}
+
 void PowerUp::UpdateThing(const PLayer& eyeObject, float elapsSec)
 {
 	if (!m_PickedUp && (eyeObject.m_Pos - m_location.point3D).Length() < 100)

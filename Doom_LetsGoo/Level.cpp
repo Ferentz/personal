@@ -427,7 +427,7 @@ std::vector<Thing*>& Level::GetThings()
 	return m_pThings;
 }
 
-std::vector<Plane*>& Level::GetWalls()
+const std::vector<Plane*>& Level::GetWalls()
 {
 	return m_pPlanes;
 }
@@ -435,4 +435,15 @@ std::vector<Plane*>& Level::GetWalls()
 bool Level::GetCleared()
 {
 	return m_isCleared;
+}
+
+void Level::SpawnWeapon(point2D_3D Location)
+{
+	m_pThings.emplace_back(new PowerUp{ Location });
+	Vector2f positionThing{ m_pThings.back()->GetStartPos() };
+	int leafIndex{ utils::GetBSP(positionThing, true, m_BSP) };
+	m_BSPleafs[leafIndex].thingIndexes.push_back(m_pThings.size() - 1);
+	float zPos = m_BSPleafs[leafIndex].floorheight;
+	m_pThings.back()->SetPosHeight(zPos);
+	m_pThings.back()->SetSubsectorIndex(leafIndex);
 }

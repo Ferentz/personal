@@ -81,10 +81,10 @@ struct point2D_3D {
 	point2D_3D(float x, float y, float z);
 	Vector2f point2D{};
 	Vector3f point3D;
-	float Angle[3]{}; // rename this
+	float AngleXYUsed[3]{};
 	bool amIVisible{ true };
 	float Dist3D{};
-	float prevAngle[2]{};
+	float prevAngleXY[2]{};
 };
 
 struct Rectf

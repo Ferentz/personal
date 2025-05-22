@@ -9,13 +9,14 @@ const Level* Navigator::pLevel{};
 
 Navigator::Navigator(Vector3f& pos)
 	:m_Pos{pos},
-	m_EyePos{ pos .x, pos.y, pos.z + m_charHeightr}
+	m_EyePos{ pos .x, pos.y, pos.z + m_charHeightr},
+	m_NextPos{pos}
 {
 }
 
-void Navigator::CalcNextPos( const Vector3f& playerPos,  const std::vector<Plane*>& r_pPlanes, float elapsSec)
+void Navigator::CalcNextPos( const Vector3f& playerPos, const std::vector<Plane*>& r_pPlanes, float elapsSec)
 {
-	if (!m_Alive || m_Dying)
+	if (!m_Mobile)
 	{
 		return;
 	}
@@ -55,7 +56,7 @@ Vector3f Navigator::GetPos() const
 
 int Navigator::ColideWLevel(const Level* pLevel)
 {
-	if (!m_Alive || m_Dying)
+	if (!m_Mobile)
 	{
 		return false;
 	}
@@ -65,7 +66,7 @@ int Navigator::ColideWLevel(const Level* pLevel)
 
 void Navigator::PushPosition()
 {
-	if (!m_Alive || m_Dying)
+	if (!m_Mobile)
 	{
 		return;
 	}
@@ -73,9 +74,9 @@ void Navigator::PushPosition()
 	m_EyePos = Vector3f{ m_NextPos.x, m_NextPos.y, m_NextPos.z + m_charHeightr };
 }
 
-bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos)
+bool Navigator::HasLineOfSight( const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos)
 {
-	if (!m_Alive || m_Dying)
+	if (!m_Mobile)
 	{
 		return false;
 	}
@@ -87,18 +88,18 @@ bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vec
 	return m_hasLineOfSight;
 }
 
-bool Navigator::HasLineOfSight(const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos, const Vector3f& objectPos)
+bool Navigator::HasLineOfSight( const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos, const Vector3f& objectPos)
 {
 	bool hasLineOfSight{ true };
 	for (int wallIndex{}; wallIndex < r_pPlanes.size(); wallIndex++)
 	{
-		const Plane* wall{ r_pPlanes[wallIndex] };
+		Plane* wall{ r_pPlanes[wallIndex] };
 		Vector2f returnPos{};
 		Vector2f outNormal{};
 		if (wall->Plane::PlaneCollision(objectPos, PlayerPos, returnPos, outNormal, true))
 		{
 			hasLineOfSight = false;
-			break;
+			//break;
 		}
 	}
 	return hasLineOfSight;
