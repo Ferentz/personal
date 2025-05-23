@@ -56,7 +56,7 @@ bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vect
 	return false;
 }
 
-void Door::UpdatePlane(const PLayer& eyeObject, float elapsSec)
+void Door::UpdatePlane(const Player& eyeObject, float elapsSec)
 {
 	if (m_opening)
 	{

@@ -6,7 +6,7 @@
 #include <utils.h>
 #include <vector>
 
-class PLayer;
+class Player;
 class Texture;
 
 class PlaneIregular final
@@ -14,7 +14,7 @@ class PlaneIregular final
 public:
 	PlaneIregular();
 	PlaneIregular(std::vector<Vector2f> vertexes, int texIndx, int height);
-	void UpdatePlane(const PLayer& eyeObject);
+	void UpdatePlane(const Player& eyeObject);
 	void DrawPlane(const Texture& texture) const;
 	//void DrawPlane(const int colour);
 	void printPoints() const;

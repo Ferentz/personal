@@ -1,7 +1,7 @@
 #pragma once
 #include "utils.h"
 
-class PLayer;
+class Player;
 class Texture;
 class Navigator;
 class HealthManager;
@@ -25,7 +25,7 @@ public:
 	Thing& operator=(const Thing& rhs);
 	Thing& operator=(Thing&& rhs) = delete; // it has no movable members
 
-	virtual void UpdateThing(const PLayer& eyeObject, float elapsSec);
+	virtual void UpdateThing(const Player& eyeObject, float elapsSec);
 	virtual void DrawThing(Texture* tex);
 	Vector2f GetStartPos() const;
 	int GetSubsectorIndex() const;

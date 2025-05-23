@@ -41,7 +41,7 @@ PlaneIregular::PlaneIregular(std::vector<Vector2f> vertexes, int idx, int height
 	}
 }
 
-void PlaneIregular::UpdatePlane(const PLayer& player) {
+void PlaneIregular::UpdatePlane(const Player& player) {
 
 	//so, when updating, we can get the offseto fo the point. and, we can project the texture along world space then.
 

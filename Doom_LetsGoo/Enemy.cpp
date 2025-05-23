@@ -110,7 +110,7 @@ Enemy& Enemy::operator=(Enemy&& rhs) noexcept
 	return *this;
 }
 
-void Enemy::UpdateThing(const PLayer& player, float elapsSec)
+void Enemy::UpdateThing(const Player& player, float elapsSec)
 {
 	UpdateEnemy(elapsSec);
 	Thing::UpdateThing(player, elapsSec);
@@ -278,7 +278,7 @@ void Enemy::UpdateEnemy(float elapsSec)
 	//}
 }
 
-bool Enemy::Navigate( Level* pLevel, const PLayer& player, const float elapsSec)
+bool Enemy::Navigate( Level* pLevel, const Player& player, const float elapsSec)
 {
 	if (!m_IsShooting && m_pNavigator->m_Mobile) // if he is not shooting and alive
 	{

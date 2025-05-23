@@ -3,7 +3,7 @@
 #include "Shootable.h"
 
 
-class PLayer;
+class Player;
 class Texture;
 class HealthManager;
 class Level;
@@ -18,9 +18,9 @@ public:
 	Enemy& operator=(const Enemy& rhs) = delete;
 	Enemy& operator=(Enemy&& rhs) noexcept;
 	virtual ~Enemy() noexcept override ;
-	virtual void UpdateThing(const PLayer& player, float elapsSec) override;
+	virtual void UpdateThing(const Player& player, float elapsSec) override;
 	void UpdateEnemy(float elapsSec);
-	bool Navigate(Level* pLevel, const PLayer& player, const float elapsSec);
+	bool Navigate(Level* pLevel, const Player& player, const float elapsSec);
 	virtual void DrawThing(Texture* tex) override;
 	
 	static void AssignPlayer(HealthManager& playerHealth);

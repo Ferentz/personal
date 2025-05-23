@@ -29,6 +29,7 @@ void Game::Initialize( )
 	glAlphaFunc(GL_GREATER, 0.0f);
 	
 	m_pLevel = new Level(m_Camera);
+	m_pUI->AssignPlayer(&m_Camera);
 }
 
 void Game::Cleanup( )

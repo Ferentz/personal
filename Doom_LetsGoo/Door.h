@@ -8,7 +8,7 @@ public:
 	virtual bool Triggered() override;
 	bool PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer);
-	virtual void UpdatePlane(const PLayer& eyeObject, float elapsSec) override;
+	virtual void UpdatePlane(const Player& eyeObject, float elapsSec) override;
 private:
 	void Opening();
 	const bool m_IsExit;

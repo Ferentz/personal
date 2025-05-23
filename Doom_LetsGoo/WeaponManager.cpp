@@ -202,3 +202,32 @@ void WeaponManager::Shoot(std::vector<Shootable*> shootables, float windowWidth)
 	}
 	}
 }
+
+int WeaponManager::GetPickedUpWeaponsNum() const
+{
+	if (m_shotgunPickedUp)
+	{
+		return 3;
+	}
+	return 2;
+}
+
+int WeaponManager::GetPistolAmo() const
+{
+	return m_pistolAmo;
+}
+
+int WeaponManager::GetMaxPistolAmo() const
+{
+	return m_pistolMaxAmo;
+}
+
+int WeaponManager::GetShotgunAmo() const
+{
+	return m_shotgunAmo;
+}
+
+int WeaponManager::GetMaxShotgunAmo() const
+{
+	return m_shotgunMaxAmo;
+}

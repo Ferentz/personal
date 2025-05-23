@@ -9,10 +9,10 @@ class Level;
 class Thing;
 class Plane;
 //class HealthManager;
-class PLayer final
+class Player final
 {
 public:
-	PLayer(const Rectf& window);
+	Player(const Rectf& window);
 
 	void pushPosition();
 	bool ColideWLevel(const Level* pLevel);

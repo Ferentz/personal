@@ -173,7 +173,7 @@ PowerUp::PowerUp(point2D_3D Location)
 			true };
 }
 
-void PowerUp::UpdateThing(const PLayer& eyeObject, float elapsSec)
+void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 {
 	if (!m_PickedUp && (eyeObject.m_Pos - m_location.point3D).Length() < 100)
 	{

@@ -15,7 +15,7 @@ public:
 	virtual ~PowerUp() override;
 
 	PowerUp(point2D_3D Location);
-	virtual void UpdateThing(const PLayer& eyeObject, float elapsSec) override;
+	virtual void UpdateThing(const Player& eyeObject, float elapsSec) override;
 	virtual void DrawThing(Texture* tex) override;
 
 	Interactor* m_pInteractor{};

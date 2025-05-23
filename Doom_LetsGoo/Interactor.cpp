@@ -8,7 +8,7 @@ Interactor::Interactor()
 {
 }
 
-void Interactor::AssignPlayer(PLayer& player)
+void Interactor::AssignPlayer(Player& player)
 {
 	HealthInteractor::AssignPlayer(player.m_HealthManager);
 	WeaponInteractor::AssignPlayer(player.m_WeaponManager);

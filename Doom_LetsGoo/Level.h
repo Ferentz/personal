@@ -6,7 +6,7 @@
 #include "structs.h"
 #include <set>
 
-class PLayer;
+class Player;
 class Plane;
 class PlaneIregular;
 class Thing;
@@ -14,7 +14,7 @@ class Enemy;
 class Level final
 {
 public:
-	Level(PLayer& player);
+	Level(Player& player);
 	Level(const Level& toCopy) = delete;
 	Level(Level&& toMove) noexcept;
 	Level& operator=(const Level& rhs) = delete;
@@ -22,7 +22,7 @@ public:
 	~Level();
 
 	void DrawLevelBSP(int leaf, Vector2f pos);
-	void UpdateLevel( PLayer& eyeObject, float elapsedSec);
+	void UpdateLevel( Player& eyeObject, float elapsedSec);
 	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst,
 		bool isPlayer, bool& exit)const;
 	const std::vector<BSPnode>& GetBSPtree() const;
@@ -33,7 +33,7 @@ public:
 
 private:
 	void DrawLeaf(int leafIndex);
-	void UpdateThings(PLayer& eyeObject, float elapsedSec);
+	void UpdateThings(Player& eyeObject, float elapsedSec);
 	void SwapThingSubsector(const int originalThingSubSector, const int subSector2, const int ThingLevelIndex);
 	float GetFloorOfLeaf(const int leaf) const;
 	int GetLeafWallAmount(const int leaf) const;

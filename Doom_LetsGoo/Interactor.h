@@ -1,5 +1,5 @@
 #pragma once
-class PLayer;
+class Player;
 
 class Interactor
 {
@@ -11,7 +11,7 @@ public:
 	Interactor& operator=(const Interactor& rhs) = default;
 	Interactor& operator=(Interactor&& rhs) = default;
 	virtual void Interact() = 0;
-	static void AssignPlayer(PLayer& player);
+	static void AssignPlayer(Player& player);
 private:
 };
 

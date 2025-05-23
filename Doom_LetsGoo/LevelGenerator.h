@@ -4,7 +4,7 @@
 #include <set>
 #include <map>
 
-class PLayer;
+class Player;
 class LevelGenerator final
 {
 public:
@@ -12,7 +12,7 @@ public:
 		std::vector <Plane*>& p_Planes, std::vector <PlaneIregular>& p_FloorsNCeilings,
 		std::set<int>& tags1, std::set<int>& tags2, std::vector <Thing*>& things,
 		std::vector<Texture>& m_Textures, std::map<std::string, int>& map,
-		PLayer& player);
+		Player& player);
 	void GetTextureStructs();
 	void AddFnCTextures();
 private:
@@ -90,7 +90,7 @@ private:
 
 	std::map<std::string, int>& nameMap;
 
-	PLayer& m_pPlayer;
+	Player& m_pPlayer;
 
 	//enum ReadVertexes {
 	//	x = 0,

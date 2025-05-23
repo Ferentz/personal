@@ -43,7 +43,7 @@ Thing& Thing::operator=(const Thing& rhs)
 }
 
 
-void Thing::UpdateThing(const PLayer& player, float elapsSec)
+void Thing::UpdateThing(const Player& player, float elapsSec)
 {
 	m_location.point2D = player.GetCamera().PerspCalc(m_location);
 }

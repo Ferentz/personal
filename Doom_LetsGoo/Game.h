@@ -41,7 +41,7 @@ private:
 	//Texture* m_UI;
 	UI* m_pUI{};
 	Level* m_pLevel{};
-	PLayer m_Camera;
+	Player m_Camera;
 	float m_WindowWidth;
 	enum class GameState
 	{

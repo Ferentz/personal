@@ -25,7 +25,7 @@ the level just wants the bsp tree, the walls, the floors. and that's it basicaly
 LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BSPleafeNode>& p_BSPleafs_p,
 	std::vector <Plane*>& p_Planes_p, std::vector <PlaneIregular>& p_FloorsNCeilings_p, std::set<int>& tags1, std::set<int>& tags2,
 	std::vector <Thing*>& things, std::vector<Texture>& m_Textures, std::map<std::string, int>& map,
-	PLayer& player)
+	Player& player)
 	:vertexesImported{ utils::ReadLMP("VERTEXES.lmp", VERTEXCOLUMS) },
 	linesImported{ utils::ReadLMP("LINEDEFS.lmp", LINECOLUMS) },
 	sidesImported{ utils::ReadLMP("SIDEDEFS.lmp", SIDECOLUMS) },

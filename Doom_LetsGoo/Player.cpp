@@ -13,7 +13,7 @@
 // get the trigger event in game to shoot.
 //then conect to get the level things ad check if smth gets hit
 
-PLayer::PLayer(const Rectf& window)
+Player::Player(const Rectf& window)
 	:
 	m_NextPos{ m_Pos },
 	m_lookVector{ 0,0 },
@@ -23,19 +23,19 @@ PLayer::PLayer(const Rectf& window)
 {
 }
 
-void PLayer::pushPosition()
+void Player::pushPosition()
 {
 	m_Pos = m_NextPos;
 }
 
-bool PLayer::ColideWLevel(const Level* pLevel)
+bool Player::ColideWLevel(const Level* pLevel)
 {
 	bool exit{ false };
 	pLevel->ColideWLevel(m_Pos, m_NextPos, m_FLoorHeigt, m_charDIameter, true, exit);
 	return exit;
 }
 
-void PLayer::VelocCalc(float elapsedSec)
+void Player::VelocCalc(float elapsedSec)
 {
 	m_vericalVelocity -= (m_GRAVITY * elapsedSec);
 	m_NextPos.z = m_Pos.z + m_vericalVelocity;
@@ -50,7 +50,7 @@ void PLayer::VelocCalc(float elapsedSec)
 }
 
 
-void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
+void Player::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
 {
 	const int maxAmout{ 20 };
 	int count{ 1 };
@@ -88,7 +88,7 @@ void PLayer::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 	m_WeaponManager.Shoot(shootables, m_Camera.GetWindowWidth());
 }
 
-void PLayer::Jump()
+void Player::Jump()
 {
 	if (m_Standing)
 	{
@@ -97,37 +97,37 @@ void PLayer::Jump()
 	}
 }
 
-void PLayer::MoveForward()
+void Player::MoveForward()
 {
 	m_NextPos.x += GetLookAtVector().x;
 	m_NextPos.y -= GetLookAtVector().y;
 }
 
-void PLayer::MoveBackward()
+void Player::MoveBackward()
 {
 	m_NextPos.x -= GetLookAtVector().x;
 	m_NextPos.y += GetLookAtVector().y;
 }
 
-void PLayer::MoveLeft()
+void Player::MoveLeft()
 {
 	m_NextPos.x += -GetLookAtVector().y;
 	m_NextPos.y -= GetLookAtVector().x;
 }
 
-void PLayer::MoveRight()
+void Player::MoveRight()
 {
 	m_NextPos.x += GetLookAtVector().y;
 	m_NextPos.y -= -GetLookAtVector().x;
 }
 
-void PLayer::Turn(float offset)
+void Player::Turn(float offset)
 {
 	m_Camera.TurnCamera(offset);
 	m_lookVector = m_Camera.MakeLookAtVector();
 }
 
-void PLayer::SwitchWeapon(int weaponIndex)
+void Player::SwitchWeapon(int weaponIndex)
 {
 	WeaponType weapon{};
 	switch (weaponIndex)
@@ -143,7 +143,7 @@ void PLayer::SwitchWeapon(int weaponIndex)
 }
 
 
-bool PLayer::IsLookingAtMe(const Vector3f crosspoints[])const {
+bool Player::IsLookingAtMe(const Vector3f crosspoints[])const {
 
 	Vector3f crosA{crosspoints[1].CrossProduct(crosspoints[0])}; 
 	Vector3f crosb{ crosspoints[2].CrossProduct(crosspoints[0]) };
@@ -159,7 +159,7 @@ bool PLayer::IsLookingAtMe(const Vector3f crosspoints[])const {
 	return true;
 }
 
-void PLayer::ResetPos()
+void Player::ResetPos()
 {
 	m_Pos.x = m_StartPos.x;
 	m_Pos.y = m_StartPos.y;
@@ -167,11 +167,11 @@ void PLayer::ResetPos()
 
 }
 
-const Vector2f& PLayer::GetLookAtVector() const {
+const Vector2f& Player::GetLookAtVector() const {
 	return m_lookVector;
 }
 
-const Camera& PLayer::GetCamera() const
+const Camera& Player::GetCamera() const
 {
 	return m_Camera;
 }

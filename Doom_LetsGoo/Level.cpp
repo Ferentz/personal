@@ -17,7 +17,7 @@
 
 
 
-Level::Level(PLayer& player)
+Level::Level(Player& player)
 {
 	m_pThingTexture = new Texture("COLUA0_converted.png");
 	LevelGenerator gen{ m_BSP, m_BSPleafs,m_pPlanes, m_pFloorsNCeilings, m_tags[0], m_tags[1], m_pThings, m_Textures, m_NameMap, player };// m_pPlanes, m_pFloorsNCeilings};
@@ -180,7 +180,7 @@ void Level::DrawLeaf(int leafIndex)
 	}
 }
 
-void Level::UpdateLevel(PLayer& eyeObject, float elapsedSec)
+void Level::UpdateLevel(Player& eyeObject, float elapsedSec)
 {
 	for (int i = 0; i < m_pPlanes.size(); ++i) {
 		m_pPlanes[i]->UpdatePlane(eyeObject, elapsedSec);
@@ -198,7 +198,7 @@ void Level::UpdateLevel(PLayer& eyeObject, float elapsedSec)
 	
 }
 
-void Level::UpdateThings(PLayer& eyeObject, float elapsedSec)
+void Level::UpdateThings(Player& eyeObject, float elapsedSec)
 {
 	for (int ThingLevelIndex{ 0 }; ThingLevelIndex < m_pThings.size(); ThingLevelIndex++)
 	{
