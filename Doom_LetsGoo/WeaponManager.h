@@ -1,4 +1,8 @@
 #pragma once
+#include "Shotgun.h"
+#include "Pistol.h"
+#include <vector>
+
 class Shootable;
 enum class WeaponType {
 	pistol,
@@ -11,11 +15,9 @@ class WeaponManager final
 {
 public:
 	void SwitchWeapon(WeaponType type);
-	int GetDamageOutput();
 	int GetAmo() const;
 	void AddAmo(int amout, WeaponType type);
 	void PickUpWeapon(WeaponType type);
-	void Shoot(Shootable* object, float windowWidth);
 	void Shoot(std::vector<Shootable*> shootables, float windowWidth);
 	
 	int GetPickedUpWeaponsNum() const;
@@ -23,12 +25,17 @@ public:
 	int GetMaxPistolAmo() const;
 	int GetShotgunAmo() const;
 	int GetMaxShotgunAmo() const;
+
+	void DrawWeapon(float windowWidth) const;
+
+	void UpdateWeapon(float elapsedsecs);
+
 private:
-	WeaponType m_equipedWeapon{};
+	
+	Shotgun m_Shotgun{ 0, 50, 1000.f };
+	Pistol m_Pistol{ 50, 200, 1000.f };
+	Weapon* m_pEquipedWeapon{ &m_Pistol };
 	bool m_UnlockedWeapons[4]{true, false, false, false}; // pistol is the starting weapon, still working on this system
-	int m_pistolDamage{ 2 }, m_shotgunDamage{ 5 };
-	int m_pistolAmo{50}, m_shotgunAmo{}; //starting amo
-	int m_pistolMaxAmo{ 200 }, m_shotgunMaxAmo{50}; //starting amo
 
 	bool m_pistolPickedUp{ true }, m_shotgunPickedUp{false}; // hence why i have booleans twice
 };

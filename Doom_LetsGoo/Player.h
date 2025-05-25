@@ -17,6 +17,8 @@ public:
 	void pushPosition();
 	bool ColideWLevel(const Level* pLevel);
 	void VelocCalc(float elapsedSec);
+	void UpdatePlayer(float elapsedsecs);
+	void DrawPlayer() const;
 
 	void Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth); // clean up ref names
 	void Jump();

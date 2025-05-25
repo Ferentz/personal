@@ -14,13 +14,13 @@ void WeaponManager::SwitchWeapon(WeaponType type)
 	case WeaponType::pistol :
 		if (m_pistolPickedUp)
 		{
-			m_equipedWeapon = type;
+			m_pEquipedWeapon = &m_Pistol;
 		}
 		break;
 	case WeaponType::shotgun:
 		if (m_shotgunPickedUp)
 		{
-			m_equipedWeapon = type;
+			m_pEquipedWeapon = &m_Shotgun;
 		}
 		break;
 	default:
@@ -28,46 +28,10 @@ void WeaponManager::SwitchWeapon(WeaponType type)
 	}
 }
 
-int WeaponManager::GetDamageOutput()
-{
-	switch (m_equipedWeapon)
-	{
-	case WeaponType::pistol:
-	{
-		int damage{ (rand() % 11) + 5 };
-		//return m_pistolDamage;
-		std::cout << damage;
-		return damage;
-		break;
-	}
-	case WeaponType::shotgun:
-	{
-		int damage{ ((rand() % 11) + 5) * ((rand() % 7)+1) };
-		//return m_shotgunDamage;
-		std::cout << damage;
-		return damage;
-		break;
-	}
-	default:
-		return 0;
-		break;
-	}
-}
 
 int WeaponManager::GetAmo() const
 {
-	switch (m_equipedWeapon)
-	{
-	case WeaponType::pistol:
-		return m_pistolAmo;
-		break;
-	case WeaponType::shotgun:
-		return m_shotgunAmo;
-		break;
-	default:
-		return 0;
-		break;
-	}
+	return m_pEquipedWeapon->GetAmo();
 }
 
 void WeaponManager::AddAmo(int amount, WeaponType type)
@@ -75,10 +39,10 @@ void WeaponManager::AddAmo(int amount, WeaponType type)
 	switch (type)
 	{
 	case WeaponType::pistol:
-		m_pistolAmo += amount;
+		m_Pistol.ChangeAmoBy(amount);
 		break;
 	case WeaponType::shotgun:
-		m_shotgunAmo += amount;
+		m_Shotgun.ChangeAmoBy(amount);
 		break;
 	default:
 		break;
@@ -96,111 +60,10 @@ void WeaponManager::PickUpWeapon(WeaponType type)
 	m_shotgunPickedUp = true;
 }
 
-void WeaponManager::Shoot(Shootable* object, float windowWidth)
-{
-	int shootRange{ 100 };
-	int* p_UsedAmo{};
-	switch (m_equipedWeapon)
-	{
-	case WeaponType::pistol:
-		p_UsedAmo = &m_pistolAmo;
-		break;
-	case WeaponType::shotgun:
-		p_UsedAmo = &m_shotgunAmo;
-		break;
-	default:
-		return;
-	}
-
-	if (*p_UsedAmo > 0)
-	{
-		std::cout << "SHOOT" << std::endl;
-		if (object->GetLocationPoint().point2D.x < windowWidth / 2 + shootRange && object->GetLocationPoint().point2D.x > windowWidth / 2 - shootRange)
-		{
-			object->BeShot(GetDamageOutput());
-		}
-		//(*p_UsedAmo)--;
-	}
-}
 
 void WeaponManager::Shoot(std::vector<Shootable*> shootables, float windowWidth)
 {
-
-	int shootRange{ 100 };
-	int* p_UsedAmo{};
-	switch (m_equipedWeapon)
-	{
-	case WeaponType::pistol:
-		p_UsedAmo = &m_pistolAmo;
-		break;
-	case WeaponType::shotgun:
-		p_UsedAmo = &m_shotgunAmo;
-		break;
-	default:
-		return;
-	}
-
-	if (*p_UsedAmo > 0)
-	{
-
-		float shootRangeDist{ 1000.f };
-
-		std::vector<float> distances{};
-		distances.reserve(shootables.size());
-		switch (m_equipedWeapon)
-		{
-		case WeaponType::pistol:
-		{
-			(*p_UsedAmo)--;
-			int closest{ -1 };
-			float closestDist{ shootRangeDist };
-			for (int index{}; index < shootables.size(); index++)
-			{
-				if (closestDist > shootables[index]->GetLocationPoint().Dist3D)
-				{
-					closest = index;
-					closestDist = shootables[index]->GetLocationPoint().Dist3D;
-				}
-			}
-
-			if (closest >= 0)
-			{
-				Shoot(shootables[closest], windowWidth);
-			}
-			break;
-		}
-		case WeaponType::shotgun:
-		{
-			(*p_UsedAmo)--;
-			for (int bulletNum{}; bulletNum < 7; bulletNum++)
-			{
-				float bulletX{ rand() % (int(windowWidth / 3)) + windowWidth / 3 };
-
-				int closest{ -1 };
-				float closestDist{ shootRangeDist };
-				for (int index{}; index < shootables.size(); index++)
-				{
-					float xDif{ shootables[index]->GetLocationPoint().point2D.x - bulletX };
-					if (abs(xDif) < windowWidth / 24 &&
-						closestDist > shootables[index]->GetLocationPoint().Dist3D)
-					{
-						closest = index;
-						closestDist = shootables[index]->GetLocationPoint().Dist3D;
-					}
-				}
-
-				if (closest >= 0)
-				{
-					Shoot(shootables[closest], windowWidth);
-				}
-			}
-
-		break;
-	}
-	default:
-		return;
-	}
-	}
+	m_pEquipedWeapon->Shoot(shootables, windowWidth);
 }
 
 int WeaponManager::GetPickedUpWeaponsNum() const
@@ -214,20 +77,31 @@ int WeaponManager::GetPickedUpWeaponsNum() const
 
 int WeaponManager::GetPistolAmo() const
 {
-	return m_pistolAmo;
+	return m_Pistol.GetAmo();
 }
 
 int WeaponManager::GetMaxPistolAmo() const
 {
-	return m_pistolMaxAmo;
+	return m_Pistol.GetMaxAmo();
 }
 
 int WeaponManager::GetShotgunAmo() const
 {
-	return m_shotgunAmo;
+	return m_Shotgun.GetAmo();
 }
 
 int WeaponManager::GetMaxShotgunAmo() const
 {
-	return m_shotgunMaxAmo;
+	return m_Shotgun.GetMaxAmo();
 }
+
+void WeaponManager::DrawWeapon(float windowWidth) const
+{
+	m_pEquipedWeapon->DrawWeapon(windowWidth);
+}
+
+void WeaponManager::UpdateWeapon(float elapsedsecs)
+{
+	m_pEquipedWeapon->UpdateWeapon(elapsedsecs);
+}
+

@@ -49,6 +49,17 @@ void Player::VelocCalc(float elapsedSec)
 	
 }
 
+void Player::UpdatePlayer(float elapsedsecs)
+{
+	m_WeaponManager.UpdateWeapon(elapsedsecs);
+}
+
+void Player::DrawPlayer() const
+{
+	// we want the player to have the textures, and then display the weapon needed
+
+}
+
 
 void Player::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
 {

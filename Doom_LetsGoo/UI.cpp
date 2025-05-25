@@ -3,7 +3,7 @@
 #include "Texture.h"
 #include "Player.h"
 
-Player* UI::s_pPlayer{};
+const Player*  UI::s_pPlayer{};
 
 UI::UI(const Rectf& window)
 	:m_pUI{ new Texture{"STBAR_converted.png"} },
@@ -83,15 +83,15 @@ void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float sc
 
 	//Rectf hi{ 0, 0, width, m_UI->GetHeight() / ratio };
 
+	
+	DrawRedNumbers();
+		
+	DrawArms();
+
+	DrawAmo();
+
 	glPushMatrix(); // adds a clean matrix for the image to exist in
 	{
-		DrawRedNumbers();
-		
-		DrawArms();
-
-		DrawAmo();
-
-
 		glTranslatef(0.f, 0.f, 0.f); //moves the image space 
 		glScalef(ratio, ratio, 0.f);
 		glRotatef(0.f, 0.f, 0.f, 1.f);
@@ -102,8 +102,13 @@ void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float sc
 			m_pUI->GetHeight()
 			}
 		);
+
+		
 	}
 	glPopMatrix(); // goe out of imge space
+
+	s_pPlayer->m_WeaponManager.DrawWeapon(m_Window.width);
+
 }
 
 void UI::AssignPlayer(Player* pPlayer)

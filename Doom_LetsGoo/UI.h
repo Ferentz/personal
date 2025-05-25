@@ -10,7 +10,7 @@ public:
 	~UI();
 	void DrawUI(const float width, float bottomOfset, float leftOffset, float scale,
 		int health, int armor, int amo);
-	static Player* s_pPlayer;
+	static const Player*  s_pPlayer;
 	static void AssignPlayer(Player* pPlayer);
 
 private:

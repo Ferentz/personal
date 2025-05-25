@@ -159,6 +159,7 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Pistol.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Enemy.cpp" />
@@ -175,13 +176,16 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClCompile Include="PlaneIregular.cpp" />
     <ClCompile Include="PowerUp.cpp" />
     <ClCompile Include="Shootable.cpp" />
+    <ClCompile Include="Shotgun.cpp" />
     <ClCompile Include="Things.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="Weapon.cpp" />
     <ClCompile Include="WeaponInteractor.cpp" />
     <ClCompile Include="WeaponManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Pistol.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Door.h" />
     <ClInclude Include="Enemy.h" />
@@ -198,9 +202,11 @@ xcopy "$(SolutionDir)Resources\*.*" "$(TargetDir)" /y /d /s</Command>
     <ClInclude Include="PowerUp.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shootable.h" />
+    <ClInclude Include="Shotgun.h" />
     <ClInclude Include="Things.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="walltextures.h" />
+    <ClInclude Include="Weapon.h" />
     <ClInclude Include="WeaponInteractor.h" />
     <ClInclude Include="WeaponManager.h" />
   </ItemGroup>
