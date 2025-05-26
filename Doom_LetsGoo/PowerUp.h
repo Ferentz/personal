@@ -1,6 +1,7 @@
 #pragma once
 #include "utils.h"
 #include "Things.h"
+class SoundEffect;
 
 class HealthManager;
 class WeaponManager;
@@ -21,9 +22,13 @@ public:
 	Interactor* m_pInteractor{};
 
 private:
+
 	bool m_PickedUp{false};
 	std::string m_FilePath;
 	Texture* m_pTex;
+
+	static SoundEffect* s_PickupSound;
+	static int s_MemberCount;
 
 };
 

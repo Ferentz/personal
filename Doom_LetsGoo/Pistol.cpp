@@ -4,7 +4,7 @@
 #include "Texture.h"
 
 Pistol::Pistol(int startAmo, int maxAmo, float range)
-	:Weapon(startAmo, maxAmo, range)
+	:Weapon(startAmo, maxAmo, range, "sounds/DSPISTOL.wav")
 
 {
 	m_WeaponImages[0] = new Texture("Pistol/PISFA0.png");

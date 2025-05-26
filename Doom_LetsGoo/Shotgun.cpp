@@ -4,7 +4,7 @@
 #include "Texture.h"
 
 Shotgun::Shotgun(int startAmo, int maxAmo, float range)
-	:Weapon(startAmo, maxAmo, range)
+	:Weapon(startAmo, maxAmo, range, "sounds/DSSHOTGN.wav")
 {
 	m_ShootOverayNum = 2;
 	m_AnimationFrames = 4;

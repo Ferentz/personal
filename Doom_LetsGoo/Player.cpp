@@ -71,28 +71,30 @@ void Player::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 	distances.reserve(maxAmout);
 	for (Thing*& object : thingsToShoot)
 	{
-		if (object->GetSubClass() == ThingSubclass::enemy || object->GetSubClass() == ThingSubclass::shootable)
+		if ((object->GetSubClass() == ThingSubclass::enemy || object->GetSubClass() == ThingSubclass::shootable) )
 		{
 			Shootable* pShootable{ static_cast<Shootable*>(object) };
-
-			bool lineOfSight{ false };
-			if (pShootable->GetSubClass() == ThingSubclass::enemy)
+			if (pShootable->GetState() != ShootableStates::dead)
 			{
-				lineOfSight = static_cast <Enemy*> (pShootable)->m_pNavigator->m_hasLineOfSight;
-			}
-
-			if( m_Camera.GetDistanceFromMidle(pShootable->GetLocationPoint().point2D.x) < m_Camera.GetWindowWidth()/6 && // if the shootable is in front of you
-				(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, pShootable->GetLocationPoint().point3D))) // and if there is a line of sight
-			{
-				shootables.push_back(pShootable);
-				distances.push_back(pShootable->GetLocationPoint().Dist3D);
-				count++;
-				if (count == maxAmout)
+				bool lineOfSight{ false };
+				if (pShootable->GetSubClass() == ThingSubclass::enemy)
 				{
-					break;
+					lineOfSight = static_cast <Enemy*> (pShootable)->m_pNavigator->m_hasLineOfSight;
 				}
-				//m_WeaponManager.Shoot(pShootable, windowWidth);
-				
+
+				if (m_Camera.GetDistanceFromMidle(pShootable->GetLocationPoint().point2D.x) < m_Camera.GetWindowWidth() / 6 && // if the shootable is in front of you
+					(lineOfSight || Navigator::HasLineOfSight(r_pPlanes, m_Pos, pShootable->GetLocationPoint().point3D))) // and if there is a line of sight
+				{
+					shootables.push_back(pShootable);
+					distances.push_back(pShootable->GetLocationPoint().Dist3D);
+					count++;
+					if (count == maxAmout)
+					{
+						break;
+					}
+					//m_WeaponManager.Shoot(pShootable, windowWidth);
+
+				}
 			}
 		}
 	}

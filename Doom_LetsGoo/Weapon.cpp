@@ -4,10 +4,11 @@
 #include "Texture.h"
 #include <iostream>
 
-Weapon::Weapon(int startAmo, int maxAmo, float range)
+Weapon::Weapon(int startAmo, int maxAmo, float range, std::string soundFile)
 	:m_MaxAmo{ maxAmo },
 	m_Amo{startAmo},
-	m_Range{range}
+	m_Range{range},
+	m_GunShootSound{ soundFile }
 {
 }
 
@@ -25,6 +26,7 @@ Weapon::~Weapon()
 
 void Weapon::Shoot(std::vector<Shootable*> shootables, float windowWidth)
 {
+	m_GunShootSound.Play(false);
 	m_IsShooting = true;
 	int closest{ -1 };
 	float closestDist{ GetRange() };

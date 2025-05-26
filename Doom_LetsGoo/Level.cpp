@@ -17,6 +17,8 @@
 
 
 
+
+
 Level::Level(Player& player)
 {
 	m_pThingTexture = new Texture("COLUA0_converted.png");
@@ -202,6 +204,10 @@ void Level::UpdateThings(Player& eyeObject, float elapsedSec)
 {
 	for (int ThingLevelIndex{ 0 }; ThingLevelIndex < m_pThings.size(); ThingLevelIndex++)
 	{
+		if (ThingLevelIndex == 94)
+		{
+			std::cout << "hi";
+		}
 		m_pThings[ThingLevelIndex]->UpdateThing(eyeObject, elapsedSec);
 
 		if (m_pThings[ThingLevelIndex]->GetSubClass() == ThingSubclass::enemy)
@@ -254,7 +260,8 @@ float Level::GetFloorOfLeaf(const int leaf) const
 /// <param name="charDiameter"></param>
 /// <param name="isPlayer"></param>
 /// <returns></returns>
-int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight, const float charDiameter, const bool isPlayer, bool& exit) const
+int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight,
+	const float charDiameter, const bool isPlayer, bool& exit) const
 {
 	const int MaxIterations = 10;
 	const float Epsilon = 0.01f;
@@ -332,8 +339,9 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 			Vector2f reflectionPoint, wallNormal2D;
 			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
 			{
-				if (wall->IsDoor())
+				if (wall->IsDoor() && isPlayer)
 				{
+					m_Door.Play(false);
 					if (TriggerDoor(leaf, i) && isPlayer)
 					{
 						exit = true;
@@ -400,6 +408,7 @@ Plane* Level::GetWallFromLeaf(const int leaf, const int wallIdx) const
 /// </returns>
 bool Level::TriggerDoor(const int leaf, const int wallIdx) const
 {
+	
 	const int wallIndex{ m_BSPleafs[leaf].wallIndexes[wallIdx] };
 	if (m_pPlanes.at(wallIndex)->Triggered())
 	{

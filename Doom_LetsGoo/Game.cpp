@@ -48,6 +48,10 @@ void Game::Update( float elapsedSec )
 	case Game::GameState::menu:
 		break;
 	case Game::GameState::alive:
+		if (!m_pLevel->m_LevelMusic.IsPlaying())
+		{
+			m_pLevel->m_LevelMusic.Play(true);
+		}
 		m_Camera.UpdatePlayer(elapsedSec);
 		m_pLevel->UpdateLevel(m_Camera, elapsedSec);
 		if(m_Camera.ColideWLevel(m_pLevel))

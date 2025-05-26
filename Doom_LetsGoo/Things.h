@@ -7,6 +7,7 @@ class Navigator;
 class HealthManager;
 class Interactor;
 
+
 enum class ThingSubclass
 {
 	decoration,

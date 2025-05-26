@@ -22,6 +22,7 @@ public:
 	Shootable& operator=(Shootable&& rhs) = default; // it has no movable members
 
 	void BeShot(int damage);
+	ShootableStates GetState() const;
 
 protected:
 	ShootableStates m_State{};

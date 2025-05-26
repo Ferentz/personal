@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
+#include "SoundEffect.h"
 class Shootable;
 class Texture;
 class Weapon
 {
 public:
 
-	Weapon(int startAmo, int maxAmo, float range);
+	Weapon(int startAmo, int maxAmo, float range, std::string soundName);
 	~Weapon();
 
 	Weapon(const Weapon& toCopy) = delete;
@@ -36,6 +37,9 @@ protected:
 	int m_TextureOffsets[6][2]{ {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}};
 	bool GetIsShooting() const;
 	bool m_IsShooting{ false };
+
+	SoundEffect m_GunShootSound;
+
 private:
 	/*bool m_IsShooting{ false };
 	bool m_DrawFire{false};

@@ -3,6 +3,8 @@
 #include "Texture.h"
 #include "PLayer.h"
 
+
+
 Thing::Thing(Vector2f pos, float height, std::string sprite)
 	:m_StartPos{ pos },
 	m_Height{ height },

@@ -6,6 +6,9 @@
 #include "structs.h"
 #include <set>
 
+#include "SoundEffect.h"
+#include "SoundStream.h"
+
 class Player;
 class Plane;
 class PlaneIregular;
@@ -30,6 +33,10 @@ public:
 	const std::vector <Plane*>& GetWalls();
 	bool GetCleared();
 	void SpawnWeapon(point2D_3D Location);
+	SoundStream m_LevelMusic{
+		"sounds/D_E1M1.mid"
+	};
+	
 
 private:
 	void DrawLeaf(int leafIndex);
@@ -60,5 +67,10 @@ private:
 	std::set<int> m_tags[2]; // name unlear
 
 	int m_EnemyToDraw{};
+	
+	SoundEffect m_Door{
+		"sounds/DSDOROPN.wav"
+	};
+
 };
 

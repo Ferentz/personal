@@ -12,9 +12,14 @@ Shootable::Shootable(Vector2f pos, float height, std::string sprite,
 
 void Shootable::BeShot(int damage)
 {
-	if (m_State != ShootableStates::dead || m_State != ShootableStates::dying)
+	if (!(m_State == ShootableStates::dead || m_State == ShootableStates::dying))
 	{
 		m_State = ShootableStates::harmed;
 		m_pHealthManager.Harm(damage);
 	}
+}
+
+ShootableStates Shootable::GetState() const
+{
+	return m_State;
 }
