@@ -151,7 +151,7 @@ void Enemy::UpdateEnemy(float elapsSec)
 						// if still has line of sight over player, harm the player 
 						if (m_pNavigator->m_hasLineOfSight)
 						{
-							//pPlayerHealth->Harm(5);
+							pPlayerHealth->Harm(5);
 						}
 						//reset shooting + animation
 						m_TexIndex = 0;
