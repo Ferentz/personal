@@ -19,7 +19,7 @@ private:
 	void GenerateLevel();
 	void MakeWalls(const float SCALE);
 	void AddPlane(int line, float floorHeight, float ceilingHeight, const float SCALE, int idx);
-	int GetSectorFromLine(int line, bool backSide);
+	int GetSectorFromLine(int line, bool backSide) const;
 	void ConstructSubSectors(const std::vector<Vector2f>& boundingBox, std::vector<Line>& sliceLines,
 		int startNode, int prevNode, const float SCALE, int* sectorPerSubsector);
 	void SeamFixSubsectors(const int* sectorPerSubsector);

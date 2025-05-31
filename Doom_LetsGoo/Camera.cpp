@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Camera.h"
+#include <iostream>
 
 Camera::Camera(const Rectf& window, const Vector3f& pos)
 	:m_Window{ window },
@@ -9,31 +10,29 @@ Camera::Camera(const Rectf& window, const Vector3f& pos)
 
 Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 {
-	const float DEVISION = m_Window.width / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
+	const float DEVISION = m_Window.width / float(M_PI);
 	const float SCALE{ 1.5f };
 	Vector3f point{ pointStruc.point3D };
 	float yDist{ point.y - m_Pos.y };
 	float hightDist{ point.z - m_Pos.z };
 	float xDist{ (point.x - m_Pos.x) };
-	float floorDist{};
-	floorDist = sqrt(xDist * xDist + yDist * yDist);
 
 	float xAngle{ float(atan2(yDist, xDist)) };
 	float yAngle{};
 
 
-	// se we got our originl angle, but we wanna calculate it according to the x axes. so, we rotate it with the negative offset
+	// se we got our originl angle, but we wanna calculate it according to the x axes. so, we rotate it with the offset
 	float newXAngle = xAngle + (m_angleOffset);
 
 	if (newXAngle < -M_PI) {
-		newXAngle = newXAngle + 2 * M_PI;
+		newXAngle = newXAngle + 2 * float(M_PI);
 	}
 	if (newXAngle > M_PI) {
-		newXAngle = newXAngle - 2 * M_PI;
+		newXAngle = newXAngle - 2 * float(M_PI);
 	}
 	float diagonalDist{ float(sqrt(xDist * xDist + yDist * yDist)) };
 	pointStruc.Dist3D = float(sqrt(diagonalDist * diagonalDist + hightDist * hightDist));
-	float newXDist = cos(newXAngle) * diagonalDist; // should be good. cos times hypotheneus
+	float newXDist = cos(newXAngle) * diagonalDist;
 	float newYDist = sin(newXAngle) * diagonalDist;
 
 	yAngle = float(atan2(hightDist, newXDist));
@@ -72,9 +71,9 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 		return Point2D;
 	}
 
-	float restAngle = direction * M_PI - newXAngle;
+	float restAngle = direction * float(M_PI) - newXAngle;
 	float entryAngle = atan2(direction * m_projDist, newXDist);
-	float entryAngleRest = direction * M_PI - entryAngle;
+	float entryAngleRest = direction * float(M_PI) - entryAngle;
 	float result = restAngle * entryAngle / entryAngleRest;
 
 	Point2D.x = SCALE * (result * m_projDist) * DEVISION + m_Window.width / 2;
@@ -83,12 +82,89 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 	return Point2D;
 }
 
+bool Camera::ClipLineToFOV(point2D_3D& frontPt, point2D_3D& backPt) const
+{
+	point2D_3D clippedPt{};
+	auto wrapAngle = [](float angle) {
+		while (angle < -M_PI) angle += float(2 * M_PI);
+		while (angle > M_PI) angle -= float(2 * M_PI);
+		return angle;
+		};
+
+	Vector3f vis3D = frontPt.point3D;
+	Vector3f invis3D = backPt.point3D;
+
+	Vector3f vis3D_repos = vis3D - m_Pos;
+	Vector3f invis3D_repos = invis3D - m_Pos;
+
+	float angleVis = atan2(vis3D_repos.y, vis3D_repos.x) + m_angleOffset;
+	float angleInvis = atan2(invis3D_repos.y, invis3D_repos.x) + m_angleOffset;
+
+	angleVis = wrapAngle(angleVis);
+	angleInvis = wrapAngle(angleInvis);
+
+	auto shortestAngleDist = [](float from, float to) {
+		float diff = to - from;
+		while (diff < -M_PI) diff += float(2 * M_PI);
+		while (diff > M_PI) diff -= float (2 * M_PI);
+		return diff;
+		};
+
+	// Wrap angles to [-?, ?]
+	angleVis = wrapAngle(angleVis);
+	angleInvis = wrapAngle(angleInvis);
+	//--------------------------------
+	/*Vector2f relativeVis{ cos(angleVis), sin(angleVis) };
+	Vector2f relativeInvis{ cos(angleInvis), sin(angleInvis) };
+	Vector2f relativeResult{};
+	Vector2f::doIntersect(Vector2f{ -1000.f,0.f }, Vector2f{ 1000.f,0.f }, relativeVis, relativeInvis, relativeResult);
+	float dist2D{ sqrt(relativeResult.x* relativeResult.x + relativeResult.y * relativeResult.y) };
+	float relativeResultAngle{ atan2(relativeResult.y, relativeResult.x) };
+	float resultAngle(relativeResultAngle - m_angleOffset);
+	Vector3f result{ cos(resultAngle)* dist2D + m_Pos.x,  sin(resultAngle)* dist2D + m_Pos.y, invis3D.z};
+	point2D_3D resultPoint{};
+	resultPoint.point3D = result;
+	backPt.point2D = PerspCalc(resultPoint);
+	return true;*/
+	//--------------------------------
+	float boundary = (angleVis > 0) ? float(M_PI) / 2.0f : -float(M_PI) / 2.0f;
+
+
+	if (angleVis / abs(angleVis) != angleInvis / abs(angleInvis))
+	{
+		if (angleVis > 0)
+		{
+			angleInvis = angleInvis + 2 * float(M_PI);
+		}
+		else
+		{
+			angleInvis = angleInvis - 2 * float(M_PI);
+			//std::cout << "visible angle " << angleVis << std::endl;
+			//std::cout << "invisible angle " << angleInvis << std::endl;
+			std::cout << "different!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+		}
+		
+	}
+	// Use shortest angular distance
+	float angleAB = angleInvis - angleVis;
+	float angleToBoundary = boundary - angleVis;
+
+	// Avoid divide-by-zero
+	if (std::abs(angleAB) < 0.0001f) return false;
+
+	float t = angleToBoundary / angleAB;
+
+	Vector3f clippedPos = invis3D + ((vis3D - invis3D ) * t);
+	clippedPt.point3D = clippedPos;
+	 // calculate the 2D position
+	backPt.point2D = PerspCalc(clippedPt);
+
+	return true;
+}
+
 void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) const
 {
 	// we will need, the visible point and the invisible point
-
-	const float DEVISION = 900 / M_PI; // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
-	const float SCALE{ 1.f };
 
 	const Vector3f point_invis{ invisible.point3D };
 
@@ -100,10 +176,10 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 	float newXAngle_invis = xAngle_invis + (m_angleOffset);
 
 	if (newXAngle_invis < -M_PI) {
-		newXAngle_invis = newXAngle_invis + 2 * M_PI;
+		newXAngle_invis = newXAngle_invis + 2 * float(M_PI);
 	}
 	if (newXAngle_invis > M_PI) {
-		newXAngle_invis = newXAngle_invis - 2 * M_PI;
+		newXAngle_invis = newXAngle_invis - 2 * float(M_PI);
 	}
 
 	float diagonalDist_invis{ float(sqrt(xDist_invis * xDist_invis + yDist_invis * yDist_invis)) };
@@ -120,10 +196,10 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 	float newXAngle_vis = xAngle_vis + (m_angleOffset);
 
 	if (newXAngle_vis < -M_PI) {
-		newXAngle_vis = newXAngle_vis + 2 * M_PI;
+		newXAngle_vis = newXAngle_vis + 2 * float(M_PI);
 	}
 	if (newXAngle_vis > M_PI) {
-		newXAngle_vis = newXAngle_vis - 2 * M_PI;
+		newXAngle_vis = newXAngle_vis - 2 * float(M_PI);
 	}
 	float diagonalDist_vis{ float(sqrt(xDist_vis * xDist_vis + yDist_vis * yDist_vis)) };
 	float newXDist_vis = cos(newXAngle_vis) * diagonalDist_vis; // should be good. cos times hypotheneus
@@ -135,14 +211,22 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 	Vector2f result{};
 	if (Vector2f::doIntersect(Vector2f{ -1000.f,0.f }, Vector2f{ 1000.f,0.f }, visible2D, invisible2D, result))
 	{
-		//atan2(result.x, result.y);
-		float hightDist_invis{ invisible.point3D.z - m_Pos.z };
-		float yAngle_invis = float(atan2(hightDist_invis, newXDist_invis));
-
+		// we got the result of the thing interjecting with the camera shoulder line.
+		// we then need to get it's x which...doesnt matter. itgets projected stragthe on -90 0r +90 degrees
+		// so... what?
+		const float DEVISION = m_Window.width / float(M_PI); // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
+		const float SCALE{ 1.f };
 		Vector2f Point2D{};
-		Point2D.y = SCALE * ((yAngle_invis)*m_projDist) * DEVISION + 900 / 2;
-		Point2D.x = SCALE * ((newXAngle_invis)*m_projDist) * DEVISION + 900 / 2;
 
+		float newXDist = 0;
+		float newYDist = result.y;
+		//
+
+		float hightDist{ point_invis.z - m_Pos.z };
+		float yAngle = float(atan2(hightDist, newXDist));
+		Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
+		Point2D.x = SCALE * float(atan2(result.y, 0) * m_projDist) * DEVISION + m_Window.width / 2;
+	
 		invisible.point2D = Point2D;
 	}
 	//utils::Raycast(LINE_SEGMENT, CENTER, m_MousePos, hitInfo)
@@ -158,19 +242,19 @@ void Camera::TurnCamera(float offset)
 	m_angleOffset += offset;
 
 	if (m_angleOffset > M_PI) {
-		m_angleOffset = -M_PI + (int(m_angleOffset * 100) % int(M_PI * 100)) / 100.f;
+		m_angleOffset = -float(M_PI) + (int(m_angleOffset * 100) % int(M_PI * 100)) / 100.f;
 	}
 	if (m_angleOffset < -M_PI) {
-		m_angleOffset = M_PI + (int(m_angleOffset * 100) % int(-M_PI * 100)) / 100.f;
+		m_angleOffset = float(M_PI) + (int(m_angleOffset * 100) % int(-M_PI * 100)) / 100.f;
 	}
 }
 
-float Camera::GetDistanceFromMidle(float xScreenPos)
+float Camera::GetDistanceFromMidle(float xScreenPos) const
 {
 	return xScreenPos - m_Window.width / 2;
 }
 
-float Camera::GetWindowWidth()
+float Camera::GetWindowWidth() const
 {
 	return m_Window.width;
 }

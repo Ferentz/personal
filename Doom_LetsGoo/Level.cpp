@@ -204,10 +204,7 @@ void Level::UpdateThings(Player& eyeObject, float elapsedSec)
 {
 	for (int ThingLevelIndex{ 0 }; ThingLevelIndex < m_pThings.size(); ThingLevelIndex++)
 	{
-		if (ThingLevelIndex == 94)
-		{
-			std::cout << "hi";
-		}
+		
 		m_pThings[ThingLevelIndex]->UpdateThing(eyeObject, elapsedSec);
 
 		if (m_pThings[ThingLevelIndex]->GetSubClass() == ThingSubclass::enemy)
@@ -390,7 +387,7 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 
 int Level::GetLeafWallAmount(const int leaf) const
 {
-	return m_BSPleafs[leaf].wallIndexes.size();
+	return int(m_BSPleafs[leaf].wallIndexes.size());
 }
 
 Plane* Level::GetWallFromLeaf(const int leaf, const int wallIdx) const
@@ -451,7 +448,7 @@ void Level::SpawnWeapon(point2D_3D Location)
 	m_pThings.emplace_back(new PowerUp{ Location });
 	Vector2f positionThing{ m_pThings.back()->GetStartPos() };
 	int leafIndex{ utils::GetBSP(positionThing, true, m_BSP) };
-	m_BSPleafs[leafIndex].thingIndexes.push_back(m_pThings.size() - 1);
+	m_BSPleafs[leafIndex].thingIndexes.push_back(int(m_pThings.size()) - 1);
 	float zPos = m_BSPleafs[leafIndex].floorheight;
 	m_pThings.back()->SetPosHeight(zPos);
 	m_pThings.back()->SetSubsectorIndex(leafIndex);

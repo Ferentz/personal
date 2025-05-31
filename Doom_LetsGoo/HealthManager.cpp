@@ -19,8 +19,8 @@ void HealthManager::Heal(int healAmount)
 void HealthManager::Harm(int damage)
 {
 	float absorbedAmount{ damage * m_Armour_DamageAbsorption };
-	m_Health -= damage - absorbedAmount;
-	m_ArmourHealth -= absorbedAmount;
+	m_Health -= int(damage - absorbedAmount);
+	m_ArmourHealth -= int(absorbedAmount);
 	if (m_ArmourHealth<0)
 	{
 		m_ArmourHealth = 0;

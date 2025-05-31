@@ -34,7 +34,7 @@ void HealthInteractor::Interact()
 		return;
 	}
 	std::cout << "up health" << std::endl;
-	m_pPlayerHealth->Heal(m_HealAmount);
+	m_pPlayerHealth->Heal(int(m_HealAmount));
 }
 
 void HealthInteractor::AssignPlayer(HealthManager& playerHealth)

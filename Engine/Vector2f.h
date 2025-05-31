@@ -8,6 +8,7 @@ struct Vector2f final
 	// -------------------------
 	Vector2f( );
 	explicit Vector2f( float x, float y );
+	explicit Vector2f(int x, int y);
 	explicit Vector2f( const Vector2f& fromPoint, const Vector2f& tillPoint );
 
 	// -------------------------

@@ -45,7 +45,7 @@ public:
 private:
 	Camera m_Camera;
 
-	int m_charDIameter{ 20 };
+	float m_charDIameter{ 20.f };
 	int m_charHeight{ 40 };
 	
 	Vector2f m_lookVector;

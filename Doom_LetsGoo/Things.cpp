@@ -52,7 +52,7 @@ void Thing::UpdateThing(const Player& player, float elapsSec)
 
 void Thing::DrawThing(Texture* tex)
 {
-	float scale{ 0.001 };
+	float scale{ 0.001f };
 	float width{ tex->GetWidth() / (m_location.Dist3D * scale)};
 	float height{ m_Height / (m_location.Dist3D * scale) };
 	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };

@@ -26,7 +26,7 @@ public:
 
 	void DrawLevelBSP(int leaf, Vector2f pos);
 	void UpdateLevel( Player& eyeObject, float elapsedSec);
-	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameterconst,
+	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameter,
 		bool isPlayer, bool& exit)const;
 	const std::vector<BSPnode>& GetBSPtree() const;
 	std::vector <Thing*>& GetThings();

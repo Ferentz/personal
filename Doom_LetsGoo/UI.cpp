@@ -63,14 +63,22 @@ UI::~UI()
 	for (int index{}; index < 12; index++)
 	{
 		delete m_pNumbersRed[index];
+		m_pNumbersRed[index] = nullptr;
 	}
 	for (int index{}; index < 10; index++)
 	{
 		delete m_pNumbersGreyFlat[index];
 		delete m_pNumbersGreyShadow[index];
 		delete m_pNumbersYellow[index];
+
+		m_pNumbersGreyFlat[index] = nullptr;
+		m_pNumbersGreyShadow[index] = nullptr;
+		m_pNumbersYellow[index] = nullptr;
 	}
+	delete m_pArmsBase;
+	m_pArmsBase = nullptr;
 	delete m_pUI;
+	m_pUI = nullptr;
 
 }
 
@@ -259,7 +267,7 @@ void UI::DrawArms()
 		glTranslatef(m_Window.width * 0.323f, m_Window.width * 0.00f, 0.f);
 		glRotatef(0.f, 0.f, 0.f, 1.f);
 
-		glScalef(m_Window.width * 0.0031, m_Window.width * 0.0031, 0.f);
+		glScalef(m_Window.width * 0.0031f, m_Window.width * 0.0031f, 0.f); //TODO:: magic number spotted
 		int count{ 2 };
 		int pickedUpArms{ s_pPlayer->m_WeaponManager.GetPickedUpWeaponsNum()};
 		glPushMatrix();
@@ -270,12 +278,12 @@ void UI::DrawArms()
 			
 				glPushMatrix();
 				{
-					glTranslatef( 0, - i * 10, 0.f);
+					glTranslatef( 0.f, - i * 10.f, 0.f);
 					for (int j{ 0 }; j < 3; j++)
 					{
 						glPushMatrix();
 						{
-							glTranslatef(j * 12, 0.f,  0.f);
+							glTranslatef(j * 12.f, 0.f,  0.f);
 							if (count <= pickedUpArms)
 							{
 								m_pNumbersYellow[count]->Draw(
@@ -327,7 +335,7 @@ void UI::DrawAmo()
 	{
 		glTranslatef(m_Window.width * 0.85f, m_Window.width * 0.066f, 0.f);
 		glRotatef(0.f, 0.f, 0.f, 1.f);
-		glScalef(m_Window.width * 0.0031, m_Window.width * 0.0031, 0.f);
+		glScalef(m_Window.width * 0.0031f, m_Window.width * 0.0031f, 0.f); //TODO:: magic number again
 
 		const float rowOffset{ -m_Window.width * 0.007f };
 		PrintNumber(s_pPlayer->m_WeaponManager.GetPistolAmo(), false, 4);

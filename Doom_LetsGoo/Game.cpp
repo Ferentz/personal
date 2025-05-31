@@ -222,13 +222,13 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 {
 	// SAMPLE CODE: print mouse position
 	//const float mouseX{ float(e.x) }; //.xrel
-	const float mouseX{ float(e.xrel) }; //.xrel
-	const float mouseY{ float(e.y) };
-	const float mousPosX{ float(e.x) };
+	const int mouseX{ int(e.xrel) }; //.xrel
+	const int mouseY{ int(e.y) };
+	const int mousPosX{ int(e.x) };
 	if (mousPosX <= 1)
 	{
 		//SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
-		SDL_WarpMouseInWindow(SDL_GL_GetCurrentWindow(), GetViewPort().width - 2, mouseY);
+		SDL_WarpMouseInWindow(SDL_GL_GetCurrentWindow(), int(GetViewPort().width) - 2, mouseY);
 		//SDL_WarpMouseInWindow
 	}
 	if (mousPosX >= GetViewPort().width - 1)
@@ -239,7 +239,7 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 	}
 	
 	
-	m_Camera.Turn(mouseX / 100);
+	m_Camera.Turn(mouseX / 100.f);
 	
 }
 

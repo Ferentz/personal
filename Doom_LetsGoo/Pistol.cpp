@@ -96,7 +96,7 @@ void Pistol::DrawWeapon(float windowWidth) const
 			glPushMatrix();
 			{
 				//glTranslatef(0.f, m_WeaponImages[m_ImageIndex]->GetHeight()/2, 0.f); //moves the image space 
-				glTranslatef(-m_TextureOffsets[0][0], m_TextureOffsets[0][1], 0.f);
+				glTranslatef(float( -m_TextureOffsets[0][0]), float(m_TextureOffsets[0][1]), 0.f);
 				m_WeaponImages[0]->Draw(
 					Rectf{
 				0.f,
@@ -109,7 +109,7 @@ void Pistol::DrawWeapon(float windowWidth) const
 			glPopMatrix();
 		}
 
-		glTranslatef(-m_TextureOffsets[indexToUse][0], m_TextureOffsets[indexToUse][1], 0.f);
+		glTranslatef(float( -m_TextureOffsets[indexToUse][0]), float(m_TextureOffsets[indexToUse][1]), 0.f);
 
 		m_WeaponImages[indexToUse]->Draw(
 			Rectf{

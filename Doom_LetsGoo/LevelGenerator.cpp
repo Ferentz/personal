@@ -85,11 +85,11 @@ void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, 
 	//Plane plane2{ positionPlanea, widtha, heighta, 2 };
 	if (linesImported.data[line][ReadLines::sectorTag] == 1)
 	{
-		r_tags[0].insert(r_Planes.size());
+		r_tags[0].insert(int(r_Planes.size()));
 	}
 	if (linesImported.data[line][ReadLines::sectorTag] == 2)
 	{
-		r_tags[1].insert(r_Planes.size());
+		r_tags[1].insert(int(r_Planes.size()));
 	}
 	if (WillBeDoor(linesImported.data[line][ReadLines::actionSpecial]))
 	{
@@ -106,7 +106,7 @@ void LevelGenerator::AddPlane(int line, float floorHeight, float ceilingHeight, 
 	r_Planes.back()->SetActionBools(linesImported.data[line][ReadLines::actionSpecial]);
 }
 
-int LevelGenerator::GetSectorFromLine(int line, bool backSide)
+int LevelGenerator::GetSectorFromLine(int line, bool backSide) const
 {
 	int sideDef{ linesImported.data[line][ReadLines::frontSide + int(backSide)] };
 	return sidesImported.data[sideDef][ReadSides::sector];
@@ -142,7 +142,7 @@ void sliceLine(const std::vector<Vector2f>& boundingBoxOriginal, std::vector<Vec
 			boundingBoxNew.push_back(segPoint1);
 		}
 		// get the following point of the bounding box
-		int nextPoint = utils::getArrIndex(boundingBoxOriginal.size(), point + 1);
+		int nextPoint = utils::getArrIndex(int(boundingBoxOriginal.size()), point + 1);
 		Vector2f segPoint2 = boundingBoxOriginal[nextPoint];
 		Vector2f intersectionPoint{}; // point in which the potential intersection is stored.
 		//check if the partition line and the bounding box segment intersect
@@ -448,10 +448,10 @@ void LevelGenerator::GenerateLevel()
 	MakeWalls(SCALE);
 
 	const int buffer{ 1000 };
-	float top = nodesImported.data[nodesImported.rows - 1][8] + buffer;
-	float bottom = nodesImported.data[nodesImported.rows - 1][5] - buffer;
-	float left = nodesImported.data[nodesImported.rows - 1][6] - buffer;
-	float right = nodesImported.data[nodesImported.rows - 1][11] + buffer;
+	int top = nodesImported.data[nodesImported.rows - 1][8] + buffer;
+	int bottom = nodesImported.data[nodesImported.rows - 1][5] - buffer;
+	int left = nodesImported.data[nodesImported.rows - 1][6] - buffer;
+	int right = nodesImported.data[nodesImported.rows - 1][11] + buffer;
 
 	std::vector<Vector2f> startingBox{ Vector2f{left, top},Vector2f{right, top},Vector2f{right, bottom },Vector2f{left, bottom} };
 	std::vector<Line> sliceLines;
@@ -598,7 +598,7 @@ void LevelGenerator::ReadThings()
 		int height{1};
 		int hp{1};
 		float speedScale{1.};
-		int speed{1};
+		float speed{1};
 
 		
 

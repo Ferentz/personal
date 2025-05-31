@@ -22,14 +22,14 @@ public:
 
 private:
 	static const Level* pLevel;
-	const int m_TimeIntervalSecs{ 2 }; // specify time unit
+	const float m_TimeIntervalSecs{ 2.f }; // specify time unit
 	int m_charHeightr{ 50 };
 	Vector3f& m_Pos;
 	Vector3f m_EyePos;
 	Vector3f m_NextPos;
 	const float m_detectRadius{ 1000 };
 	const float m_minPlayerDist{ 200 };
-	int m_charDiameter{ 20 };
+	float m_charDiameter{ 20.f };
 	
 	
 	float m_timer{};

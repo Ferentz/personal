@@ -131,9 +131,9 @@ void Matrix2x3::SetAsTranslate(Vector2f pt)
 
 void Matrix2x3::SetAsScale(float scaleX, float scaleY)
 {
-	dirX = Vector2f{ scaleX, 0 };
-	dirY = Vector2f{ 0, scaleY };
-	orig = Vector2f{ 0, 0 };
+	dirX = Vector2f{ scaleX, 0.f };
+	dirY = Vector2f{ 0.f, scaleY };
+	orig = Vector2f{ 0.f, 0.f };
 }
 
 void Matrix2x3::SetAsScale(float scale)
@@ -164,7 +164,7 @@ Matrix2x3 Matrix2x3::CreateScalingMatrix(Vector2f scaleVector)
 
 Matrix2x3 Matrix2x3::CreateScalingMatrix(float scaleX, float scaleY)
 {
-	return Matrix2x3( Vector2f{ scaleX, 0 }, Vector2f{ 0, scaleY }, Vector2f{} );
+	return Matrix2x3( Vector2f{ scaleX, 0.f }, Vector2f{ 0.f, scaleY }, Vector2f{} );
 }
 
 Matrix2x3 Matrix2x3::CreateTranslationMatrix(Vector2f origin)

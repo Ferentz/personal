@@ -56,11 +56,34 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 }
 
 void Plane::UpdatePlane(const Player& player, float elapsSec) {
+	bool pointVisible{ false };
 	for (int index{}; index < 4; index++) {
 		m_Points[index].point2D = player.GetCamera().PerspCalc(m_Points[index]);
+		if (m_Points[index].amIVisible)
+		{
+			pointVisible = true;
+		}
 	}
-	
-	if (m_Normal.DotProduct(player.GetLookAtVector()) < 0)
+
+	for (int index{}; index < 4; index++) {
+		bool vis1{ m_Points[index].amIVisible };
+		int prevIndex{ utils::getArrIndex(4, index - 1) };
+		bool vis2{ m_Points[prevIndex].amIVisible };
+		/*if (m_Normal.DotProduct(player.GetLookAtVector()) < 0 && vis1 != vis2)
+		{
+			if (vis1 == true)
+			{
+				player.GetCamera().ClipLineToFOV(m_Points[index], m_Points[prevIndex]);
+			}
+			else
+			{
+				player.GetCamera().ClipLineToFOV(m_Points[prevIndex], m_Points[index]);
+			}
+			
+		}*/
+	}
+
+	if (m_Normal.DotProduct(player.GetLookAtVector()) < 0 && pointVisible)
 	{
 		m_IsVisible = true;
 	}

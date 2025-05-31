@@ -20,6 +20,12 @@ Vector2f::Vector2f( float x, float y )
 {
 }
 
+Vector2f::Vector2f(int x, int y)
+	: x{ float( x ) }
+	, y{ float( y)  }
+{
+}
+
 Vector2f::Vector2f( const Vector2f& fromPoint, const Vector2f& tillPoint )
 	: Vector2f{ tillPoint.x - fromPoint.x, tillPoint.y - fromPoint.y }
 {

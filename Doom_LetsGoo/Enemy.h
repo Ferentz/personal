@@ -34,9 +34,12 @@ private:
 	float m_timer;
 	bool m_IsShooting{ false };
 	bool m_CanShootAgain{ true };
-
 	bool m_SpawnWeapon{ false };
-
+	
+	int m_TextureColums{ 5 };
+	int m_DeathRow{};
+	int m_HurtRow{};
+	int m_AttackRow{};
 	std::vector <Texture> m_pMonsterTexture{};
 	std::vector <std::string> m_MonsterTexturePaths{};
 	Vector2f m_direction;
