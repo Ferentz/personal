@@ -2,20 +2,33 @@
 #include <iostream>
 #include "WeaponManager.h"
 #include "Enemy.h"
-#include "Plane.h"
-#include "Navigator.h"
-#include "HealthManager.h"
 
+#pragma region basics
+void WeaponManager::DrawWeapon(float windowWidth) const
+{
+	glPushMatrix();
+	{
+		glScalef(windowWidth / 300, windowWidth / 300, 0.f);
+		glTranslatef(0.f, 180, 0.f);
+		m_pEquipedWeapon->DrawWeapon(windowWidth);
+	}
+	glPopMatrix();
+}
 
+void WeaponManager::UpdateWeapon(float elapsedsecs)
+{
+	m_pEquipedWeapon->UpdateWeapon(elapsedsecs);
+}
+
+#pragma endregion basics
+
+#pragma region general
 void WeaponManager::SwitchWeapon(WeaponType type)
 {
 	switch (type)
 	{
 	case WeaponType::pistol :
-		if (m_pistolPickedUp)
-		{
 			m_pEquipedWeapon = &m_Pistol;
-		}
 		break;
 	case WeaponType::shotgun:
 		if (m_shotgunPickedUp)
@@ -27,7 +40,6 @@ void WeaponManager::SwitchWeapon(WeaponType type)
 		break;
 	}
 }
-
 
 int WeaponManager::GetAmo() const
 {
@@ -60,7 +72,6 @@ void WeaponManager::PickUpWeapon(WeaponType type)
 	m_shotgunPickedUp = true;
 }
 
-
 void WeaponManager::Shoot(std::vector<Shootable*> shootables, float windowWidth)
 {
 	m_pEquipedWeapon->Shoot(shootables, windowWidth);
@@ -74,6 +85,10 @@ int WeaponManager::GetPickedUpWeaponsNum() const
 	}
 	return 2;
 }
+
+#pragma endregion general
+
+#pragma region weapon specific
 
 int WeaponManager::GetPistolAmo() const
 {
@@ -95,13 +110,4 @@ int WeaponManager::GetMaxShotgunAmo() const
 	return m_Shotgun.GetMaxAmo();
 }
 
-void WeaponManager::DrawWeapon(float windowWidth) const
-{
-	m_pEquipedWeapon->DrawWeapon(windowWidth);
-}
-
-void WeaponManager::UpdateWeapon(float elapsedsecs)
-{
-	m_pEquipedWeapon->UpdateWeapon(elapsedsecs);
-}
-
+#pragma endregion weapon specific

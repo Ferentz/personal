@@ -1,62 +1,27 @@
 #include "pch.h"
-#include "Enemy.h"
-#include "Texture.h"
-#include <string>
-#include <filesystem>
-#include <iostream>
 
-#include "PLayer.h"
+#include "Enemy.h"
 #include "Navigator.h"
-#include "Interactor.h"
+
+#include "Player.h"
+#include "Texture.h"
 #include "Level.h"
 
+#include <string>
+#include <filesystem>
 
-HealthManager* Enemy::pPlayerHealth{};
-
+//TODO :: texture manager?
 Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
-	:Shootable{ pos, height , folder, 20 },
-	m_TexIndex{},
-	m_timer{},
-	m_direction{},
+	:Shootable{ pos, height, folder, 20 },
 	m_pNavigator{ new Navigator(m_location.point3D) }
 {
-	std::cout << m_pMonsterTexture.size() << std::endl;
 	for (const auto& entry : std::filesystem::directory_iterator(folder))
 	{
-		
 		std::string path{ entry.path().string() };
 		m_MonsterTexturePaths.emplace_back(path);
 	}
-	std::cout << m_MonsterTexturePaths.size() << std::endl;
 	LoadTextures();
 	m_SubClass = ThingSubclass::enemy;
-}
-
-Enemy::Enemy(const Enemy& toCopy)
-	:Shootable{ Shootable(toCopy) },
-	m_TexIndex{ toCopy.m_TexIndex },
-	m_timer{ toCopy.m_timer },
-	m_direction{ toCopy.m_direction },
-	m_pNavigator{ new Navigator(*toCopy.m_pNavigator) }
-{
-	m_MonsterTexturePaths.reserve(toCopy.m_MonsterTexturePaths.size());
-	for (const std::string& suffix : toCopy.m_MonsterTexturePaths)
-	{
-		m_MonsterTexturePaths.push_back(suffix);
-	}
-	LoadTextures();
-}
-
-// try this
-Enemy::Enemy(Enemy&& toMove) noexcept
-	:Shootable(Shootable( toMove ) ),
-	m_TexIndex{ std::move( toMove.m_TexIndex ) },
-	m_timer{ std::move( toMove.m_timer )},
-	m_direction{ std::move( toMove.m_direction ) },
-	m_pNavigator{ std::move(toMove.m_pNavigator) }
-{
-	m_pMonsterTexture = std::move(toMove.m_pMonsterTexture);
-	m_MonsterTexturePaths = std::move(toMove.m_MonsterTexturePaths);
 }
 
 Enemy::~Enemy()
@@ -65,27 +30,101 @@ Enemy::~Enemy()
 	m_pNavigator = nullptr;
 }
 
+#pragma region rule of 5
+
+Enemy::Enemy(const Enemy& toCopy)
+	:Shootable{ Shootable(toCopy) },
+	m_pNavigator{ new Navigator(*toCopy.m_pNavigator) }
+{
+	m_timer = toCopy.m_timer;
+	m_IsShooting = toCopy.m_IsShooting;
+	m_CanShootAgain = toCopy.m_CanShootAgain;
+	m_SpawnWeapon = toCopy.m_SpawnWeapon;
+
+	m_TexIndex = toCopy.m_TexIndex;
+	
+	m_MonsterTexturePaths = toCopy.m_MonsterTexturePaths;
+	LoadTextures();
+}
+
+Enemy::Enemy(Enemy&& toMove) noexcept
+	:Shootable(std::move(Shootable( toMove )) ),
+	m_pNavigator{ std::move(toMove.m_pNavigator) }
+{
+	MoveEnemyMembers(std::move(toMove));
+}
+
 Enemy& Enemy::operator=(Enemy&& rhs) noexcept
 {
 	if (&rhs != this)
 	{
-		Shootable::operator=(rhs);
-		m_TexIndex = rhs.m_TexIndex;
-		m_timer = rhs.m_timer;
-		m_direction = rhs.m_direction;
-		m_pMonsterTexture = std::move(rhs.m_pMonsterTexture);
-		m_MonsterTexturePaths = std::move(rhs.m_MonsterTexturePaths);
+		Shootable::operator=(std::move(rhs));
 		m_pNavigator = rhs.m_pNavigator;
 		rhs.m_pNavigator = nullptr;
+		MoveEnemyMembers(std::move(rhs));
 	}
 	return *this;
 }
 
+//private rule of 5 helper
+void Enemy::MoveEnemyMembers(Enemy&& toMove)
+{
+	m_timer = std::move(toMove.m_timer);
+	m_IsShooting = std::move(toMove.m_IsShooting);
+	m_CanShootAgain = std::move(toMove.m_CanShootAgain);
+	m_SpawnWeapon = std::move(toMove.m_SpawnWeapon);
+
+	m_TexIndex = std::move(toMove.m_TexIndex);
+	m_MonsterTexturePaths = std::move(toMove.m_MonsterTexturePaths);
+
+	m_DeathRow = std::move(toMove.m_DeathRow);
+	m_HurtRow = std::move(toMove.m_HurtRow);
+	m_AttackRow = std::move(toMove.m_AttackRow);
+	m_pMonsterTexture = std::move(toMove.m_pMonsterTexture);
+}
+
+#pragma endregion rule of 5
+
+#pragma region Thing expansion
 void Enemy::UpdateThing(const Player& player, float elapsSec)
 {
 	UpdateEnemy(elapsSec);
 	Thing::UpdateThing(player, elapsSec);
 }
+
+void Enemy::DrawThing(Texture* tex)
+{
+	int index{ m_TexIndex * m_TextureColums };
+	switch (m_State)
+	{
+	case ShootableStates::alive:
+		if (m_IsShooting)
+		{
+			index += (m_AttackRow * m_TextureColums);
+		}
+		break;
+	case ShootableStates::harmed:
+		index = (m_HurtRow * m_TextureColums);
+		break;
+	case ShootableStates::dying:
+		index = m_TexIndex + (m_DeathRow * m_TextureColums);
+		break;
+	case ShootableStates::dead:
+		index = (m_DeathRow * m_TextureColums) + m_TextureColums - 1;
+		break;
+	default:
+		break;
+	}
+
+	float scale{ 0.001f };
+	float width{ m_pMonsterTexture[index].GetWidth() / (m_location.Dist3D * scale) };
+	float height{ m_pMonsterTexture[index].GetHeight() / (m_location.Dist3D * scale) };
+	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };
+	m_pMonsterTexture[index].Draw(dest);
+}
+#pragma endregion Thing expansion
+
+#pragma region enemy behaviour
 
 void Enemy::UpdateEnemy(float elapsSec)
 {
@@ -93,7 +132,7 @@ void Enemy::UpdateEnemy(float elapsSec)
 	if (m_State != ShootableStates::dead)
 	{
 		m_timer += elapsSec;
-		if (m_timer >= 0.5) // the time interval to swithc textures/perform actions
+		if (m_timer >= m_IntervalTime) // the time interval to swithc textures/perform actions
 		{
 			switch (m_State)
 			{
@@ -119,7 +158,7 @@ void Enemy::UpdateEnemy(float elapsSec)
 						// if still has line of sight over player, harm the player 
 						if (m_pNavigator->m_hasLineOfSight)
 						{
-							pPlayerHealth->Harm(5);
+							s_pPlayerHealth->Harm(5);
 						}
 						//reset shooting + animation
 						m_TexIndex = 0;
@@ -130,7 +169,6 @@ void Enemy::UpdateEnemy(float elapsSec)
 					m_TexIndex++;
 					m_timer = 0;
 				}
-
 				else {
 					m_CanShootAgain = true;
 					m_TexIndex++;
@@ -144,7 +182,7 @@ void Enemy::UpdateEnemy(float elapsSec)
 			}
 			case ShootableStates::harmed:
 			{
-				if (m_pHealthManager.GetHeath() <= 0)
+				if (m_HealthManager.GetHealth() <= 0)
 				{
 					m_timer = 0;
 					m_pNavigator->m_Mobile = false;
@@ -182,7 +220,7 @@ bool Enemy::Navigate( Level* pLevel, const Player& player, const float elapsSec)
 {
 	if (!m_IsShooting && m_pNavigator->m_Mobile) // if he is not shooting and alive
 	{
-		m_pNavigator->CalcNextPos(player.m_Pos, pLevel->GetWalls(), elapsSec);
+		m_pNavigator->CalcNextPos(player.GetPos(), pLevel->GetWalls(), elapsSec);
 
 		m_pNavigator->ColideWLevel(pLevel);
 	
@@ -197,43 +235,21 @@ bool Enemy::Navigate( Level* pLevel, const Player& player, const float elapsSec)
 	return false;
 }
 
-void Enemy::DrawThing(Texture* tex)
+Navigator* Enemy::GetpNavigator() const
 {
-	int index{ m_TexIndex * m_TextureColums };
-	switch (m_State)
-	{
-	case ShootableStates::alive:
-		if (m_IsShooting)
-		{
-			index += (m_AttackRow * m_TextureColums);
-		}
-		break;
-	case ShootableStates::harmed:
-		index = (m_HurtRow * m_TextureColums);
-		break;
-	case ShootableStates::dying:
-		index = m_TexIndex + (m_DeathRow * m_TextureColums);
-		break;
-	case ShootableStates::dead:
-		index = (m_DeathRow * m_TextureColums) + m_TextureColums-1;
-		break;
-	default:
-		break;
-	}
-	
-	float scale{ 0.001f };
-	float width{ m_pMonsterTexture[index].GetWidth() / (m_location.Dist3D * scale) };
-	float height{ m_pMonsterTexture[index].GetHeight() / (m_location.Dist3D * scale) };
-	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };
-	m_pMonsterTexture[index].Draw(dest);
+	return m_pNavigator;
 }
 
+#pragma endregion enemy behaviour
 
-
-void Enemy::AssignPlayer(HealthManager& playerHealth)
+#pragma region statics
+void Enemy::AssignPlayerHealth(HealthManager& playerHealth)
 {
-	pPlayerHealth = &playerHealth;
+	s_pPlayerHealth = &playerHealth;
 }
+
+HealthManager* Enemy::s_pPlayerHealth{};
+#pragma endregion link to player health
 
 void Enemy::LoadTextures()
 {
@@ -243,7 +259,6 @@ void Enemy::LoadTextures()
 		m_pMonsterTexture.emplace_back(Texture(path));
 	}
 	int rows{ int(m_pMonsterTexture.size()) / m_TextureColums };
-	std::cout << rows << std::endl;
 	m_DeathRow = rows - 1 - 1;
 	m_HurtRow = m_DeathRow - 1;
 	m_AttackRow = m_HurtRow - 2;

@@ -2,8 +2,7 @@
 #include "HealthManager.h"
 
 HealthManager::HealthManager(int startingHealth)
-	:m_Health{ startingHealth },
-	m_FullHealth{ startingHealth }
+	:m_Health{ startingHealth }
 {
 }
 
@@ -27,12 +26,12 @@ void HealthManager::Harm(int damage)
 	}
 }
 
-int HealthManager::GetHeath() const
+int HealthManager::GetHealth() const
 {
 	return m_Health;
 }
 
-int HealthManager::GetArmour() const
+int HealthManager::GetArmourHealth() const
 {
 	return m_ArmourHealth;
 }
@@ -42,7 +41,7 @@ void HealthManager::FullHealth()
 	m_Health = m_FullHealth;
 }
 
-void HealthManager::SetArmour(float damageAbsorption)
+void HealthManager::SetArmourAbsorption(float damageAbsorption)
 {
 	if (m_Armour_DamageAbsorption < damageAbsorption)
 	{
@@ -54,17 +53,19 @@ void HealthManager::SetArmour(float damageAbsorption)
 	}
 }
 
-void HealthManager::IncreaseMaxArmour(int amount)
+void HealthManager::IncreaseMaxArmourHealth(int amount)
 {
 	m_MaxArmour += amount;
+	m_ArmourHealth += amount;
+	if (m_ArmourHealth > m_MaxArmour)
+	{
+		m_ArmourHealth = m_MaxArmour;
+	}
 }
 
 void HealthManager::IncreaseMaxHealth(int amount)
 {
 	m_MaxHealth += amount;
+	Heal(amount);
 }
 
-HealthManager& HealthManager::operator=(const HealthManager& rhs)
-{
-	return *this;
-}

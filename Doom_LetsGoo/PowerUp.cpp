@@ -1,11 +1,12 @@
 #include "pch.h"
 #include <iostream>
 #include "PowerUp.h"
+
 #include "Interactor.h"
 #include "HealthInteractor.h"
 #include "WeaponInteractor.h"
-#include "WeaponManager.h"
-#include "PLayer.h"
+
+#include "Player.h"
 #include "Texture.h"
 
 #include "SoundEffect.h"
@@ -17,12 +18,6 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 	:Thing{ pos , height  , sprite },
 	m_FilePath{ "pickUps/" + sprite + "A0.png" }
 {
-	//m_pInteractor = new Interactor{};
-	// assigns the interactor
-	/*std::string path{ entry.path().string() };
-	std::string name{ entry.path().filename().string() };
-	std::string suffic{ entry.path().filename().string().erase(name.size() - 4, name.size() - 1) };
-	suffic.erase(0, 4);*/
 	if (s_PickupSound == nullptr)
 	{
 		s_PickupSound = new SoundEffect{ "sounds/DSITEMUP.wav" };
@@ -31,79 +26,94 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 
 	m_pTex = new Texture{ m_FilePath };
 	m_SubClass = ThingSubclass::pickup;
+
 	switch (type)
 	{
 	case utils::ThingsEnum::Shotgun:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			4,
 			WeaponType::shotgun,
 			true };
 		break;
 	case utils::ThingsEnum::Chaingun:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			20,
 			WeaponType::chaingun,
 			true };
 		break;
 	case utils::ThingsEnum::RocketLauncher:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			2,
 			WeaponType::rocket,
 			true };
 		break;
 	case utils::ThingsEnum::Clip:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			10,
 			WeaponType::pistol};
 		break;
 	case utils::ThingsEnum::shotgunShells4:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			4,
 			WeaponType::shotgun };
 		break;
 	case utils::ThingsEnum::BoxOfRockets:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			5,
 			WeaponType::rocket };
 		break;
 	case utils::ThingsEnum::BoxOfBullets:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			50,
 			WeaponType::pistol };
 		break;
 	case utils::ThingsEnum::BoxOfShotgunShells:
+		m_InteractorSwitch_HiF_WiT = true;
 		m_pInteractor = new WeaponInteractor{
 			20,
 			WeaponType::shotgun };
 		break;
 
 	case utils::ThingsEnum::Stimpack:
+		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			10};
 		break;
 	case utils::ThingsEnum::Medikit:
+		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			25 };
 		break;
 	case utils::ThingsEnum::HealthBonus:
+		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			1,
 		false,
 		true};
 		break;
 	case utils::ThingsEnum::ArmorBonus:
+		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			1,
 		true,
 		true };
 		break;
 	case utils::ThingsEnum::Armor:
+		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			1/3.f,
 		true,
 		false };
 		break;
 	case utils::ThingsEnum::Megaarmor:
+		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			1/2.f,
 		true,
@@ -114,54 +124,17 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 	}
 }
 
-PowerUp::PowerUp(const PowerUp& toCopy)
-	:Thing( Thing(toCopy)),
-	m_FilePath{ toCopy.m_FilePath }
+PowerUp::PowerUp(point2D_3D Location)
+	:Thing{ Vector2f{Location.point3D.x, Location.point3D.y} , 20  , "SHOT" },
+	m_FilePath{ "pickUps/SHOTA0.png" }
 {
-	m_PickedUp = toCopy.m_PickedUp;
 	m_pTex = new Texture{ m_FilePath };
-	m_pInteractor = toCopy.m_pInteractor;
-}
-
-PowerUp::PowerUp(PowerUp&& toMove) noexcept
-	:Thing(Thing(toMove)),
-	m_FilePath{ std::move(toMove.m_FilePath )}
-{
-	m_PickedUp = std::move(toMove.m_PickedUp);
-	m_pTex = toMove.m_pTex;
-	toMove.m_pTex = nullptr;
-	m_pInteractor = std::move(toMove.m_pInteractor);
-}
-
-PowerUp& PowerUp::operator=(const PowerUp& rhs)
-{
-	if (&rhs != this)
-	{
-		Thing::operator=(rhs);
-		m_PickedUp = rhs.m_PickedUp;
-		m_FilePath = rhs.m_FilePath;
-		if (m_pTex != nullptr)
-		{
-			delete m_pTex;
-		}
-		m_pTex = new Texture{ m_FilePath };
-		m_pInteractor = rhs.m_pInteractor;
-	}
-	return *this;
-}
-
-PowerUp& PowerUp::operator=(PowerUp&& rhs) noexcept
-{
-	if (&rhs != this)
-	{
-		Thing::operator=(rhs);
-		m_PickedUp = std::move(rhs.m_PickedUp);
-		m_FilePath = std::move(rhs.m_FilePath);
-		m_pTex = rhs.m_pTex;
-		rhs.m_pTex = nullptr;
-		m_pInteractor = std::move(rhs.m_pInteractor);
-	}
-	return *this;
+	m_SubClass = ThingSubclass::pickup;
+	m_InteractorSwitch_HiF_WiT = true;
+	m_pInteractor = new WeaponInteractor{
+			4,
+			WeaponType::shotgun,
+			true };
 }
 
 PowerUp::~PowerUp()
@@ -177,22 +150,92 @@ PowerUp::~PowerUp()
 	m_pInteractor = nullptr;
 }
 
-PowerUp::PowerUp(point2D_3D Location)
-	:Thing{ Vector2f{Location.point3D.x, Location.point3D.y} , 20  , "SHOT" },
-	m_FilePath{ "pickUps/SHOTA0.png" }
+#pragma region rule of 5
+PowerUp::PowerUp(const PowerUp& toCopy)
+	:Thing( Thing(toCopy)),
+	m_FilePath{ toCopy.m_FilePath }
 {
+	m_PickedUp = toCopy.m_PickedUp;
 	m_pTex = new Texture{ m_FilePath };
-	m_SubClass = ThingSubclass::pickup;
-
-	m_pInteractor = new WeaponInteractor{
-			4,
-			WeaponType::shotgun,
-			true };
+	m_InteractorSwitch_HiF_WiT = toCopy.m_InteractorSwitch_HiF_WiT;
+	if (toCopy.m_InteractorSwitch_HiF_WiT)
+	{
+		m_pInteractor = new WeaponInteractor{
+			*static_cast<WeaponInteractor*>(toCopy.m_pInteractor)
+		};
+	}
+	else
+	{
+		m_pInteractor = new HealthInteractor{
+			*static_cast<HealthInteractor*>(toCopy.m_pInteractor)
+		};
+	}
 }
+
+PowerUp::PowerUp(PowerUp&& toMove) noexcept
+	:Thing(Thing(toMove)),
+	m_FilePath{ std::move(toMove.m_FilePath )}
+{
+	m_PickedUp = std::move(toMove.m_PickedUp);
+	m_pTex = toMove.m_pTex;
+	toMove.m_pTex = nullptr;
+	m_InteractorSwitch_HiF_WiT = toMove.m_InteractorSwitch_HiF_WiT;
+	m_pInteractor = std::move(toMove.m_pInteractor);
+	toMove.m_pInteractor = nullptr;
+}
+
+PowerUp& PowerUp::operator=(const PowerUp& rhs)
+{
+	if (&rhs != this)
+	{
+		Thing::operator=(rhs);
+		m_PickedUp = rhs.m_PickedUp;
+		m_FilePath = rhs.m_FilePath;
+		if (m_pTex != nullptr)
+		{
+			delete m_pTex;
+		}
+		m_pTex = new Texture{ m_FilePath };
+		m_InteractorSwitch_HiF_WiT = rhs.m_InteractorSwitch_HiF_WiT;
+		delete m_pInteractor;
+		if (rhs.m_InteractorSwitch_HiF_WiT)
+		{
+			m_pInteractor = new WeaponInteractor{
+				*static_cast<WeaponInteractor*>(rhs.m_pInteractor)
+			};
+		}
+		else
+		{
+			m_pInteractor = new HealthInteractor{
+				*static_cast<HealthInteractor*>(rhs.m_pInteractor)
+			};
+		}
+	}
+	return *this;
+}
+
+PowerUp& PowerUp::operator=(PowerUp&& rhs) noexcept
+{
+	if (&rhs != this)
+	{
+		Thing::operator=(rhs);
+		m_PickedUp = std::move(rhs.m_PickedUp);
+		m_FilePath = std::move(rhs.m_FilePath);
+		m_pTex = rhs.m_pTex;
+		rhs.m_pTex = nullptr;
+		m_InteractorSwitch_HiF_WiT = rhs.m_InteractorSwitch_HiF_WiT;
+		m_pInteractor = std::move(rhs.m_pInteractor);
+		rhs.m_pInteractor = nullptr;
+	}
+	return *this;
+}
+
+#pragma endregion rule of 5
+
 
 void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 {
-	if (!m_PickedUp && (eyeObject.m_Pos - m_location.point3D).Length() < 100)
+	if (!m_PickedUp && (eyeObject.GetPos() - m_location.point3D).Length() < 100)
 	{
 		s_PickupSound->Play(false);
 		std::cout << "pickup" << std::endl;

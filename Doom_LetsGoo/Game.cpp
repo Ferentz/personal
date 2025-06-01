@@ -3,16 +3,15 @@
 #include <ios>
 #include <iostream>
 #include "UI.h"
-
-// need to start thinking on ui
+#include "Level.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
-	m_Camera{ GetViewPort() },
-	m_WindowWidth{ window.width },
-	m_pUI{ new UI{GetViewPort()} }
-	//m_UI{ new Texture{"STBAR_converted.png"} }
+	m_Player{ GetViewPort() },
+	m_pUI{ new UI{GetViewPort()} },
+	m_pLevel{ new Level(m_Player) }
 {
+	m_pUI->AssignPlayer(&m_Player);
 	Initialize();
 }
 
@@ -27,18 +26,11 @@ void Game::Initialize( )
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
-	
-	m_pLevel = new Level(m_Camera);
-	m_pUI->AssignPlayer(&m_Camera);
 }
 
 void Game::Cleanup( )
 {
-	if (m_pLevel != nullptr)
-	{
-		delete m_pLevel;
-	}
-	
+	delete m_pLevel;
 }
 
 void Game::Update( float elapsedSec )
@@ -48,40 +40,58 @@ void Game::Update( float elapsedSec )
 	case Game::GameState::menu:
 		break;
 	case Game::GameState::alive:
+	{
 		if (!m_pLevel->m_LevelMusic.IsPlaying())
 		{
 			m_pLevel->m_LevelMusic.Play(true);
 		}
-		m_Camera.UpdatePlayer(elapsedSec);
-		m_pLevel->UpdateLevel(m_Camera, elapsedSec);
-		if(m_Camera.ColideWLevel(m_pLevel))
+
+		m_pLevel->UpdateLevel(m_Player, elapsedSec);
+
+		if (m_Player.UpdatePlayer(elapsedSec, m_pLevel))
 		{
+			SDL_ShowCursor(SDL_ENABLE);  // shows the cursor
 			m_State = GameState::won;
 		}
-		m_Camera.VelocCalc(elapsedSec);
-		m_Camera.pushPosition();
-		if (m_Camera.m_HealthManager.GetHeath() <= 0)
+		if (m_Player.m_HealthManager.GetHealth() <= 0)
 		{
+			SDL_ShowCursor(SDL_ENABLE);  // shows the cursor
 			m_State = GameState::dead;
 		}
+
+		Uint32 mouseState = SDL_GetMouseState(nullptr, nullptr);
+		if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+		{
+			m_Player.Shoot(m_pLevel->GetThings(), m_pLevel->GetWalls(), GetWindow().width);
+
+		}
+
+		// Check keyboard state
+		const Uint8* pStates = SDL_GetKeyboardState(nullptr);
+		if (pStates[SDL_SCANCODE_A])
+		{
+			m_Player.MoveLeft();
+		}
+		if (pStates[SDL_SCANCODE_D])
+		{
+			m_Player.MoveRight();
+		}
+		if (pStates[SDL_SCANCODE_W])
+		{
+			m_Player.MoveForward();
+		}
+		if (pStates[SDL_SCANCODE_S])
+		{
+			m_Player.MoveBackward();
+		}
+
 		break;
+	}
 	case Game::GameState::dead:
 		break;
 	default:
 		break;
 	}
-	// Check keyboard state
-	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	//if ( pStates[SDL_SCANCODE_RIGHT] )
-	//{
-	//	std::cout << "Right arrow key is down\n";
-	//}
-	//if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	//{
-	//	std::cout << "Left and up arrow keys are down\n";
-	//}
-	
-	
 }
 
 void Game::Draw( ) const
@@ -95,22 +105,12 @@ void Game::Draw( ) const
 		break;
 	case Game::GameState::alive:
 		{
-		//------UI propper
-		//UI myUI{};
-		m_pUI->DrawUI(GetWindow().width, bottomBounf, leftBound, scale,
-			m_Camera.m_HealthManager.GetHeath(), m_Camera.m_HealthManager.GetArmour(),
-			m_Camera.m_WeaponManager.GetAmo());
+		m_pUI->DrawUI(GetWindow().width,
+			m_Player.m_HealthManager.GetHealth(), m_Player.m_HealthManager.GetArmourHealth(),
+			m_Player.m_WeaponManager.GetAmo());
+		Vector2f pos{ m_Player.GetPos().x, m_Player.GetPos().y};
+		m_pLevel->DrawLevel( pos);
 
-		//------gameplay
-		//m_pLevel->DrawLevelUnordered();
-		Vector2f pos{ m_Camera.m_Pos.x, m_Camera.m_Pos.y };
-		int leaf{ utils::GetBSP(pos, true, m_pLevel->GetBSPtree()) };
-		m_pLevel->DrawLevelBSP(leaf, pos);
-
-		//------UI old
-		//glDepthFunc(GL_ALWAYS);
-		//m_Camera.GetHealth();
-		//float width{ GetWindow().width };
 		}
 		break;
 	case Game::GameState::dead:
@@ -118,13 +118,6 @@ void Game::Draw( ) const
 	default:
 		break;
 	}
-
-	//float uiWidth{ m_UI->GetWidth() };
-	//float ratio{ uiWidth / width };
-
-	//Rectf hi{ 0, 0, width, m_UI->GetHeight()/ratio};
-	//m_UI->Draw(hi);
-
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
@@ -133,70 +126,39 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 	switch (key)
 	{
 	case SDLK_1:
-		m_Camera.SwitchWeapon(1);
+		m_Player.SwitchWeapon(1);
 		break;
 	case SDLK_2:
-		m_Camera.SwitchWeapon(2);
+		m_Player.SwitchWeapon(2);
 		break;
 	case SDLK_LEFT:
-		leftBound--;
-		std::cout << leftBound << " leftOffset" << std::endl;
-		//g_eyePos.x = g_eyePos.x + increment;
-		//m_Camera.m_NextPos.x += -m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		//m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
-
 		break;
 	case SDLK_RIGHT:
-		leftBound++;
-		std::cout << leftBound << " leftOffset" << std::endl;
-		//g_eyePos.x = g_eyePos.x - increment;
-		//m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().y;//cos(Eye.m_offset) * e.y;
-		//m_Camera.m_NextPos.y -= -m_Camera.GetLookAtVector().x;//sin(Eye.m_offset) * e.y;
 		break;
 	case SDLK_UP:
-		//bottomBounf++;
-		//std::cout << bottomBounf << " bottomOffset" << std::endl;
-		//g_eyePos.z = g_eyePos.z + increment;
-		//Eye.m_eyePos.x = Eye.m_eyePos.x + Eye.getLookkVector().x;
-		//Eye.m_eyePos.y = Eye.m_eyePos.y + Eye.getLookkVector().y;
-		//m_pLevel->m_subSectorToDraw++;
+
 		break;
 	case SDLK_DOWN:
-		//bottomBounf--;
-		//std::cout << bottomBounf << " bottomOffset" << std::endl;
-		//g_eyePos.z = g_eyePos.z - increment;
-		//m_pLevel->m_subSectorToDraw--;
 		break;
-	case SDLK_a:
-		//scale--;
-		//std::cout << scale << " scale" << std::endl;
-		m_Camera.MoveLeft();
-		break;
-	case SDLK_d:
-		//scale++;
-		m_Camera.MoveRight();
-		//std::cout << scale << " scale" << std::endl;
-		
-		break;
-	case SDLK_w:
-		m_Camera.MoveForward();
-		
-		break;
-	case SDLK_s:
-		m_Camera.MoveBackward();
-		
-		break;
+	//case SDLK_a:
+	//	m_Player.MoveLeft();
+	//	break;
+	//case SDLK_d:
+	//	m_Player.MoveRight();
+	//	break;
+	//case SDLK_w:
+	//	m_Player.MoveForward();
+	//	break;
+	//case SDLK_s:
+	//	m_Player.MoveBackward();
+	//	break;
 	case SDLK_q:
 		break;
 	case SDLK_e:
 		break;
 	case SDLK_SPACE:
-		m_Camera.Jump();
-		
+		m_Player.Jump();
 		break;
-		//case SDLK_1:
-		//case SDLK_KP_1:
-
 	}
 }
 
@@ -220,26 +182,20 @@ void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 {
-	// SAMPLE CODE: print mouse position
-	//const float mouseX{ float(e.x) }; //.xrel
-	const int mouseX{ int(e.xrel) }; //.xrel
+	const int mouseX{ int(e.xrel) };
 	const int mouseY{ int(e.y) };
 	const int mousPosX{ int(e.x) };
 	if (mousPosX <= 1)
 	{
-		//SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
 		SDL_WarpMouseInWindow(SDL_GL_GetCurrentWindow(), int(GetViewPort().width) - 2, mouseY);
-		//SDL_WarpMouseInWindow
 	}
 	if (mousPosX >= GetViewPort().width - 1)
 	{
-		//SDL_WarpMouseGlobal(mousPosX + GetViewPort().width - 2, mouseY);
 		SDL_WarpMouseInWindow(SDL_GL_GetCurrentWindow(), 2, mouseY);
-		//SDL_WarpMouseInWindow
 	}
 	
 	
-	m_Camera.Turn(mouseX / 100.f);
+	m_Player.Turn(-mouseX / 100.f);
 	
 }
 
@@ -252,10 +208,10 @@ void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
 		{
 		case Game::GameState::menu:
 			m_State = GameState::alive;
+			SDL_ShowCursor(SDL_DISABLE);  // Hides the cursor
 			EnterLevel();
 			break;
 		case Game::GameState::alive:
-			m_Camera.Shoot(m_pLevel->GetThings(), m_pLevel->GetWalls(), m_WindowWidth);
 			break;
 		case GameState::won:
 
@@ -294,13 +250,9 @@ void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 
 void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)
 {
-
-	float increment{ 10.f };
-	//Eye.m_eyePos.y = Eye.m_eyePos.y + increment * e.y;
-	m_Camera.m_NextPos.x += m_Camera.GetLookAtVector().x * e.y * increment;
-	m_Camera.m_NextPos.y -= m_Camera.GetLookAtVector().y * e.y * increment;
-
-
+	/*float increment{ 10.f };
+	m_Player.m_NextPos.x += m_Player.GetLookAtVector().x * e.y * increment;
+	m_Player.m_NextPos.y -= m_Player.GetLookAtVector().y * e.y * increment;*/
 }
 
 void Game::ClearBackground( ) const
@@ -332,5 +284,5 @@ void Game::ClearBackground( ) const
 void Game::EnterLevel()
 {
 	//m_Camera.m_HealthManager.FullHealth();
-	m_Camera.ResetPos();
+	m_Player.ResetPos();
 }

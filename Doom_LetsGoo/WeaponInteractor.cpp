@@ -5,7 +5,7 @@
 WeaponManager* WeaponInteractor::m_pPlayerWeapons{};
 
 WeaponInteractor::WeaponInteractor(int pickedupAmount, WeaponType type, bool isWeapon)
-	:m_PickedupAmount{pickedupAmount},
+	:m_PickedupAmountAmo{pickedupAmount},
 	m_Type{type},
 	m_IsWeapon{ isWeapon }
 {
@@ -18,7 +18,7 @@ void WeaponInteractor::Interact()
 	{
 		m_pPlayerWeapons->PickUpWeapon(m_Type);
 	}
-	m_pPlayerWeapons->AddAmo(m_PickedupAmount, m_Type);
+	m_pPlayerWeapons->AddAmo(m_PickedupAmountAmo, m_Type);
 }
 
 void WeaponInteractor::AssignPlayer(WeaponManager& playerWeapon)

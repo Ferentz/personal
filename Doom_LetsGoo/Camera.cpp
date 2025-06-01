@@ -3,19 +3,42 @@
 #include <iostream>
 
 Camera::Camera(const Rectf& window, const Vector3f& pos)
-	:m_Window{ window },
-	m_Pos{pos}
+	:r_Window{ window },
+	r_Pos{pos}
 {
 }
 
-Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
+void Camera::TurnCamera(float offset)
 {
-	const float DEVISION = m_Window.width / float(M_PI);
+	m_angleOffset += offset;
+
+	if (m_angleOffset > M_PI) {
+		m_angleOffset = -float(M_PI) + (int(m_angleOffset * 100) % int(M_PI * 100)) / 100.f; // /100 and *100 to be able to keep .00 preceision with modulo
+	}
+	if (m_angleOffset < -M_PI) {
+		m_angleOffset = float(M_PI) + (int(m_angleOffset * 100) % int(-M_PI * 100)) / 100.f;
+	}
+}
+
+#pragma region 3dTo2d
+
+/// <summary>
+/// takes a single point in world space and calculates it's 2d position on screen based on the camera position and rotation.
+/// Adjusts : AngleXYUsed, prevAngleXY, amIVisible, point2D
+/// </summary>
+/// <param name="pointStruct" >
+/// </param>
+/// <returns>
+/// Vector2f screen position
+/// </returns>
+Vector2f Camera::PerspectiveCalculation(point2D_3D& pointStruct) const
+{
+	const float DEVISION = r_Window.width / float(M_PI);
 	const float SCALE{ 1.5f };
-	Vector3f point{ pointStruc.point3D };
-	float yDist{ point.y - m_Pos.y };
-	float hightDist{ point.z - m_Pos.z };
-	float xDist{ (point.x - m_Pos.x) };
+	Vector3f point{ pointStruct.point3D };
+	float yDist{ point.y - r_Pos.y };
+	float hightDist{ point.z - r_Pos.z };
+	float xDist{ (point.x - r_Pos.x) };
 
 	float xAngle{ float(atan2(yDist, xDist)) };
 	float yAngle{};
@@ -31,27 +54,27 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 		newXAngle = newXAngle - 2 * float(M_PI);
 	}
 	float diagonalDist{ float(sqrt(xDist * xDist + yDist * yDist)) };
-	pointStruc.Dist3D = float(sqrt(diagonalDist * diagonalDist + hightDist * hightDist));
+	pointStruct.Dist3D = float(sqrt(diagonalDist * diagonalDist + hightDist * hightDist));
 	float newXDist = cos(newXAngle) * diagonalDist;
 	float newYDist = sin(newXAngle) * diagonalDist;
 
 	yAngle = float(atan2(hightDist, newXDist));
 
-	pointStruc.AngleXYUsed[0] = xAngle;
-	pointStruc.AngleXYUsed[1] = yAngle;
-	pointStruc.prevAngleXY[0] = pointStruc.AngleXYUsed[0];
-	pointStruc.prevAngleXY[1] = pointStruc.AngleXYUsed[1];
+	pointStruct.AngleXYUsed[0] = xAngle;
+	pointStruct.AngleXYUsed[1] = yAngle;
+	pointStruct.prevAngleXY[0] = pointStruct.AngleXYUsed[0];
+	pointStruct.prevAngleXY[1] = pointStruct.AngleXYUsed[1];
 	if (newXDist > 0)
 	{
-		pointStruc.amIVisible = true;
+		pointStruct.amIVisible = true;
 	}
 	else
 	{
-		pointStruc.amIVisible = false;
+		pointStruct.amIVisible = false;
 	}
 
 	Vector2f Point2D{};
-	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
+	Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + r_Window.height / 2;
 
 	//the following code serves to map the points when they are passing behind you, as -pi would be all the wway to the left, and pi all the way to the right.
 	// When the point passed behind you, you dont want it to jump from left to right
@@ -65,9 +88,9 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 		direction = -1;
 	}
 	else {
-		Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + m_Window.width / 2;
-		pointStruc.AngleXYUsed[2] = (newXAngle)*m_projDist;
-		pointStruc.point2D = Point2D;
+		Point2D.x = SCALE * ((newXAngle)*m_projDist) * DEVISION + r_Window.width / 2;
+		pointStruct.AngleXYUsed[2] = (newXAngle)*m_projDist;
+		pointStruct.point2D = Point2D;
 		return Point2D;
 	}
 
@@ -76,9 +99,9 @@ Vector2f Camera::PerspCalc(point2D_3D& pointStruc) const
 	float entryAngleRest = direction * float(M_PI) - entryAngle;
 	float result = restAngle * entryAngle / entryAngleRest;
 
-	Point2D.x = SCALE * (result * m_projDist) * DEVISION + m_Window.width / 2;
-	pointStruc.AngleXYUsed[2] = newXAngle;
-	pointStruc.point2D = Point2D;
+	Point2D.x = SCALE * (result * m_projDist) * DEVISION + r_Window.width / 2;
+	pointStruct.AngleXYUsed[2] = newXAngle;
+	pointStruct.point2D = Point2D;
 	return Point2D;
 }
 
@@ -94,8 +117,8 @@ bool Camera::ClipLineToFOV(point2D_3D& frontPt, point2D_3D& backPt) const
 	Vector3f vis3D = frontPt.point3D;
 	Vector3f invis3D = backPt.point3D;
 
-	Vector3f vis3D_repos = vis3D - m_Pos;
-	Vector3f invis3D_repos = invis3D - m_Pos;
+	Vector3f vis3D_repos = vis3D - r_Pos;
+	Vector3f invis3D_repos = invis3D - r_Pos;
 
 	float angleVis = atan2(vis3D_repos.y, vis3D_repos.x) + m_angleOffset;
 	float angleInvis = atan2(invis3D_repos.y, invis3D_repos.x) + m_angleOffset;
@@ -157,7 +180,7 @@ bool Camera::ClipLineToFOV(point2D_3D& frontPt, point2D_3D& backPt) const
 	Vector3f clippedPos = invis3D + ((vis3D - invis3D ) * t);
 	clippedPt.point3D = clippedPos;
 	 // calculate the 2D position
-	backPt.point2D = PerspCalc(clippedPt);
+	backPt.point2D = PerspectiveCalculation(clippedPt);
 
 	return true;
 }
@@ -168,8 +191,8 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 
 	const Vector3f point_invis{ invisible.point3D };
 
-	float yDist_invis{ point_invis.y - m_Pos.y };
-	float xDist_invis{ (point_invis.x - m_Pos.x) };
+	float yDist_invis{ point_invis.y - r_Pos.y };
+	float xDist_invis{ (point_invis.x - r_Pos.x) };
 	float xAngle_invis{ float(atan2(yDist_invis, xDist_invis)) };
 
 	// se we got our originl angle, but we wanna calculate it according to the x axes. so, we rotate it with the negative offset
@@ -188,8 +211,8 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 	//---------------------------------------------------------------------------------------------------------------------------
 	const Vector3f point_vis{ visible.point3D };
 
-	float yDist_vis{ point_vis.y - m_Pos.y };
-	float xDist_vis{ (point_vis.x - m_Pos.x) };
+	float yDist_vis{ point_vis.y - r_Pos.y };
+	float xDist_vis{ (point_vis.x - r_Pos.x) };
 	float xAngle_vis{ float(atan2(yDist_vis, xDist_vis)) };
 
 	// se we got our originl angle, but we wanna calculate it according to the x axes. so, we rotate it with the negative offset
@@ -214,7 +237,7 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 		// we got the result of the thing interjecting with the camera shoulder line.
 		// we then need to get it's x which...doesnt matter. itgets projected stragthe on -90 0r +90 degrees
 		// so... what?
-		const float DEVISION = m_Window.width / float(M_PI); // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
+		const float DEVISION = r_Window.width / float(M_PI); // curently magic number. should get linked up with the window size but havent found how to do that yet in a way that i like
 		const float SCALE{ 1.f };
 		Vector2f Point2D{};
 
@@ -222,39 +245,38 @@ void Camera::intersecCalc(const point2D_3D& visible, point2D_3D& invisible) cons
 		float newYDist = result.y;
 		//
 
-		float hightDist{ point_invis.z - m_Pos.z };
+		float hightDist{ point_invis.z - r_Pos.z };
 		float yAngle = float(atan2(hightDist, newXDist));
-		Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + m_Window.height / 2;
-		Point2D.x = SCALE * float(atan2(result.y, 0) * m_projDist) * DEVISION + m_Window.width / 2;
+		Point2D.y = SCALE * ((yAngle)*m_projDist) * DEVISION + r_Window.height / 2;
+		Point2D.x = SCALE * float(atan2(result.y, 0) * m_projDist) * DEVISION + r_Window.width / 2;
 	
 		invisible.point2D = Point2D;
 	}
 	//utils::Raycast(LINE_SEGMENT, CENTER, m_MousePos, hitInfo)
 }
 
-const Vector2f Camera::MakeLookAtVector() const
-{
-	return Vector2f{float( cos(m_angleOffset)), float(sin(m_angleOffset)) };
-}
+#pragma endregion 3dTo2d
 
-void Camera::TurnCamera(float offset)
-{
-	m_angleOffset += offset;
+#pragma region camProperties
 
-	if (m_angleOffset > M_PI) {
-		m_angleOffset = -float(M_PI) + (int(m_angleOffset * 100) % int(M_PI * 100)) / 100.f;
+const Vector2f Camera::MakeLookAtVector(bool invert) const
+{
+	if(invert)
+	{
+		return Vector2f{ float(cos(-m_angleOffset)), float(sin(-m_angleOffset)) };
+
 	}
-	if (m_angleOffset < -M_PI) {
-		m_angleOffset = float(M_PI) + (int(m_angleOffset * 100) % int(-M_PI * 100)) / 100.f;
-	}
+	return Vector2f{ float(cos(m_angleOffset)), float(sin(m_angleOffset)) };
 }
 
 float Camera::GetDistanceFromMidle(float xScreenPos) const
 {
-	return xScreenPos - m_Window.width / 2;
+	return xScreenPos - r_Window.width / 2;
 }
 
 float Camera::GetWindowWidth() const
 {
-	return m_Window.width;
+	return r_Window.width;
 }
+
+#pragma endregion camProperties

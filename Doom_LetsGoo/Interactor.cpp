@@ -2,11 +2,7 @@
 #include "Interactor.h"
 #include "HealthInteractor.h"
 #include "WeaponInteractor.h"
-#include "PLayer.h"
-
-Interactor::Interactor()
-{
-}
+#include "Player.h"
 
 void Interactor::AssignPlayer(Player& player)
 {

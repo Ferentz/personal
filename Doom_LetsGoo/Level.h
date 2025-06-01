@@ -1,10 +1,6 @@
 #pragma once
 #include "BaseGame.h"
 #include <vector>
-#include "Texture.h"
-#include "Utils.h"
-#include "structs.h"
-#include <set>
 
 #include "SoundEffect.h"
 #include "SoundStream.h"
@@ -13,64 +9,75 @@ class Player;
 class Plane;
 class PlaneIregular;
 class Thing;
-class Enemy;
+class Texture;
+
 class Level final
 {
 public:
-	Level(Player& player);
-	Level(const Level& toCopy) = delete;
-	Level(Level&& toMove) noexcept;
-	Level& operator=(const Level& rhs) = delete;
-	Level& operator=(Level&& rhs) noexcept;
+	explicit Level(Player& player);
 	~Level();
 
-	void DrawLevelBSP(int leaf, Vector2f pos);
+	//rule of 5
+	
+	Level(Level&& toMove) noexcept;
+	Level& operator=(Level&& rhs) noexcept;
+
+	Level(const Level& toCopy) = delete; // there should only be one instance of a given level + the level's are created by the level generator, which can be called again if this is desired
+	Level& operator=(const Level& rhs) = delete;
+	
+
+	//basics
+	void DrawLevel(Vector2f pos);
 	void UpdateLevel( Player& eyeObject, float elapsedSec);
-	int ColideWLevel(const Vector3f& pos, Vector3f& nextPos, float& floorHeight, const float charDiameter,
-		bool isPlayer, bool& exit)const;
-	const std::vector<BSPnode>& GetBSPtree() const;
-	std::vector <Thing*>& GetThings();
-	const std::vector <Plane*>& GetWalls();
-	bool GetCleared();
+	
+	//collision
+	void ColideWLevel(const Vector3f& pos, Vector3f& nextPos,
+		float& floorHeight, const float charDiameter,
+		const bool ignoreLedges, bool& foundExit) const;
+
+	//interactions
+	const std::vector <Thing*>& GetThings() const;
+	const std::vector <Plane*>& GetWalls() const;
+	bool GetCleared() const;
 	void SpawnWeapon(point2D_3D Location);
+
+	
 	SoundStream m_LevelMusic{
 		"sounds/D_E1M1.mid"
 	};
 	
 
 private:
+	//rule of 5 helper
+	void MoveLevelMembers(Level&& toMove) noexcept;
+
+	//basics helpers
+	void DrawLevelBSP(int leaf, Vector2f pos);
 	void DrawLeaf(int leafIndex);
 	void UpdateThings(Player& eyeObject, float elapsedSec);
 	void SwapThingSubsector(const int originalThingSubSector, const int subSector2, const int ThingLevelIndex);
+	const std::vector<BSPnode>& GetBSPtree() const;
+
+	//collision helpers
 	float GetFloorOfLeaf(const int leaf) const;
 	int GetLeafWallAmount(const int leaf) const;
 	Plane* GetWallFromLeaf(int leaf, int wallIdx) const;
 	bool TriggerDoor(const int leaf, const int wallIdx) const;
 
-	bool m_isCleared{false};
-	//added vars
-	Texture* m_pThingTexture{};
-	std::vector<Texture> m_Textures{};
-	std::map<std::string, int> m_NameMap{};
 
+	bool m_isCleared{false};
+
+	Texture* m_pThingTexture{}; //temp untill Thing class is finalized   TODO:: include texture with Thing class
+	
 	std::vector<BSPnode> m_BSP{};
 	std::vector<BSPleafeNode> m_BSPleafs{};
-	int m_PlaneAmount{}; //remove
 	std::vector <Plane*> m_pPlanes{};
-	// so now, 
-	int m_floorsNCeilingsAmount{}; // remove
 	std::vector <PlaneIregular> m_pFloorsNCeilings{};
 	std::vector <Thing*> m_pThings{};
-
-	// we need a vector to store what line a wall belongs to
-	std::vector<int> m_LinePerWall;
-	std::set<int> m_tags[2]; // name unlear
-
-	int m_EnemyToDraw{};
+	std::vector<Texture> m_Textures{};
 	
 	SoundEffect m_Door{
 		"sounds/DSDOROPN.wav"
 	};
-
 };
 

@@ -10,10 +10,43 @@ Door::Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, fl
 {
 }
 
+bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer)
+{
+	if (Plane::PlaneCollision(pos3D, nextPos3D, returnPos, outNormal, isPlayer))
+	{
+		m_opening = true;
+		return true;
+	}
+	return false;
+}
+
+void Door::UpdatePlane(const Player& eyeObject, float elapsSec)
+{
+	if (m_opening)
+	{
+		Opening();
+	}
+	Plane::UpdatePlane(eyeObject, elapsSec);
+}
+
+/// <summary>
+/// returns if door is the level exit
+/// </summary>
+/// <returns>
+/// </returns>
+bool Door::Trigger()
+{
+	if (m_IsExit)
+	{
+		return true;
+	}
+	m_opening = true;
+	return false;
+}
 
 void Door::Opening()
 {
-	
+
 	float lowestHeight{ 1000 };
 	for (int point{}; point < 4; point++)
 	{
@@ -33,35 +66,5 @@ void Door::Opening()
 		m_direction = 1;
 		m_opening = false;
 	}
-}
-
-bool Door::Triggered()
-{
-	if (m_IsExit)
-	{
-		return true;
-	}
-	m_opening = true;
-	return false;
-}
-
-bool Door::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D, Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer)
-{
-	if (Plane::PlaneCollision(pos3D, nextPos3D, returnPos, outNormal, isPlayer))
-	{
-		//triggered();
-		m_opening = true;
-		return true;
-	}
-	return false;
-}
-
-void Door::UpdatePlane(const Player& eyeObject, float elapsSec)
-{
-	if (m_opening)
-	{
-		Opening();
-	}
-	Plane::UpdatePlane(eyeObject, elapsSec);
 }
 

@@ -1,35 +1,25 @@
 #include "pch.h"
 #include "plane.h"
+
 #include <iostream>
-#include <cmath>
-#include <vector> // For vector operations if needed
-#include <utils.h>
+//#include <cmath>
+//#include <vector>
+//#include <utils.h>
+
 #include "Texture.h"
-#include "PLayer.h"
+#include "Player.h"
 
-const Color4f RED{ 1.0f, 0.0f, 0.0f, 1.0f };
-const Color4f WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
-const Color4f YELLOW{ 1.0f, 1.0f, 0.0f, 1.0f };
-const Color4f BLUE{ 0.0f, 0.0f, 1.0f, 1.0f };
-const Color4f GREEN{ 0.0f, 1.0f, .0f, 1.0f };
-const Color4f TEAL{ 0.0f, 1.0f, 1.0f, 1.0f };
 
-Plane::Plane()
-	:m_Location{},
-	m_Width{},
-	m_Height{},
-	m_TextureIndex{},
-	m_Normal{}
-{
-
-}
 Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 	:m_Location{ position },
 	m_Width{ width },
 	m_Height{ height },
-	m_TextureIndex{ texIdx },
-	m_Normal{ m_Width.CrossProduct(m_Height).x,m_Width.CrossProduct(m_Height).y }
+	m_TextureIndex{ texIdx }
 {
+	Vector3f cross{ m_Width.CrossProduct(
+		Vector3f(abs(m_Height.x), abs(m_Height.y), abs(m_Height.z))) };
+	m_Normal = Vector2f{ cross.x,cross.y };
+
 	for (int index{}; index < 4; index++) {
 		m_Points[index] = {};
 	}
@@ -39,11 +29,6 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 	for (int widthFactor{}; widthFactor < 2; widthFactor++) {
 
 		for (int heightFactorPrev{}; heightFactorPrev < 2; heightFactorPrev++) {
-			// first 0 0 , then 0 1, then 1 1, then 1 0
-
-			// so, 0 0 1 1 is good
-			//then 0 1 1 0
-			// 0 
 			heightFactor += heightFactorPrev * mult;
 			m_Points[pointIndex].point3D.x = position.x + width.x * widthFactor + height.x * heightFactor;
 			m_Points[pointIndex].point3D.y = position.y + width.y * widthFactor + height.y * heightFactor;
@@ -55,10 +40,11 @@ Plane::Plane(Vector3f& position, Vector3f& width, Vector3f& height, int texIdx)
 
 }
 
+#pragma region basics
 void Plane::UpdatePlane(const Player& player, float elapsSec) {
 	bool pointVisible{ false };
 	for (int index{}; index < 4; index++) {
-		m_Points[index].point2D = player.GetCamera().PerspCalc(m_Points[index]);
+		m_Points[index].point2D = player.GetCamera().PerspectiveCalculation(m_Points[index]);
 		if (m_Points[index].amIVisible)
 		{
 			pointVisible = true;
@@ -69,21 +55,9 @@ void Plane::UpdatePlane(const Player& player, float elapsSec) {
 		bool vis1{ m_Points[index].amIVisible };
 		int prevIndex{ utils::getArrIndex(4, index - 1) };
 		bool vis2{ m_Points[prevIndex].amIVisible };
-		/*if (m_Normal.DotProduct(player.GetLookAtVector()) < 0 && vis1 != vis2)
-		{
-			if (vis1 == true)
-			{
-				player.GetCamera().ClipLineToFOV(m_Points[index], m_Points[prevIndex]);
-			}
-			else
-			{
-				player.GetCamera().ClipLineToFOV(m_Points[prevIndex], m_Points[index]);
-			}
-			
-		}*/
 	}
-
-	if (m_Normal.DotProduct(player.GetLookAtVector()) < 0 && pointVisible)
+	// clamp the dot result to reduce instances of large walls being visible whilst behind you
+	if (m_Normal.Normalized().DotProduct(player.GetLookAtVector(true)) < 0.2f && pointVisible)
 	{
 		m_IsVisible = true;
 	}
@@ -99,13 +73,13 @@ void Plane::DrawPlane(const Texture& texture) const
 	/*if (m_IsVisible) // no way to tell the normal when loading the level
 	{
 	}*/
-	bool isVisible{ false };
+	/*bool isVisible{ false };
 	for (int index{}; index < 4; index++) {
 		if (m_Points[index].amIVisible) {
 			isVisible = true;
 		}
-	}
-	if (isVisible) {
+	}*/
+	if (m_IsVisible) {
 
 		Vector3f planesCompArr3D[4];
 		for (int index{}; index < 4; index++) {
@@ -118,55 +92,9 @@ void Plane::DrawPlane(const Texture& texture) const
 		texture.DrawTexturePersp(planesCompArr3D);
 	}
 }
+#pragma endregion basics
 
-bool Plane::PlaneCollision(Player& eyeObject) {
-
-	float top{ m_Location.z + m_Height.z };
-	float bottom{ m_Location.z };
-	float topUse{ top };
-	float bottomUse{ bottom };
-	if (top < bottom)
-	{
-		topUse = bottom;
-		bottomUse = top;
-	}
-	
-	if (eyeObject.m_NextPos.z > topUse || eyeObject.m_NextPos.z < bottomUse)
-	{
-		return false;
-	}
-		
-	utils::HitInfo hitInfo{};
-	Vector2f pos{ eyeObject.m_Pos.x, eyeObject.m_Pos.y };
-	Vector2f nextPos{ eyeObject.m_NextPos.x, eyeObject.m_NextPos.y };
-	Vector2f wallvert[]{ Vector2f( m_Points[0].point3D.x, m_Points[0].point3D.y ),
-		Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y } };
-	
-	
-	if (utils::Raycast(wallvert, 2,
-		pos, nextPos,
-		hitInfo))
-	{
-		//std::cout << m_bBlock << std::endl;
-		//std::cout << m_bBlockMonster << std::endl;
-		//std::cout << m_bSecret << std::endl;
-		//std::cout << m_bSoundBlock << std::endl;
-		//std::cout << std::endl;
-		if (m_bBlockMonster)
-		{
-			std::cout << "activate door" << std::endl;
-		}
-		const Vector2f RAY{ pos - nextPos };
-		const Vector2f REFLECTION{ RAY.Reflect(hitInfo.normal) };
-
-		Vector2f nextPoint2D = hitInfo.intersectPoint - REFLECTION * (hitInfo.lambda);
-		eyeObject.m_NextPos.x = nextPoint2D.x;
-		eyeObject.m_NextPos.y = nextPoint2D.y;
-		return true;
-	}
-	return false;
-}
-
+#pragma region collision
 bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	Vector2f& returnPos, Vector2f& outNormal, const bool isPlayer) const
 {
@@ -178,24 +106,11 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	float highPoint = std::max(pos3D.z, nextPos3D.z); // some walls are created upside down
 	float lowPoint = std::min(pos3D.z, nextPos3D.z);
 
-	//if (!isPlayer && lowPoint > topUse && abs(m_Height.z) > 5)
-	//{
-	//	//std::cout << "large ledge" << std::endl;
-	//	return true;
-	//}
 
 	if (lowPoint > topUse || highPoint < bottomUse)
 	{
 		return false;
 	}
-
-	//if(
-	//	((pos3D.z > topUse) || (pos3D.z < bottomUse)) ||
-	//	((nextPos3D.z > topUse) || (nextPos3D.z < bottomUse))//&& isPlayer) ||
-	//	) // if the player is above or below, if a monster and the ledge is bigger than the step height
-	//{
-	//	return false;
-	//}
 		
 
 	Vector2f pos{ pos3D.x, pos3D.y };
@@ -222,14 +137,8 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		std::cout << m_bSecret << std::endl;
 		std::cout << m_bSoundBlock << std::endl;
 		std::cout << std::endl;*/
-		//if (m_bBlock)
-		//{
-		//	//std::cout << "activate door" << std::endl;
-		//}
-		// Get approach vector
-		Vector2f moveDir = (nextPos - pos).Normalized();
 
-		// Make sure normal is pointing toward pos (against motion)
+		Vector2f moveDir = (nextPos - pos).Normalized();
 		Vector2f hitNormal = hitInfo.normal.Normalized();
 		if (hitNormal.DotProduct(moveDir) > 0.0f)
 		{
@@ -251,18 +160,14 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 	return false;
 }
 
-void Plane::SetActionBools(uint16_t actionBit)
+void Plane::GetWallVerts(Vector2f wallVerts[]) const
 {
-	m_bBlock = (actionBit & 0x0001) != 0 ;
-	m_bBlockMonster = (actionBit & 0x0002) != 0 ;
-	m_bTwoSided = (actionBit & 0x0004) != 0 ;
-	m_bUnpeggedUpperTex = (actionBit & 0x0008) != 0;
-	m_bUnpeggedLowerTex = (actionBit & 0x0010) != 0 ;
-	m_bSecret = (actionBit & 0x0020) != 0 ;
-	m_bSoundBlock = (actionBit & 0x0040) != 0 ;
-	m_bNotOnAutoMap = (actionBit & 0x0080) != 0 ;
-	m_bAlwaysOnAUtoMap = (actionBit & 0x0100) != 0 ;
+	wallVerts[0] = Vector2f{ m_Points[0].point3D.x, m_Points[0].point3D.y };
+	wallVerts[1] = Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y };
 }
+#pragma endregion collision
+
+#pragma region interaction
 bool Plane::IsDoor()
 {
 	if (m_bBlock)
@@ -271,55 +176,27 @@ bool Plane::IsDoor()
 	}
 	return false;
 }
+
 int Plane::GetTexIdx()
 {
 	return m_TextureIndex;
 }
-bool Plane::Triggered()
+bool Plane::Trigger()
 {
 	return false;
 }
-//
-//bool Plane::PlaneCollision(DoomCamera& eyeObject) {
-//	
-//	Vector3f normalWidth{ m_Width.Normalized()};
-//	Vector3f normalHeight{ m_Height.Normalized() };
-//	Vector3f normal{ m_Width.CrossProduct(m_Height).Normalized() }; //cross(height).normalize() };
-//
-//	Vector3f relativeEyeLocation_moved{ eyeObject.m_Pos.x - m_Location.x,
-//		eyeObject.m_Pos.y - m_Location.y,
-//		eyeObject.m_Pos.z - m_Location.z };
-//
-//	//std::cout << relativeEyeLocation_moved << std::endl;
-//
-//	float newXpos = relativeEyeLocation_moved.DotProduct(normalWidth) * relativeEyeLocation_moved.DotProduct(normalWidth);//dot(normalWidth), 2)); // all power 2 to avoid using the square root later
-//	float newYpos = relativeEyeLocation_moved.DotProduct(normalHeight) * relativeEyeLocation_moved.DotProduct(normalHeight);
-//	float newZpos = relativeEyeLocation_moved.DotProduct(normal) * relativeEyeLocation_moved.DotProduct(normal);
-//
-//	float planeWidth = m_Width.DotProduct(m_Width);  // Squared length of width vector
-//	float planeHeight = m_Height.DotProduct(m_Height);  // Squared length of height vector
-//
-//	while (newXpos >= 0 - planeOfset && newXpos <= planeWidth + planeOfset &&
-//		newYpos >= 0 - planeOfset && newYpos <= planeHeight + planeOfset &&
-//		newZpos >= -planeOfset && newZpos <= planeOfset) //planeOfset is the power 2 of the actual planeoffset
-//	{
-//		float sideCheck = relativeEyeLocation_moved.DotProduct(normal);
-//		int mult{ -1 };
-//		if (sideCheck > 0) {
-//			mult = 1;
-//		}
-//		std::cout << "collide" << std::endl;
-//		eyeObject.m_Pos.x += normal.x * mult;
-//		eyeObject.m_Pos.y += normal.y * mult;
-//		eyeObject.m_Pos.z += normal.z * mult;
-//		return true;
-//	}
-//
-//	return false;
-//}
+#pragma endregion interaction
 
-void Plane::GetWallVerts(Vector2f wallVerts[]) const 
+void Plane::SetActionBools(uint16_t actionBit)
 {
-	wallVerts[0] = Vector2f{ m_Points[0].point3D.x, m_Points[0].point3D.y };
-	wallVerts[1] = Vector2f{ m_Points[2].point3D.x, m_Points[2].point3D.y };
+	m_bBlock = (actionBit & 0x0001) != 0;
+	m_bBlockMonster = (actionBit & 0x0002) != 0;
+	m_bTwoSided = (actionBit & 0x0004) != 0;
+	m_bUnpeggedUpperTex = (actionBit & 0x0008) != 0;
+	m_bUnpeggedLowerTex = (actionBit & 0x0010) != 0;
+	m_bSecret = (actionBit & 0x0020) != 0;
+	m_bSoundBlock = (actionBit & 0x0040) != 0;
+	m_bNotOnAutoMap = (actionBit & 0x0080) != 0;
+	m_bAlwaysOnAUtoMap = (actionBit & 0x0100) != 0;
 }
+

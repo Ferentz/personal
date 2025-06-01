@@ -23,7 +23,7 @@ Pistol::Pistol(int startAmo, int maxAmo, float range)
 	
 }
 
-void Pistol::Shoot(std::vector<Shootable*> shootables, float windowWidth)
+void Pistol::Shoot(std::vector<Shootable*>& shootables, float windowWidth)
 {
 	if (GetAmo() > 0 && !GetIsShooting())
 	{
@@ -44,11 +44,7 @@ void Pistol::UpdateWeapon(float elapsedsecs)
 			{
 				m_ImageIndex++;
 
-				if (m_ImageIndex == m_FireFrame)
-				{
-					//m_DrawFire = true;
-				}
-				if (m_DrawFire && m_ImageIndex > m_FireFrame + m_ShootOverayNum - 1)
+				if (m_DrawFire && m_ImageIndex > m_FireFrameIndex + m_ShootOverlayNumFrames - 1)
 				{
 					m_ImageIndex = 0;
 
@@ -76,50 +72,46 @@ void Pistol::UpdateWeapon(float elapsedsecs)
 
 void Pistol::DrawWeapon(float windowWidth) const
 {
-	glPushMatrix();
+	glTranslatef(-8.5f, 0.f, 0.f);
+	int indexToUse{ m_ShootOverlayNumFrames };
+	if (m_IsShooting)
 	{
-		int indexToUse{ m_ShootOverayNum };
-		if (m_IsShooting)
-		{
-			indexToUse = m_ImageIndex + m_ShootOverayNum;
-		}
-		if (!m_IsShooting)
-		{
-			indexToUse = m_ShootOverayNum;
-		}
-
-		//glTranslatef(windowWidth / 2, 100.f, 0.f); //moves the image space 
-		glScalef(windowWidth / 300, windowWidth / 300, 0.f);
-		glTranslatef(0.f, 200, 0.f);
-		if (m_IsShooting && !m_Reverse && m_ImageIndex == m_FireFrame)
-		{
-			glPushMatrix();
-			{
-				//glTranslatef(0.f, m_WeaponImages[m_ImageIndex]->GetHeight()/2, 0.f); //moves the image space 
-				glTranslatef(float( -m_TextureOffsets[0][0]), float(m_TextureOffsets[0][1]), 0.f);
-				m_WeaponImages[0]->Draw(
-					Rectf{
-				0.f,
-				-m_WeaponImages[0]->GetHeight(),
-				m_WeaponImages[0]->GetWidth(),
-				m_WeaponImages[0]->GetHeight()
-					}
-				);
-			}
-			glPopMatrix();
-		}
-
-		glTranslatef(float( -m_TextureOffsets[indexToUse][0]), float(m_TextureOffsets[indexToUse][1]), 0.f);
-
-		m_WeaponImages[indexToUse]->Draw(
-			Rectf{
-				0.f,
-			-m_WeaponImages[indexToUse]->GetHeight(),
-			m_WeaponImages[indexToUse]->GetWidth(),
-			m_WeaponImages[indexToUse]->GetHeight()
-			}
-		);
-
+		indexToUse = m_ImageIndex + m_ShootOverlayNumFrames;
 	}
-	glPopMatrix();
+	if (!m_IsShooting)
+	{
+		indexToUse = m_ShootOverlayNumFrames;
+	}
+
+	//glTranslatef(windowWidth / 2, 100.f, 0.f); //moves the image space 
+		
+	if (m_IsShooting && !m_Reverse && m_ImageIndex == m_FireFrameIndex)
+	{
+		glPushMatrix();
+		{
+			//glTranslatef(0.f, m_WeaponImages[m_ImageIndex]->GetHeight()/2, 0.f); //moves the image space 
+			glTranslatef(float( -m_TextureOffsets[0][0]), float(m_TextureOffsets[0][1]), 0.f);
+			m_WeaponImages[0]->Draw(
+				Rectf{
+			0.f,
+			-m_WeaponImages[0]->GetHeight(),
+			m_WeaponImages[0]->GetWidth(),
+			m_WeaponImages[0]->GetHeight()
+				}
+			);
+		}
+		glPopMatrix();
+	}
+
+	glTranslatef(float( -m_TextureOffsets[indexToUse][0]), float(m_TextureOffsets[indexToUse][1]), 0.f);
+
+	m_WeaponImages[indexToUse]->Draw(
+		Rectf{
+			0.f,
+		-m_WeaponImages[indexToUse]->GetHeight(),
+		m_WeaponImages[indexToUse]->GetWidth(),
+		m_WeaponImages[indexToUse]->GetHeight()
+		}
+	);
+
 }

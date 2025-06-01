@@ -1,28 +1,35 @@
 #include "pch.h"
-#include "PLayer.h"
+#include "Player.h"
 #include <iostream>
 #include "Level.h"
 #include "Plane.h"
-//#include "Things.h"
 #include "Enemy.h"
 #include "Navigator.h"
-//#include "game.h"
 
-// next we need to work on jump
-
-// get the trigger event in game to shoot.
-//then conect to get the level things ad check if smth gets hit
 
 Player::Player(const Rectf& window)
-	:
-	m_NextPos{ m_Pos },
-	m_lookVector{ 0,0 },
-	m_HealthManager{500},
+	:m_HealthManager{500},
 	m_WeaponManager{},
 	m_Camera{ window , m_Pos}
 {
 }
 
+
+#pragma region basics
+bool Player::UpdatePlayer(float elapsedsecs, Level* pLevel)
+{
+	m_WeaponManager.UpdateWeapon(elapsedsecs);
+
+	if (ColideWLevel(pLevel))
+	{
+		return true;
+	}
+	VelocCalc(elapsedsecs);
+	pushPosition();
+	return false;
+}
+
+#pragma region basics helpers
 void Player::pushPosition()
 {
 	m_Pos = m_NextPos;
@@ -35,33 +42,27 @@ bool Player::ColideWLevel(const Level* pLevel)
 	return exit;
 }
 
+//TODO :: footsteps soud + velocity bob & sound when fall
 void Player::VelocCalc(float elapsedSec)
 {
-	m_vericalVelocity -= (m_GRAVITY * elapsedSec);
-	m_NextPos.z = m_Pos.z + m_vericalVelocity;
-	if (m_NextPos.z <= m_FLoorHeigt + m_charHeight)
+	m_VericalVelocity -= (m_Gravity * elapsedSec * m_JumpnFallSpeed);
+	m_NextPos.z = m_Pos.z + (m_VericalVelocity * elapsedSec * m_JumpnFallSpeed);
+	if (m_NextPos.z <= m_FLoorHeigt + m_CharHeight)
 	{
-		m_vericalVelocity = 0;
-		m_NextPos.z = m_FLoorHeigt + m_charHeight;
+		m_VericalVelocity = 0;
+		m_NextPos.z = m_FLoorHeigt + m_CharHeight;
 		m_Standing = true;
 		return;
 	}
 	
 }
 
-void Player::UpdatePlayer(float elapsedsecs)
-{
-	m_WeaponManager.UpdateWeapon(elapsedsecs);
-}
 
-void Player::DrawPlayer() const
-{
-	// we want the player to have the textures, and then display the weapon needed
+#pragma endregion basics helpers
+#pragma endregion basics
 
-}
-
-
-void Player::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
+#pragma region input
+void Player::Shoot(const std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth)
 {
 	const int maxAmout{ 20 };
 	int count{ 1 };
@@ -69,7 +70,7 @@ void Player::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 	std::vector<float> distances{};
 	shootables.reserve(maxAmout);
 	distances.reserve(maxAmout);
-	for (Thing*& object : thingsToShoot)
+	for (Thing* object : thingsToShoot)
 	{
 		if ((object->GetSubClass() == ThingSubclass::enemy || object->GetSubClass() == ThingSubclass::shootable) )
 		{
@@ -79,7 +80,7 @@ void Player::Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>&
 				bool lineOfSight{ false };
 				if (pShootable->GetSubClass() == ThingSubclass::enemy)
 				{
-					lineOfSight = static_cast <Enemy*> (pShootable)->m_pNavigator->m_hasLineOfSight;
+					lineOfSight = static_cast <Enemy*> (pShootable)->GetpNavigator()->m_hasLineOfSight;
 				}
 
 				if (m_Camera.GetDistanceFromMidle(pShootable->GetLocationPoint().point2D.x) < m_Camera.GetWindowWidth() / 6 && // if the shootable is in front of you
@@ -106,38 +107,48 @@ void Player::Jump()
 	if (m_Standing)
 	{
 		m_Standing = false;
-		m_vericalVelocity = 4;
+		m_VericalVelocity = m_JumpVelocity;
 	}
 }
 
 void Player::MoveForward()
 {
-	m_NextPos.x += GetLookAtVector().x;
-	m_NextPos.y -= GetLookAtVector().y;
+	//m_NextPos.x += GetLookAtVector().x;
+	//m_NextPos.y -= GetLookAtVector().y;
+	Move(GetLookAtVector().x, -GetLookAtVector().y);
 }
 
 void Player::MoveBackward()
 {
-	m_NextPos.x -= GetLookAtVector().x;
-	m_NextPos.y += GetLookAtVector().y;
+	//m_NextPos.x -= GetLookAtVector().x;
+	//m_NextPos.y += GetLookAtVector().y;
+	Move(-GetLookAtVector().x, GetLookAtVector().y);
 }
 
 void Player::MoveLeft()
 {
-	m_NextPos.x += -GetLookAtVector().y;
-	m_NextPos.y -= GetLookAtVector().x;
+	//m_NextPos.x += -GetLookAtVector().y;
+	//m_NextPos.y -= GetLookAtVector().x;
+	Move(-GetLookAtVector().y, -GetLookAtVector().x);
 }
 
 void Player::MoveRight()
 {
-	m_NextPos.x += GetLookAtVector().y;
-	m_NextPos.y -= -GetLookAtVector().x;
+	//m_NextPos.x += GetLookAtVector().y;
+	//m_NextPos.y -= -GetLookAtVector().x;
+	Move(GetLookAtVector().y, GetLookAtVector().x);
 }
 
+void Player::Move(float x, float y)
+{
+	m_NextPos.x += x * m_Speed;
+	m_NextPos.y += y * m_Speed;
+}
 void Player::Turn(float offset)
 {
 	m_Camera.TurnCamera(offset);
 	m_lookVector = m_Camera.MakeLookAtVector();
+	m_InvertedLookVector = m_Camera.MakeLookAtVector(true);
 }
 
 void Player::SwitchWeapon(int weaponIndex)
@@ -155,23 +166,9 @@ void Player::SwitchWeapon(int weaponIndex)
 	m_WeaponManager.SwitchWeapon(weapon);
 }
 
+#pragma endregion input
 
-bool Player::IsLookingAtMe(const Vector3f crosspoints[])const {
-
-	Vector3f crosA{crosspoints[1].CrossProduct(crosspoints[0])}; 
-	Vector3f crosb{ crosspoints[2].CrossProduct(crosspoints[0]) };
-
-	Vector3f crosResult{crosA.CrossProduct(crosb)};
-	Vector3f eyeVec{ m_Pos.CrossProduct(crosspoints[0]) }; 
-
-	float dotResult = crosResult.DotProduct(eyeVec); 
-
-	if (dotResult < 0) {
-		return false;
-	}
-	return true;
-}
-
+#pragma region other
 void Player::ResetPos()
 {
 	m_Pos.x = m_StartPos.x;
@@ -180,7 +177,11 @@ void Player::ResetPos()
 
 }
 
-const Vector2f& Player::GetLookAtVector() const {
+const Vector2f& Player::GetLookAtVector( bool invert) const {
+	if (invert)
+	{
+		return m_InvertedLookVector;
+	}
 	return m_lookVector;
 }
 
@@ -188,3 +189,9 @@ const Camera& Player::GetCamera() const
 {
 	return m_Camera;
 }
+
+const Vector3f& Player::GetPos() const
+{
+	return m_Pos;
+}
+#pragma endregion other

@@ -6,7 +6,6 @@ struct Vector3f
 	Vector3f();
 	explicit Vector3f(float x, float y, float z = 0.f);
 	explicit Vector3f(const Vector3f& fromPoint, const Vector3f& tillPoint);
-
 	// -------------------------
 	// Member operators
 	// -------------------------

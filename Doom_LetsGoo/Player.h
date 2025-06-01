@@ -12,14 +12,12 @@ class Plane;
 class Player final
 {
 public:
-	Player(const Rectf& window);
+	explicit Player(const Rectf& window);
 
-	void pushPosition();
-	bool ColideWLevel(const Level* pLevel);
-	void VelocCalc(float elapsedSec);
-	void UpdatePlayer(float elapsedsecs);
-	void DrawPlayer() const;
+	//basics
+	bool UpdatePlayer(float elapsedsecs, Level* pLevel);
 
+	//input
 	void Shoot(std::vector<Thing*> thingsToShoot, const std::vector<Plane*>& r_pPlanes, float windowWidth); // clean up ref names
 	void Jump();
 	void MoveForward();
@@ -27,33 +25,48 @@ public:
 	void MoveLeft();
 	void MoveRight();
 	void Turn(float offset);
-
 	void SwitchWeapon(int weaponIndex);
 
-	bool IsLookingAtMe(const Vector3f crosspoints[])const;
+	//other
 	void ResetPos();
-	const Vector2f& GetLookAtVector() const;
+	const Vector2f& GetLookAtVector(bool invert = false) const;
 	const Camera& GetCamera() const;
+	const Vector3f& GetPos()const;
 
+	//public since the classes themselves maintain what can or cannot be done
 	HealthManager m_HealthManager;
 	WeaponManager m_WeaponManager;
-	
-	Vector3f m_StartPos{ 1056, -3616 ,10 };
-	Vector3f m_Pos{ 1056, -3616 ,10 };
-	Vector3f m_NextPos;
 
 private:
+	//update helpers
+	void pushPosition();
+	bool ColideWLevel(const Level* pLevel);
+	void VelocCalc(float elapsedSec);
+
+	//move helper
+	void Move(float x, float y);
+
+
+	Vector3f m_StartPos{ 1056, -3616 ,10 };
+	Vector3f m_Pos{ m_StartPos };
+	Vector3f m_NextPos{ m_StartPos };
+
 	Camera m_Camera;
 
-	float m_charDIameter{ 20.f };
-	int m_charHeight{ 40 };
+	const float m_charDIameter{ 20.f };
+	const int m_CharHeight{ 40 };
 	
-	Vector2f m_lookVector;
-
-	const float m_GRAVITY{ 9.807f };
+	//movement
+	const float m_Speed{ 5.f };
+	const float m_Gravity{ 9.807f };
+	const float m_JumpnFallSpeed{7.f}; // implemented after elapsedsecs got aplied. allows you to keep the ratio between jump strength and gravity
+	const float m_JumpVelocity{ 20.f };
 	bool m_Standing{ false };
-	//name consistency
-	float m_vericalVelocity{};
+
+	//function handled
+	float m_VericalVelocity{};
 	float m_FLoorHeigt{};
+	Vector2f m_lookVector{};
+	Vector2f m_InvertedLookVector{};
 };
 

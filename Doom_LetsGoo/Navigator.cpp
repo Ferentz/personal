@@ -8,8 +8,8 @@
 const Level* Navigator::pLevel{};
 
 Navigator::Navigator(Vector3f& pos)
-	:m_Pos{pos},
-	m_EyePos{ pos .x, pos.y, pos.z + m_charHeightr},
+	:r_Pos{pos},
+	m_EyePos{ pos .x, pos.y, pos.z + m_charHeight},
 	m_NextPos{pos}
 {
 }
@@ -20,8 +20,8 @@ void Navigator::CalcNextPos( const Vector3f& playerPos, const std::vector<Plane*
 	{
 		return;
 	}
-	seesPlayer = false;
-	Vector3f PlayDirec{ playerPos - m_Pos };
+	m_SeesPlayer = false;
+	Vector3f PlayDirec{ playerPos - r_Pos };
 	if (PlayDirec.Length() < m_detectRadius)
 	{
 		if (HasLineOfSight(r_pPlanes, playerPos))
@@ -29,18 +29,22 @@ void Navigator::CalcNextPos( const Vector3f& playerPos, const std::vector<Plane*
 			Vector3f normalizedDirection{ PlayDirec.Normalized() };
 			m_Direction.x = normalizedDirection.x * m_Speed;
 			m_Direction.y = normalizedDirection.y * m_Speed;
-			seesPlayer = true;
+			m_SeesPlayer = true;
 		}
 	}
 
-	if (m_timer <= 0 && !seesPlayer)
+	if (m_timer <= 0 && !m_SeesPlayer)
 	{
-		m_Direction.x = ((rand() % 20) - 10) / 10.f;
-		m_Direction.y = ((rand() % 20) - 10) / 10.f;
+		float angle = float(rand()) / RAND_MAX * 2 * M_PI;
+		m_Direction.x = cosf(angle) * m_Speed;
+		m_Direction.y = sinf(angle) * m_Speed;
+
+		//m_Direction.x = ((rand() % 20) - 10) / 10.f;
+		//m_Direction.y = ((rand() % 20) - 10) / 10.f;
 		m_timer = m_TimeIntervalSecs;
 	}
 	m_timer -= elapsSec;
-	m_NextPos = Vector3f{ m_Pos.x + m_Direction.x, m_Pos.y + m_Direction.y, m_Pos.z };
+	m_NextPos = Vector3f{ r_Pos.x + m_Direction.x, r_Pos.y + m_Direction.y, r_Pos.z };
 
 }
 
@@ -51,17 +55,17 @@ Vector3f Navigator::GetNextPos() const
 
 Vector3f Navigator::GetPos() const
 {
-	return m_Pos;
+	return r_Pos;
 }
 
-int Navigator::ColideWLevel(const Level* pLevel)
+void Navigator::ColideWLevel(const Level* pLevel)
 {
 	if (!m_Mobile)
 	{
-		return false;
+		return;
 	}
 	bool exit{ false };
-	return pLevel->ColideWLevel(m_Pos, m_NextPos, m_NextPos.z, m_charDiameter, false, exit);
+	pLevel->ColideWLevel(r_Pos, m_NextPos, m_NextPos.z, m_charDiameter, false, exit);
 }
 
 void Navigator::PushPosition()
@@ -70,8 +74,8 @@ void Navigator::PushPosition()
 	{
 		return;
 	}
-	m_Pos = m_NextPos;
-	m_EyePos = Vector3f{ m_NextPos.x, m_NextPos.y, m_NextPos.z + m_charHeightr };
+	r_Pos = m_NextPos;
+	m_EyePos = Vector3f{ m_NextPos.x, m_NextPos.y, m_NextPos.z + m_charHeight };
 }
 
 bool Navigator::HasLineOfSight( const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos)
@@ -90,7 +94,6 @@ bool Navigator::HasLineOfSight( const std::vector <Plane*>&  r_pPlanes, const Ve
 
 bool Navigator::HasLineOfSight( const std::vector <Plane*>&  r_pPlanes, const Vector3f& PlayerPos, const Vector3f& objectPos)
 {
-	bool hasLineOfSight{ true };
 	for (int wallIndex{}; wallIndex < r_pPlanes.size(); wallIndex++)
 	{
 		Plane* wall{ r_pPlanes[wallIndex] };
@@ -98,11 +101,10 @@ bool Navigator::HasLineOfSight( const std::vector <Plane*>&  r_pPlanes, const Ve
 		Vector2f outNormal{};
 		if (wall->Plane::PlaneCollision(objectPos, PlayerPos, returnPos, outNormal, true))
 		{
-			hasLineOfSight = false;
-			//break;
+			return false;
 		}
 	}
-	return hasLineOfSight;
+	return true;
 }
 
 void Navigator::SetLevel(const Level* level)

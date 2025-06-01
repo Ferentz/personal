@@ -1,73 +1,32 @@
 #include "pch.h"
 #include "Level.h"
+
 #include <iostream>
+#include <cassert>
+#include <stack>
+#include <set>
+
+#include "Player.h"
 #include "Plane.h"
 #include "PlaneIregular.h"
-#include "Things.h"
 #include "Enemy.h"
 #include "PowerUp.h"
-#include <vector>
-#include <cassert>
-#include "PLayer.h"
+#include "Texture.h"
 
-#include <stack>
 #include "LevelGenerator.h"
 #include "Navigator.h"
 #include "Interactor.h"
 
 
 
-
-
 Level::Level(Player& player)
 {
 	m_pThingTexture = new Texture("COLUA0_converted.png");
-	LevelGenerator gen{ m_BSP, m_BSPleafs,m_pPlanes, m_pFloorsNCeilings, m_tags[0], m_tags[1], m_pThings, m_Textures, m_NameMap, player };// m_pPlanes, m_pFloorsNCeilings};
-}
-
-
-Level::Level(Level&& toMove) noexcept
-	:m_isCleared{ toMove.m_isCleared }
-{
-	m_pThingTexture = toMove.m_pThingTexture;
-	toMove.m_pThingTexture = nullptr;
-	m_Textures = std::move(toMove.m_Textures);
-	m_NameMap = std::move(toMove.m_NameMap);
-	m_BSP = std::move(toMove.m_BSP);
-	m_BSPleafs = std::move(toMove.m_BSPleafs);
-	m_PlaneAmount = toMove.m_PlaneAmount;
-	m_pPlanes = std::move(toMove.m_pPlanes);
-	m_floorsNCeilingsAmount = toMove.m_floorsNCeilingsAmount;
-	m_pFloorsNCeilings = std::move(toMove.m_pFloorsNCeilings);
-	m_pThings = std::move(toMove.m_pThings);
-	m_LinePerWall = std::move(toMove.m_LinePerWall);
-	for (int i{}; i < 2; i++)
-	{
-		m_tags[i] = std::move(toMove.m_tags[i]);
-	}
-}
-
-
-Level& Level::operator=(Level&& rhs) noexcept
-{
-	m_isCleared = rhs.m_isCleared ;
-	m_pThingTexture = rhs.m_pThingTexture;
-	rhs.m_pThingTexture = nullptr;
-	m_Textures = std::move(rhs.m_Textures);
-	m_NameMap = std::move(rhs.m_NameMap);
-	m_BSP = std::move(rhs.m_BSP);
-	m_BSPleafs = std::move(rhs.m_BSPleafs);
-	m_PlaneAmount = rhs.m_PlaneAmount;
-	m_pPlanes = std::move(rhs.m_pPlanes);
-	m_floorsNCeilingsAmount = rhs.m_floorsNCeilingsAmount;
-	m_pFloorsNCeilings = std::move(rhs.m_pFloorsNCeilings);
-	m_pThings = std::move(rhs.m_pThings);
-	m_LinePerWall = std::move(rhs.m_LinePerWall);
-	for (int i{}; i < 2; i++)
-	{
-		m_tags[i] = std::move(rhs.m_tags[i]);
-	}
-	return *this;
+	LevelGenerator gen{
+		m_BSP, m_BSPleafs,m_pPlanes,
+		m_pFloorsNCeilings, m_pThings,
+		m_Textures, player
+	};
 }
 
 Level::~Level() {
@@ -82,6 +41,60 @@ Level::~Level() {
 	}
 	delete m_pThingTexture;
 }
+
+#pragma region rule of 5
+Level::Level(Level&& toMove) noexcept
+{
+	MoveLevelMembers(std::move(toMove));
+}
+
+Level& Level::operator=(Level&& rhs) noexcept
+{
+	MoveLevelMembers(std::move(rhs));
+	return *this;
+}
+
+void Level::MoveLevelMembers(Level&& toMove) noexcept
+{
+	m_isCleared = std::move(toMove.m_isCleared);
+	m_pThingTexture = std::move(toMove.m_pThingTexture);
+	toMove.m_pThingTexture = nullptr;
+	m_Textures = std::move(toMove.m_Textures);
+	m_BSP = std::move(toMove.m_BSP);
+	m_BSPleafs = std::move(toMove.m_BSPleafs);
+	m_pPlanes = std::move(toMove.m_pPlanes);
+	m_pFloorsNCeilings = std::move(toMove.m_pFloorsNCeilings);
+	m_pThings = std::move(toMove.m_pThings);
+}
+
+#pragma endregion rule of 5
+
+#pragma region basics
+void Level::DrawLevel(Vector2f pos)
+{
+	int leaf{ utils::GetBSP(pos, true, GetBSPtree()) };
+	DrawLevelBSP(leaf, pos);
+}
+
+void Level::UpdateLevel(Player& eyeObject, float elapsedSec)
+{
+	for (size_t i = 0; i < m_pPlanes.size(); ++i) {
+		m_pPlanes[i]->UpdatePlane(eyeObject, elapsedSec);
+	}
+
+	// we wanna implememnt the raycast
+	// the ray is from pos to next pos. and we cast to the relevant level geometry
+
+
+	for (size_t i = 0; i < m_pFloorsNCeilings.size(); ++i) {
+		m_pFloorsNCeilings[i].UpdatePlane(eyeObject);
+	}
+
+	UpdateThings(eyeObject, elapsedSec);
+
+}
+
+#pragma region basics helpers
 
 void Level::DrawLevelBSP(int leaf, Vector2f posInLevel)
 {
@@ -166,6 +179,7 @@ void Level::DrawLeaf(int leafIndex)
 		int thingIndex{ m_BSPleafs[leafIndex].thingIndexes[thingNum] };
 		/*if (thingIndex == 93 || thingIndex == 94) // to check specific ones
 		{*/
+		assert(m_pThingTexture != nullptr);
 		m_pThings[thingIndex]->DrawThing(m_pThingTexture);
 		//}
 	}
@@ -182,23 +196,6 @@ void Level::DrawLeaf(int leafIndex)
 	}
 }
 
-void Level::UpdateLevel(Player& eyeObject, float elapsedSec)
-{
-	for (int i = 0; i < m_pPlanes.size(); ++i) {
-		m_pPlanes[i]->UpdatePlane(eyeObject, elapsedSec);
-	}
-
-	// we wanna implememnt the raycast
-	// the ray is from pos to next pos. and we cast to the relevant level geometry
-
-
-	for (int i = 0; i < m_pFloorsNCeilings.size(); ++i) {
-		m_pFloorsNCeilings[i].UpdatePlane(eyeObject);
-	}
-	
-	UpdateThings(eyeObject, elapsedSec);
-	
-}
 
 void Level::UpdateThings(Player& eyeObject, float elapsedSec)
 {
@@ -212,7 +209,7 @@ void Level::UpdateThings(Player& eyeObject, float elapsedSec)
 			Enemy* enemyPtr = static_cast<Enemy*>(m_pThings[ThingLevelIndex]);
 			if (enemyPtr->Navigate(this, eyeObject, elapsedSec)) // if he is not shooting and alive
 			{
-				const Vector3f nextPos{ enemyPtr->m_pNavigator->GetNextPos() };
+				const Vector3f nextPos{ enemyPtr->GetpNavigator()->GetNextPos()};
 				Vector2f next2D{ nextPos.x, nextPos.y };
 				const int subSector2 = utils::GetBSP(next2D, true, m_BSP);
 				const int originalThingSubSector{ enemyPtr->GetSubsectorIndex()};
@@ -243,22 +240,30 @@ void Level::SwapThingSubsector(const int originalThingSubSector, const int subSe
 
 }
 
-float Level::GetFloorOfLeaf(const int leaf) const
+const std::vector<BSPnode>& Level::GetBSPtree() const
 {
-	return m_BSPleafs[leaf].floorheight;
+	return m_BSP;
+	// TODO: insert return statement here
 }
 
+#pragma endregion basics helpers
+
+#pragma endregion basics
+
+#pragma region collision
 /// <summary>
-/// 
+/// collides anything with a 3d position and a diameter with the level
+/// the position will be adjusted for a max of 10 times
 /// </summary>
 /// <param name="pos"></param>
-/// <param name="r_nextPos"></param>
-/// <param name="floorHeight"></param>
+/// <param name="r_nextPos"> will be mutated for later use </param>
+/// <param name="floorHeight"> will corespond to the new next position </param>
 /// <param name="charDiameter"></param>
-/// <param name="isPlayer"></param>
+/// <param name="ignoreLedges"> to ignore ledges or not</param>
+/// <param name="foundExit"> if the exit was found during this collision </param>
 /// <returns></returns>
-int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight,
-	const float charDiameter, const bool isPlayer, bool& exit) const
+void Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHeight,
+	const float charDiameter, const bool ignoreLedges, bool& foundExit) const
 {
 	const int MaxIterations = 10;
 	const float Epsilon = 0.01f;
@@ -288,60 +293,20 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 		}
 			
 		Vector3f moveDirNorm = moveVec.Normalized(); // normalized direction
-		//for (int wallIndex{}; wallIndex < m_pPlanes.size(); wallIndex++)
-		//{
-		//	Plane* wall{ m_pPlanes.at(wallIndex)};
-		//
-		//	Vector2f reflectionPoint, wallNormal2D;
-		//	if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
-		//	{
-		//		if (wall->IsDoor())
-		//		{
-		//			//TriggerDoor(leaf, i);
-		//		}
-		//		if (hitWal == -1)
-		//		{
-		//			//hitWal = i;
-		//		}
-		//
-		//		Vector3f wallNormal3D(wallNormal2D.x, wallNormal2D.y, 0.0f);
-		//
-		//		Vector3f fullMove = nextPos - curPos;
-		//		Vector3f slideVec = fullMove - wallNormal3D * (fullMove.DotProduct(wallNormal3D));
-		//
-		//		if (slideVec.Length() < Epsilon)
-		//		{
-		//			nextPos = curPos;
-		//		}
-		//		else if(isPlayer)
-		//		{
-		//			nextPos = curPos + slideVec;
-		//		}
-		//
-		//		// Update next floor height after wall slide
-		//		//Vector2f next2D{ nextPos.x, nextPos.y };
-		//		//newLeaf = utils::GetBSP(next2D, true, m_BSP);
-		//		//NextHeight = GetFloorOfLeaf(newLeaf);
-		//
-		//		//hitSomething = true;
-		//		//break;
-		//	}
-		//}
-
-		// THIS IS THE BSP COLISION
+		
 		for (int i = 0; i < GetLeafWallAmount(leaf); ++i)
 		{
 			Plane* wall{ GetWallFromLeaf(leaf, i) };
 			
 			Vector2f reflectionPoint, wallNormal2D;
-			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, isPlayer))
+			if (wall->PlaneCollision(curPos, nextPos + moveDirNorm * charDiameter, reflectionPoint, wallNormal2D, ignoreLedges))
 			{
-				if (wall->IsDoor() && isPlayer)
+				if (wall->IsDoor() && ignoreLedges)
 				{
 					m_Door.Play(false);
-					if (TriggerDoor(leaf, i) && isPlayer)
+					if (TriggerDoor(leaf, i) && ignoreLedges)
 					{
-						exit = true;
+						foundExit = true;
 					}
 				}
 
@@ -374,15 +339,20 @@ int Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorHe
 	if (iterations >= MaxIterations)
 	{
 		r_nextPos = pos;
-		return leaf;
+		//return leaf;
 	}
 	else {
 		r_nextPos.x = nextPos.x;
 		r_nextPos.y = nextPos.y;
 		floorHeight = NextFloorHeight;
-		return newLeaf;
+		//return newLeaf;
 	}
 	// Final corrected position after all slides
+}
+
+float Level::GetFloorOfLeaf(const int leaf) const
+{
+	return m_BSPleafs[leaf].floorheight;
 }
 
 int Level::GetLeafWallAmount(const int leaf) const
@@ -407,38 +377,37 @@ bool Level::TriggerDoor(const int leaf, const int wallIdx) const
 {
 	
 	const int wallIndex{ m_BSPleafs[leaf].wallIndexes[wallIdx] };
-	if (m_pPlanes.at(wallIndex)->Triggered())
+	if (m_pPlanes.at(wallIndex)->Trigger())
 	{
 		return true;
 	}
-	if (m_pPlanes.at(wallIndex + 1)->IsDoor())
+	int upIndex{ utils::getArrIndex(m_pPlanes.size(), wallIndex + 1) };
+	if (m_pPlanes.at(upIndex)->IsDoor())
 	{
-		m_pPlanes.at(wallIndex + 1)->Triggered();
+		m_pPlanes.at(upIndex)->Trigger();
 	}
-	if (m_pPlanes.at(wallIndex - 1)->IsDoor())
+	int downIndex{ utils::getArrIndex(m_pPlanes.size(), wallIndex - 1) };
+	if (m_pPlanes.at(downIndex)->IsDoor())
 	{
-		m_pPlanes.at(wallIndex - 1)->Triggered();
+		m_pPlanes.at(downIndex)->Trigger();
 	}
 	return false;
 }
 
-const std::vector<BSPnode>& Level::GetBSPtree() const
-{
-	return m_BSP;
-	// TODO: insert return statement here
-}
+#pragma endregion collision
 
-std::vector<Thing*>& Level::GetThings()
+#pragma region interactions
+const std::vector<Thing*>& Level::GetThings() const 
 {
 	return m_pThings;
 }
 
-const std::vector<Plane*>& Level::GetWalls()
+const std::vector<Plane*>& Level::GetWalls() const
 {
 	return m_pPlanes;
 }
 
-bool Level::GetCleared()
+bool Level::GetCleared() const
 {
 	return m_isCleared;
 }
@@ -453,3 +422,4 @@ void Level::SpawnWeapon(point2D_3D Location)
 	m_pThings.back()->SetPosHeight(zPos);
 	m_pThings.back()->SetSubsectorIndex(leafIndex);
 }
+#pragma endregion interactions

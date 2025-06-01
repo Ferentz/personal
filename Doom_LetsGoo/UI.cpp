@@ -82,7 +82,7 @@ UI::~UI()
 
 }
 
-void UI::DrawUI(const float width, float bottomOfset, float leftOffset, float scale,
+void UI::DrawUI(const float width,
 	int health, int armor, int amo)
 {
 	//float width{ GetWindow().width };
@@ -124,6 +124,12 @@ void UI::AssignPlayer(Player* pPlayer)
 	s_pPlayer = pPlayer;
 }
 
+/// <summary>
+/// gets the individual digits of number based on "index" where index is for example: 100 -> get the degit representing the hunderds
+/// </summary>
+/// <param name="number"></param>
+/// <param name="index"></param>
+/// <returns></returns>
 int UI::GetDigit(int number, int index) {
 	int devisor{ number / index };
 	if (devisor >= 10)
@@ -224,39 +230,43 @@ void UI::PrintNumber(int number, bool percent, int numberSwitch)
 
 void UI::DrawRedNumbers()
 {
-	glPushMatrix(); // adds a clean matrix for the image to exist in
-	{
-		//float numOffset{};
-		glTranslatef(m_Window.width * m_AmoLeftOffset, m_Window.width * m_mainStatBottomOffset, 0.f);
-		glRotatef(0.f, 0.f, 0.f, 1.f);
+	const float mainStatBottomOffset{ 0.04f };
 
-		glPushMatrix(); // adds a clean matrix for the image to exist in
+	const float mainStatScale{ 0.0023f };
+
+	const float amoLeftOffset{ -0.003f };
+
+	const float healthLeftOffset{ 0.145f };
+	const float armourLeftOffset{ 0.408f };
+	glPushMatrix(); 
+	{
+		glTranslatef(m_Window.width * amoLeftOffset, m_Window.width * mainStatBottomOffset, 0.f);
+
+		glPushMatrix(); 
 		{
-			glScalef(m_Window.width * m_MainStatScale, m_Window.width * m_MainStatScale, 0.f);
+			glScalef(m_Window.width * mainStatScale, m_Window.width * mainStatScale, 0.f);
 			PrintNumber(s_pPlayer->m_WeaponManager.GetAmo(), false, 1);
 		}
 		glPopMatrix();
 
-		glTranslatef(m_Window.width * m_HealthLeftOffset, 0, 0.f); //moves the image space 
-		glPushMatrix(); // adds a clean matrix for the image to exist in
+		glTranslatef(m_Window.width * healthLeftOffset, 0, 0.f);  
+		glPushMatrix(); 
 		{
-			glScalef(m_Window.width * m_MainStatScale, m_Window.width * m_MainStatScale, 0.f);
-			PrintNumber(s_pPlayer->m_HealthManager.GetHeath(), true, 1);
+			glScalef(m_Window.width * mainStatScale, m_Window.width * mainStatScale, 0.f);
+			PrintNumber(s_pPlayer->m_HealthManager.GetHealth(), true, 1);
 		}
 		glPopMatrix();
 
 
-		glTranslatef(m_Window.width * m_ArmourLeftOffset, 0, 0.f);
-		glPushMatrix(); // adds a clean matrix for the image to exist in
+		glTranslatef(m_Window.width * armourLeftOffset, 0, 0.f);
+		glPushMatrix(); 
 		{
-			glScalef(m_Window.width * m_MainStatScale, m_Window.width * m_MainStatScale, 0.f);
-			PrintNumber(s_pPlayer->m_HealthManager.GetArmour(), true, 1);
+			glScalef(m_Window.width * mainStatScale, m_Window.width * mainStatScale, 0.f);
+			PrintNumber(s_pPlayer->m_HealthManager.GetArmourHealth(), true, 1);
 		}
 		glPopMatrix();
-
-
 	}
-	glPopMatrix(); // goe out of imge space
+	glPopMatrix(); 
 
 }
 
@@ -264,26 +274,29 @@ void UI::DrawArms()
 {
 	glPushMatrix(); 
 	{
+		const float armsNumScale{ 0.0031f };
+		//get to the panel 
 		glTranslatef(m_Window.width * 0.323f, m_Window.width * 0.00f, 0.f);
-		glRotatef(0.f, 0.f, 0.f, 1.f);
-
-		glScalef(m_Window.width * 0.0031f, m_Window.width * 0.0031f, 0.f); //TODO:: magic number spotted
+		glScalef(m_Window.width * armsNumScale, m_Window.width * armsNumScale, 0.f); //TODO:: magic number spotted
+		
 		int count{ 2 };
-		int pickedUpArms{ s_pPlayer->m_WeaponManager.GetPickedUpWeaponsNum()};
+		int pickedUpArms{ s_pPlayer->m_WeaponManager.GetPickedUpWeaponsNum()}; // goes up when the next weapon progression is picked up (curently just shotgun)
 		glPushMatrix();
 		{
+			//move to the startPos of the numbers
 			glTranslatef(7, 22, 0.f);
-			for (int i{ 0 }; i < 2; i++)
+			//rows
+			for (int row{ 0 }; row < 2; row++)
 			{
-			
 				glPushMatrix();
 				{
-					glTranslatef( 0.f, - i * 10.f, 0.f);
-					for (int j{ 0 }; j < 3; j++)
+					glTranslatef( 0.f, - row * 10.f, 0.f);
+					//colums
+					for (int collum{ 0 }; collum < 3; collum++)
 					{
 						glPushMatrix();
 						{
-							glTranslatef(j * 12.f, 0.f,  0.f);
+							glTranslatef(collum * 12.f, 0.f,  0.f);
 							if (count <= pickedUpArms)
 							{
 								m_pNumbersYellow[count]->Draw(
@@ -331,34 +344,41 @@ void UI::DrawArms()
 
 void UI::DrawAmo()
 {
+	const int AmoTexSwitch{ 4 };
 	glPushMatrix();
 	{
+		// move to available amo start pos
+		const float armsNumScale{ 0.0031f };
 		glTranslatef(m_Window.width * 0.85f, m_Window.width * 0.066f, 0.f);
-		glRotatef(0.f, 0.f, 0.f, 1.f);
-		glScalef(m_Window.width * 0.0031f, m_Window.width * 0.0031f, 0.f); //TODO:: magic number again
+		glScalef(m_Window.width * armsNumScale, m_Window.width * armsNumScale, 0.f); //TODO:: magic number again
 
 		const float rowOffset{ -m_Window.width * 0.007f };
-		PrintNumber(s_pPlayer->m_WeaponManager.GetPistolAmo(), false, 4);
+		
 		glPushMatrix();
 		{
+			// print available amo, only pistol and shotgun are implemented
+			PrintNumber(s_pPlayer->m_WeaponManager.GetPistolAmo(), false, 4);
 			glTranslatef(0, rowOffset, 0.f);
 			PrintNumber(s_pPlayer->m_WeaponManager.GetShotgunAmo(), false, 4);
 			glTranslatef(0, rowOffset, 0.f);
-			PrintNumber(0, false, 4);
+			PrintNumber(0, false, AmoTexSwitch);
 			glTranslatef(0, rowOffset, 0.f);
-			PrintNumber(0, false, 4);
+			PrintNumber(0, false, AmoTexSwitch);
 		}
 		glPopMatrix();
+
+		// move to max amo start pos
 		glTranslatef(m_Window.width * 0.025f, 0, 0.f);
-		PrintNumber(s_pPlayer->m_WeaponManager.GetMaxPistolAmo(), false, 4);
 		glPushMatrix();
 		{
+			//print max amo vals, again, just pistol and shotgun are curntly implemented
+			PrintNumber(s_pPlayer->m_WeaponManager.GetMaxPistolAmo(), false, 4);
 			glTranslatef(0, rowOffset, 0.f);
 			PrintNumber(s_pPlayer->m_WeaponManager.GetMaxShotgunAmo(), false, 4);
 			glTranslatef(0, rowOffset, 0.f);
-			PrintNumber(50, false, 4);
+			PrintNumber(50, false, AmoTexSwitch);
 			glTranslatef(0, rowOffset, 0.f);
-			PrintNumber(300, false, 4);
+			PrintNumber(300, false, AmoTexSwitch);
 		}
 		glPopMatrix();
 	}

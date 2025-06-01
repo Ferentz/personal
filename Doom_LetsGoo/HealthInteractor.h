@@ -5,7 +5,8 @@ class HealthManager;
 class HealthInteractor final : public Interactor
 {
 public:
-	HealthInteractor(float healAmount, bool affectsArmour = false, bool affectsMax = false);
+	explicit HealthInteractor(float healAmount, bool affectsArmour = false, bool affectsMax = false);
+	
 	virtual void Interact() override;
 	static void AssignPlayer(HealthManager& playerHealth);
 private:

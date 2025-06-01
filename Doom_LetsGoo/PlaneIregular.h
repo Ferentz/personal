@@ -1,9 +1,5 @@
 #pragma once
-#pragma once
 #include "structs.h"
-//#include "Camera.h"
-//#include "pVector.h"
-#include <utils.h>
 #include <vector>
 
 class Player;
@@ -13,30 +9,27 @@ class PlaneIregular final
 {
 public:
 	PlaneIregular();
-	PlaneIregular(std::vector<Vector2f> vertexes, int texIndx, int height);
+	explicit PlaneIregular(std::vector<Vector2f> vertexes, int texIndx, int height);
+	
+	//basics
 	void UpdatePlane(const Player& eyeObject);
 	void DrawPlane(const Texture& texture) const;
-	//void DrawPlane(const int colour);
+
+	//interactions
+	int GetTexIdx() const;
 	void printPoints() const;
-	point2D_3D GetPoint(int index) const;
+	
+
+	//editing
+	point2D_3D GetPoint(int index) const; //not a const or ref as it might be inserted in another PlaneIregular
 	int GetAmountPoints() const;
 	void insertPoint(int insertPos, point2D_3D& point);
 	void PopPoint(int popIndex);
-	int GetTexIdx();
-	
-	//point3f getLocation();
-	//int getClosestPointIndex();
-	//float getPoint3dDist(int index);
-	//bool PlaneCollision(Camera& eyeObject);
-	float planeOfset{ 0.5 };
-	int m_colour;
 
 private:
 	int m_texIDX;
 	Vector3f width;
 	Vector3f height;
-	int* m_ConcaveSequence{};
-	bool m_concave{};
 	std::vector<point2D_3D> m_pPointsArr;
 	int m_amoountOfPoints;
 };

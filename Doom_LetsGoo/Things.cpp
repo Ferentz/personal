@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Things.h"
+
+#include "Player.h"
 #include "Texture.h"
-#include "PLayer.h"
 
 
 
@@ -9,13 +10,11 @@ Thing::Thing(Vector2f pos, float height, std::string sprite)
 	:m_StartPos{ pos },
 	m_Height{ height },
 	m_location{ pos.x, pos.y, 0 },
-	//m_pNavigator{nullptr},
-	//m_pHealthManager{nullptr},
-	//m_pInteractor{nullptr},
 	m_SubClass{ ThingSubclass::decoration }
 {
 }
 
+#pragma region rule of 5
 Thing::Thing(const Thing& toCopy) 
 	:m_StartPos{ toCopy.m_StartPos },
 	m_Height{ toCopy.m_Height },
@@ -44,10 +43,12 @@ Thing& Thing::operator=(const Thing& rhs)
 	return *this;
 }
 
+#pragma endregion rule of 5
 
+#pragma region basics
 void Thing::UpdateThing(const Player& player, float elapsSec)
 {
-	m_location.point2D = player.GetCamera().PerspCalc(m_location);
+	m_location.point2D = player.GetCamera().PerspectiveCalculation(m_location);
 }
 
 void Thing::DrawThing(Texture* tex)
@@ -61,6 +62,9 @@ void Thing::DrawThing(Texture* tex)
 	tex->Draw(dest);
 }
 
+#pragma endregion basics
+
+#pragma region interactions
 Vector2f Thing::GetStartPos() const
 {
 	return m_StartPos;
@@ -91,3 +95,4 @@ const ThingSubclass Thing::GetSubClass() const
 {
 	return m_SubClass;
 }
+#pragma endregion interactions

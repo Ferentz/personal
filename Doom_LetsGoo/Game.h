@@ -1,21 +1,24 @@
 #pragma once
 #include "BaseGame.h"
-#include <vector>
-#include "Texture.h"
-#include "Utils.h"
-#include "Level.h"
-#include "PLayer.h"
+#include "Player.h"
+
+
 class UI;
+class Level;
+
 class Game final: public BaseGame
 {
 public:
 	explicit Game( const Window& window );
+	~Game();
+
+	//rule of 5
 	Game(const Game& other) = delete;
 	Game& operator=(const Game& other) = delete;
-	Game( Game&& other) = delete;
+	Game(Game&& other) = delete;
 	Game& operator=(Game&& other) = delete;
+
 	// http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rh-override
-	~Game();
 
 	void Update( float elapsedSec ) override;
 	void Draw( ) const override;
@@ -30,19 +33,14 @@ public:
 
 private:
 
-	// FUNCTIONS
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
 	void EnterLevel();
-	float leftBound{ 268 };
-	float bottomBounf{ 38 };
-	float scale{ 2 };
-	//Texture* m_UI;
-	UI* m_pUI{};
-	Level* m_pLevel{};
-	Player m_Camera;
-	float m_WindowWidth;
+
+	Player m_Player;
+	UI* m_pUI;
+	Level* m_pLevel;
 	enum class GameState
 	{
 		menu,
@@ -50,5 +48,5 @@ private:
 		dead,
 		won
 	};
-	GameState m_State{};
+	GameState m_State{ GameState::menu };
 };
