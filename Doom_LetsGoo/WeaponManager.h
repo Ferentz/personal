@@ -33,10 +33,7 @@ public:
 	int GetShotgunAmo() const;
 	int GetMaxShotgunAmo() const;
 
-	
-
 private:
-	
 	Shotgun m_Shotgun{ 0, 50, 1000.f };
 	Pistol m_Pistol{ 50, 200, 1000.f };
 	Weapon* m_pEquipedWeapon{ &m_Pistol };

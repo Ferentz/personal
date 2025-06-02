@@ -243,7 +243,6 @@ void Level::SwapThingSubsector(const int originalThingSubSector, const int subSe
 const std::vector<BSPnode>& Level::GetBSPtree() const
 {
 	return m_BSP;
-	// TODO: insert return statement here
 }
 
 #pragma endregion basics helpers

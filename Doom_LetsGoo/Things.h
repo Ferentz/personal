@@ -15,14 +15,14 @@ enum class ThingSubclass
 class Thing
 {
 public:
-	Thing( Vector2f pos, float height, std::string sprite );
-	virtual ~Thing() = default;
+	Thing( Vector2f pos, float height, std::string sprite, bool singleTexture = false );
+	virtual ~Thing();
 
 	//rule of 5
 	Thing( const Thing& toCopy );
 	Thing( Thing&& rhs ) noexcept;
 	Thing& operator=(const Thing& rhs);
-	Thing& operator=(Thing&& rhs) = delete; // it has no movable members
+	Thing& operator=(Thing&& rhs);
 
 	// basics
 	virtual void UpdateThing(const Player& eyeObject, float elapsSec);
@@ -43,8 +43,14 @@ protected:
 	point2D_3D m_location;
 
 	ThingSubclass m_SubClass;
+	
 
 	int m_SubsectorIndex{};
+	float m_ScreenRatio{};
+
+private:
+	std::string m_FilePath;
+	Texture* m_pTex{nullptr};
 	
 };
 

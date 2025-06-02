@@ -15,8 +15,8 @@ SoundEffect* PowerUp::s_PickupSound{nullptr};
 int PowerUp::s_MemberCount{0};
 
 PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string sprite)
-	:Thing{ pos , height  , sprite },
-	m_FilePath{ "pickUps/" + sprite + "A0.png" }
+	:Thing{ pos , height  , sprite, true }//,
+	//m_FilePath{ "pickUps/" + sprite + "A0.png" }
 {
 	if (s_PickupSound == nullptr)
 	{
@@ -24,7 +24,7 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 	}
 	s_MemberCount++;
 
-	m_pTex = new Texture{ m_FilePath };
+	//m_pTex = new Texture{ m_FilePath };
 	m_SubClass = ThingSubclass::pickup;
 
 	switch (type)
@@ -125,10 +125,10 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 }
 
 PowerUp::PowerUp(point2D_3D Location)
-	:Thing{ Vector2f{Location.point3D.x, Location.point3D.y} , 20  , "SHOT" },
-	m_FilePath{ "pickUps/SHOTA0.png" }
+	:Thing{ Vector2f{Location.point3D.x, Location.point3D.y} , 20  , "SHOT" , true}//,
+	//m_FilePath{ "pickUps/SHOTA0.png" }
 {
-	m_pTex = new Texture{ m_FilePath };
+	//m_pTex = new Texture{ m_FilePath };
 	m_SubClass = ThingSubclass::pickup;
 	m_InteractorSwitch_HiF_WiT = true;
 	m_pInteractor = new WeaponInteractor{
@@ -145,18 +145,18 @@ PowerUp::~PowerUp()
 		s_PickupSound = nullptr;
 	}
 	s_MemberCount--;
-	delete m_pTex;
+	//delete m_pTex;
 	delete m_pInteractor;
 	m_pInteractor = nullptr;
 }
 
 #pragma region rule of 5
 PowerUp::PowerUp(const PowerUp& toCopy)
-	:Thing( Thing(toCopy)),
-	m_FilePath{ toCopy.m_FilePath }
+	:Thing( Thing(toCopy))//,
+	//m_FilePath{ toCopy.m_FilePath }
 {
 	m_PickedUp = toCopy.m_PickedUp;
-	m_pTex = new Texture{ m_FilePath };
+	//m_pTex = new Texture{ m_FilePath };
 	m_InteractorSwitch_HiF_WiT = toCopy.m_InteractorSwitch_HiF_WiT;
 	if (toCopy.m_InteractorSwitch_HiF_WiT)
 	{
@@ -173,12 +173,12 @@ PowerUp::PowerUp(const PowerUp& toCopy)
 }
 
 PowerUp::PowerUp(PowerUp&& toMove) noexcept
-	:Thing(Thing(toMove)),
-	m_FilePath{ std::move(toMove.m_FilePath )}
+	:Thing(Thing(toMove))//,
+	//m_FilePath{ std::move(toMove.m_FilePath )}
 {
 	m_PickedUp = std::move(toMove.m_PickedUp);
-	m_pTex = toMove.m_pTex;
-	toMove.m_pTex = nullptr;
+	//m_pTex = toMove.m_pTex;
+	//toMove.m_pTex = nullptr;
 	m_InteractorSwitch_HiF_WiT = toMove.m_InteractorSwitch_HiF_WiT;
 	m_pInteractor = std::move(toMove.m_pInteractor);
 	toMove.m_pInteractor = nullptr;
@@ -190,12 +190,12 @@ PowerUp& PowerUp::operator=(const PowerUp& rhs)
 	{
 		Thing::operator=(rhs);
 		m_PickedUp = rhs.m_PickedUp;
-		m_FilePath = rhs.m_FilePath;
+		/*m_FilePath = rhs.m_FilePath;
 		if (m_pTex != nullptr)
 		{
 			delete m_pTex;
 		}
-		m_pTex = new Texture{ m_FilePath };
+		m_pTex = new Texture{ m_FilePath };*/
 		m_InteractorSwitch_HiF_WiT = rhs.m_InteractorSwitch_HiF_WiT;
 		delete m_pInteractor;
 		if (rhs.m_InteractorSwitch_HiF_WiT)
@@ -220,9 +220,9 @@ PowerUp& PowerUp::operator=(PowerUp&& rhs) noexcept
 	{
 		Thing::operator=(rhs);
 		m_PickedUp = std::move(rhs.m_PickedUp);
-		m_FilePath = std::move(rhs.m_FilePath);
+		/*m_FilePath = std::move(rhs.m_FilePath);
 		m_pTex = rhs.m_pTex;
-		rhs.m_pTex = nullptr;
+		rhs.m_pTex = nullptr;*/
 		m_InteractorSwitch_HiF_WiT = rhs.m_InteractorSwitch_HiF_WiT;
 		m_pInteractor = std::move(rhs.m_pInteractor);
 		rhs.m_pInteractor = nullptr;
@@ -249,7 +249,7 @@ void PowerUp::DrawThing(Texture* tex)
 {
 	if (!m_PickedUp)
 	{
-		Thing::DrawThing(m_pTex);
+		Thing::DrawThing(tex);
 	}
 }
 

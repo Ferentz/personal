@@ -8,7 +8,7 @@ class Weapon
 public:
 
 	Weapon(int startAmo, int maxAmo, float range, std::string soundName);
-	virtual ~Weapon() = default;
+	virtual ~Weapon();
 
 	//rule of 5
 	Weapon(const Weapon& toCopy) = delete;

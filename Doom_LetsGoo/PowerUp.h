@@ -27,8 +27,8 @@ public:
 
 private:
 
-	std::string m_FilePath;
-	Texture* m_pTex;
+	//std::string m_FilePath;
+	//Texture* m_pTex;
 
 	bool m_InteractorSwitch_HiF_WiT{};
 	bool m_PickedUp{false};

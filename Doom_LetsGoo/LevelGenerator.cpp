@@ -679,7 +679,7 @@ void LevelGenerator::ReadThings()
 		case utils::ThingsEnum::Candelabra:
 			radius = 16;
 			height = 16;
-			sprite = "CLBR";
+			sprite = "CBRA";
 			sequence = "A";
 			properties = "O";
 			type = utils::ThingType::obstacle;
@@ -833,7 +833,7 @@ void LevelGenerator::ReadThings()
 			r_pThings.emplace_back(new Enemy{ position, float(height), sprite });
 			break;
 		default:
-			r_pThings.emplace_back(new Thing{ position, float(height) , sprite });
+			r_pThings.emplace_back(new Thing{ position, float(height) , sprite, true });
 			break;
 		}
 	}
@@ -873,7 +873,7 @@ void LevelGenerator::MapNames() {
 void LevelGenerator::AddFnCTextures()
 {
 	int startSize{ int(r_Textures.size()) };
-	Texture test{ "patches/FLAT20" };
+	//Texture test{ "patches/FLAT20" };
 	r_Textures.emplace_back("patches/FLAT20.png");
 	m_NameMap.insert(std::pair<std::string, int >("FLAT20", startSize));
 	r_Textures.emplace_back("patches/FLAT5_5.png");

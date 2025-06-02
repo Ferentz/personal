@@ -117,8 +117,8 @@ void Enemy::DrawThing(Texture* tex)
 	}
 
 	float scale{ 0.001f };
-	float width{ m_pMonsterTexture[index].GetWidth() / (m_location.Dist3D * scale) };
-	float height{ m_pMonsterTexture[index].GetHeight() / (m_location.Dist3D * scale) };
+	float width{ m_pMonsterTexture[index].GetWidth() * m_ScreenRatio / (m_location.Dist3D * scale) };
+	float height{ m_pMonsterTexture[index].GetHeight() * m_ScreenRatio / (m_location.Dist3D * scale) };
 	Rectf dest{ m_location.point2D.x - width / 2, m_location.point2D.y, width, height };
 	m_pMonsterTexture[index].Draw(dest);
 }
