@@ -58,7 +58,6 @@
 
 
 Here's why:
-TODO: describe why you chose this game 
 * It was a pivotal game in the games industry
 * It would be an interesting challenge
 * I wanted to make it for programing for artists when i did GGP but wasn't allowed. No way am i not making it now that i'm doing GD
@@ -71,21 +70,22 @@ TODO: describe why you chose this game
 This section gives a clear and detailed overview of which parts of the original game I planned to make.
 
 ### The minimum I will most certainly develop:
-* the level generation (geometry) and it's collision 
-* the basis of the UI (showing health, armor amo)
-* the enemies and items
-* being able to kill the nemies
+* [x] the level generation (geometry) and it's collision
+* [x] the basis of the UI (showing health, armor amo)
+* [x] the enemies and items
+* [x] being able to kill the nemies
 
 ### What I will probably make as well:
-* the apropriate texture assignemnt to the level geometry
-* switching weapons and their properties (and it's ui visualization)
-* the apropriate sounds and visual cues for enemies and items
-* showing the level stats in the ui
+* [x] the apropriate texture assignemnt to the level geometry
+* [x] switching weapons and their properties (and it's ui visualization)
+* [x] the apropriate sounds and visual cues for enemies and items
+* [x] showing the level stats in the ui
 
 ### What I plan to create if I have enough time left:
-* start screen and end screen
-* animated environment textures in the apropriate locations
-* the doom guy head in the ui
+* [ ] start screen and end screen
+* [ ] animated environment textures in the apropriate locations
+* [x] the doom guy head in the ui
+* [ ] imp enemy specific behaviour
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -110,13 +110,17 @@ Explain which project (version) must be run.
 
 <!-- HOW TO PLAY -->
 ## How to play
+You shoot the enemies, if they're trying to shoot you, you can avoid being hit by quickly finding cover.
+shotgun shoots multuple pellets per bullet.
 
-Use this space to show useful examples of how a game can be played. 
-Additional screenshots and demos work well in this space. 
+Kill the enemies and find the end of the base. Good luck marine.
 
 ### Controls
-* keys, .. 
-* .. 
+* wasd for moving up, left, down, right
+* space to jump ( not in original game, but i suck and need a way to skip most of the level to make it to the end )
+* left mouse button to shoot
+* 1 and 2 to switch weapons (2 becomes available once the second weapon type was picked up)
+* mouse movement to rotate camera
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -128,8 +132,39 @@ Additional screenshots and demos work well in this space.
 ### Object composition 
 If you applied object composition (optional); explain where and how.
 
+we have classes like:
+* navigator
+* interactor
+* weaponmanger
+* healthmanager
+
+that exist to grant other object certain abilities
+respectively:
+* "ai" navigation, like a brain for npc's : Enemies 
+* afecting the player under circomstances ( curent implementation if close-> add something to player ) : pickups
+* owning and handeling different weapons and their amunition : player 
+* having health : shootables ( not realy implemented atm), enemies, player )
+
 ### Inheritance 
 Explain where you applied inheritance (mandatory).
+
+thing -> shootable -> enemy  
+thing -> powerUp
+* thing : things that can exist in the level  
+* shootable : things that can be afected by amo  
+* enemy : shootable that can walk around and shoot the player  
+* powerUp : thing that can be picked up and which will affect the player
+
+    
+interactor -> healthInteractor  
+interactor -> weaponInteractor  
+* interactor : ability to interact with a component of the player  
+* healthInteractor : interactor that affects the healthmanger  
+* weaponInteractor : interactor that affects the weaponmanager  
+
+weapon -> pistol  
+weapon -> shotgun
+
 
 ### ..
 
@@ -140,19 +175,33 @@ Explain where you applied inheritance (mandatory).
 ## Checklist
 
 - [x] Accept / set up github project
-- [ ] week 01 topics applied
-    - [ ] const keyword applied proactively (variables, functions,..)
-    - [ ] static keyword applied proactively (class variables, static functions,..)
-    - [ ] object composition (optional)
-- [ ] week 02 topics applied
-- [ ] week 03 topics applied
-- [ ] week 04 topics applied
-- [ ] week 05 topics applied
-- [ ] week 06 topics applied
-- [ ] week 07 topics applied
-- [ ] week 08 topics applied
-- [ ] week 09 topics applied (optional)
-- [ ] week 10 topics applied (optional)
+- [X] week 01 topics applied
+    - [X] vectors
+    - [X] transformations
+- [X] week 02 topics applied
+    - [X] const keyword applied proactively (variables, functions,..)
+    - [X] static keyword applied proactively (class variables, static functions,..)
+    - [X] object composition (optional)
+- [x] week 03 topics applied
+    - [x] class relationships (aggregation, association, inheretance) 
+        - [x] aggregation (window is aggragated to ui and camera, ...)
+        - [ ] association (not realy, any instance where it's sort of the case they know about the subsystem of the other, like healthmanager)
+        - [x] inheretance ( see inheretance )
+- [x] week 04 topics applied
+    - [x] polymorphism ( things array )
+- [x] week 05 topics applied
+    - [x] operator overloading (does rule of 5 assignment operator count?)
+- [x] week 06 topics applied
+    - [x] copy semantics (rule of 55555)
+- [x] week 07 topics applied
+    - [ ] object slicing (no could MAYBE have donw it with dying enemies but like why would i want unused data? what if i wanna revive that **)
+    - [x] value cathegories (rule of 55555)
+- [x] week 08 topics applied
+    - [x] move semantics (rule of 55555)
+- [x] week 09 topics applied (optional)
+    - [x] streams. (yes. data reading. ha. haha. so funny. not realy? idk i did most of the data reading before we saw this.)
+- [x] week 10 topics applied (optional)
+    - [x] error handeling ( didn't need it at this point, but made the apropriate functions noexept )
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -172,7 +221,9 @@ Project Link: [https://github.com/HowestDAE/dae15-Ferentz_Indeherberge](https://
 Use this space to list resources you find helpful and would like to give credit to. 
 
 * [Example 1: cpp reference on std::vector](https://en.cppreference.com/w/cpp/container/vector)
-* ..
+* [doom documentation 1](https://doom.fandom.com/wiki/Doom_Wiki)
+* [doom documentation 2](https://zdoom.org/wiki/Main_Page)
+* [chatgp cuz I dont always have a teacher around to tell me i made a dumb typo and that's why my shit doesnt work](https://chatgpt.com/g/g-cksUvVWar-code-gpt)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
