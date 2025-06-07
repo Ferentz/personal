@@ -110,7 +110,10 @@ Explain which project (version) must be run.
 
 <!-- HOW TO PLAY -->
 ## How to play
-You shoot the enemies, if they're trying to shoot you, you can avoid being hit by quickly finding cover.
+a blue start screen will apear, cklick with your left mouse once to enter the level.
+
+You shoot the enemies.  
+If they're trying to shoot you, you can avoid being hit by quickly finding cover.
 shotgun shoots multuple pellets per bullet.
 
 Kill the enemies and find the end of the base. Good luck marine.
@@ -140,10 +143,10 @@ we have classes like:
 
 that exist to grant other object certain abilities
 respectively:
-* "ai" navigation, like a brain for npc's : Enemies 
-* afecting the player under circomstances ( curent implementation if close-> add something to player ) : pickups
+* "ai" navigation, like a brain for NPCs : Enemy 
+* afecting the player under circomstances ( curent implementation if close-> add something to player ) : powwerUp
 * owning and handeling different weapons and their amunition : player 
-* having health : shootables ( not realy implemented atm), enemies, player )
+* having health : shootable ( not realy implemented atm), enemy, player )
 
 ### Inheritance 
 Explain where you applied inheritance (mandatory).
