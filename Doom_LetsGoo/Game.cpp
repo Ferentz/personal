@@ -8,10 +8,10 @@
 Game::Game(const Window& window)
 	:BaseGame{ window },
 	m_Player{ GetViewPort() },
-	m_pUI{ new UI{GetViewPort()} },
+	m_pUI{ new UI{GetViewPort(), &m_Player} },
 	m_pLevel{ new Level(m_Player) }
 {
-	m_pUI->AssignPlayer(&m_Player);
+	//m_pUI->AssignPlayer(&m_Player);
 	Initialize();
 }
 
@@ -41,6 +41,8 @@ void Game::Update( float elapsedSec )
 		break;
 	case Game::GameState::alive:
 	{
+		m_pUI->UpdateUI(elapsedSec);
+
 		if (!m_pLevel->m_LevelMusic.IsPlaying())
 		{
 			m_pLevel->m_LevelMusic.Play(true);
@@ -105,11 +107,14 @@ void Game::Draw( ) const
 		break;
 	case Game::GameState::alive:
 		{
+		
 		m_pUI->DrawUI(GetWindow().width,
 			m_Player.m_HealthManager.GetHealth(), m_Player.m_HealthManager.GetArmourHealth(),
 			m_Player.m_WeaponManager.GetAmo());
 		Vector2f pos{ m_Player.GetPos().x, m_Player.GetPos().y};
 		m_pLevel->DrawLevel( pos);
+
+		m_pUI->DrawOverlay();
 
 		}
 		break;
@@ -201,7 +206,13 @@ void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 
 void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
 {
-	switch ( e.button )
+	
+	
+}
+
+void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
+{
+	switch (e.button)
 	{
 	case SDL_BUTTON_LEFT:
 		switch (m_State)
@@ -221,18 +232,13 @@ void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
 		default:
 			break;
 		}
-		
+
 		break;
 	case SDL_BUTTON_RIGHT:
 		break;
 	case SDL_BUTTON_MIDDLE:
 		break;
 	}
-	
-}
-
-void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
-{
 	/*std::cout << "MOUSEBUTTONUP event: ";
 	switch ( e.button )
 	{
@@ -263,7 +269,7 @@ void Game::ClearBackground( ) const
 		glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 		break;
 	case Game::GameState::alive:
-		glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
+		glClearColor(0.f, 0.f, 0.f, 0.f);
 	break;
 	case GameState::won:
 		glClearColor(0.0f, 0.3f, 0.0f, 1.0f);

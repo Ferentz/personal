@@ -41,5 +41,7 @@ private:
 	bool m_UnlockedWeapons[4]{true, false, false, false}; // pistol is the starting weapon, still working on this system
 
 	bool m_pistolPickedUp{ true }, m_shotgunPickedUp{false}; // hence why i have booleans twice
+	SoundEffect m_WeaponPickupSound{ "sounds/DSSGCOCK.wav" };
+
 };
 

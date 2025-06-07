@@ -10,6 +10,8 @@
 #include <string>
 #include <filesystem>
 
+#include "SoundEffect.h"
+
 //TODO :: texture manager?
 Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
 	:Shootable{ pos, height, folder, 20 },
@@ -22,12 +24,30 @@ Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
 	}
 	LoadTextures();
 	m_SubClass = ThingSubclass::enemy;
+	m_PrevHealth = m_HealthManager.GetHealth();
+	if (!s_EnemyAmount)
+	{
+		s_pRoarSound = new SoundEffect{"sounds/DSPOSIT2.wav"};
+		s_pHurtSound = new SoundEffect{ "sounds/DSDMPAIN.wav" };
+
+		s_pRoarSound->SetVolume(s_pRoarSound->GetVolume() / 2);
+		s_pHurtSound->SetVolume(s_pHurtSound->GetVolume() / 2);
+	}
+	s_EnemyAmount++;
 }
 
 Enemy::~Enemy()
 {
 	delete m_pNavigator;
 	m_pNavigator = nullptr;
+	s_EnemyAmount--;
+	if(!s_EnemyAmount)
+	{
+		delete s_pRoarSound;
+		delete s_pHurtSound;
+		s_pRoarSound = nullptr;
+		s_pHurtSound = nullptr;
+	}
 }
 
 #pragma region rule of 5
@@ -45,6 +65,9 @@ Enemy::Enemy(const Enemy& toCopy)
 	
 	m_MonsterTexturePaths = toCopy.m_MonsterTexturePaths;
 	LoadTextures();
+
+	m_PrevHealth = toCopy.m_PrevHealth;
+	m_HadLineOfSight = toCopy.m_HadLineOfSight;
 }
 
 Enemy::Enemy(Enemy&& toMove) noexcept
@@ -81,6 +104,9 @@ void Enemy::MoveEnemyMembers(Enemy&& toMove)
 	m_HurtRow = std::move(toMove.m_HurtRow);
 	m_AttackRow = std::move(toMove.m_AttackRow);
 	m_pMonsterTexture = std::move(toMove.m_pMonsterTexture);
+
+	m_PrevHealth = std::move(toMove.m_PrevHealth);
+	m_HadLineOfSight = std::move(toMove.m_HadLineOfSight);
 }
 
 #pragma endregion rule of 5
@@ -128,7 +154,20 @@ void Enemy::DrawThing(Texture* tex)
 
 void Enemy::UpdateEnemy(float elapsSec)
 {
-
+	if (m_pNavigator->m_hasLineOfSight != m_HadLineOfSight)
+	{
+		if (!m_HadLineOfSight )
+		{
+			s_pRoarSound->Play(false);
+		}
+		m_HadLineOfSight = m_pNavigator->m_hasLineOfSight;
+	}
+	if (m_HealthManager.GetHealth() < m_PrevHealth)
+	{
+		m_PrevHealth = m_HealthManager.GetHealth();
+		s_pHurtSound->Play(false);
+	}
+	
 	if (m_State != ShootableStates::dead)
 	{
 		m_timer += elapsSec;
@@ -263,3 +302,7 @@ void Enemy::LoadTextures()
 	m_HurtRow = m_DeathRow - 1;
 	m_AttackRow = m_HurtRow - 2;
 }
+
+SoundEffect* Enemy::s_pRoarSound{nullptr};
+SoundEffect* Enemy::s_pHurtSound{nullptr};
+int Enemy::s_EnemyAmount{0};

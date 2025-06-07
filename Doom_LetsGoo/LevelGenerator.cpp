@@ -783,6 +783,14 @@ void LevelGenerator::ReadThings()
 			properties = "P";
 			type = utils::ThingType::powerUp;
 			break;
+		case utils::ThingsEnum::Stimpack:
+			radius = 20;
+			height = 16;
+			sprite = "STIM";
+			sequence = "A";
+			properties = "P";
+			type = utils::ThingType::powerUp;
+			break;
 		case utils::ThingsEnum::Armor:
 			radius = 20;
 			height = 16;
@@ -820,6 +828,12 @@ void LevelGenerator::ReadThings()
 		//utils::ThingType::ammunition
 		//utils::ThingType::artifact
 		//utils::ThingType::powerUp
+
+		if (sprite.size() < 3)
+		{
+			std::cout << "empty" << std::endl;
+		}
+
 		switch (type)
 		{
 		case utils::ThingType::ammunition:

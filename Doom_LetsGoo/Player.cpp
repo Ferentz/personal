@@ -8,16 +8,31 @@
 
 
 Player::Player(const Rectf& window)
-	:m_HealthManager{500},
+	:m_HealthManager{100},
 	m_WeaponManager{},
 	m_Camera{ window , m_Pos}
 {
+	m_PrevHealth = m_HealthManager.GetHealth();
 }
 
 
 #pragma region basics
 bool Player::UpdatePlayer(float elapsedsecs, Level* pLevel)
 {
+	int newHealth{ m_HealthManager.GetHealth() };
+	if (m_PrevHealth > newHealth)
+	{
+		if (newHealth < 25)
+		{
+			m_NearDeath.Play(false);
+		}
+		else
+		{
+			m_HurtSound.Play(false);
+		}
+	}
+	m_PrevHealth = newHealth;
+	
 	m_WeaponManager.UpdateWeapon(elapsedsecs);
 
 	if (ColideWLevel(pLevel))
@@ -144,6 +159,7 @@ void Player::Move(float x, float y)
 	m_NextPos.x += x * m_Speed;
 	m_NextPos.y += y * m_Speed;
 }
+
 void Player::Turn(float offset)
 {
 	m_Camera.TurnCamera(offset);

@@ -4,6 +4,7 @@
 #include "HealthManager.h"
 #include "WeaponManager.h"
 #include "Camera.h"
+#include "SoundEffect.h"
 //class Window;
 class Level;
 class Thing;
@@ -42,6 +43,9 @@ private:
 	void pushPosition();
 	bool ColideWLevel(const Level* pLevel);
 	void VelocCalc(float elapsedSec);
+	int m_PrevHealth{};
+	SoundEffect m_HurtSound{"sounds/DSOOF.wav"};
+	SoundEffect m_NearDeath{ "sounds/DSPLPAIN.wav" };
 
 	//move helper
 	void Move(float x, float y);

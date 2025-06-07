@@ -27,6 +27,7 @@ Level::Level(Player& player)
 		m_pFloorsNCeilings, m_pThings,
 		m_Textures, player
 	};
+	m_LevelMusic.SetVolume(m_LevelMusic.GetVolume() / 2);
 }
 
 Level::~Level() {

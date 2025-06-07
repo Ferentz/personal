@@ -1,11 +1,13 @@
 #pragma once
 #include "Shootable.h"
 
+
 class Player;
 class HealthManager;
 class Texture;
 class Level;
 class Navigator;
+class SoundEffect;
 
 class Enemy final: public Shootable
 {
@@ -17,7 +19,7 @@ public:
 	Enemy(const Enemy& toCopy);
 	Enemy(Enemy&& toMove) noexcept;
 	Enemy& operator=(Enemy&& rhs) noexcept;
-	Enemy& operator=(const Enemy& rhs) = delete;
+	Enemy& operator=(const Enemy& rhs) = delete; // no, an enemy is not suposed to turn into another enemy
 	
 	//thing expansion
 	virtual void UpdateThing(const Player& player, float elapsSec) override;
@@ -31,6 +33,7 @@ public:
 	//link to player health
 	static void AssignPlayerHealth(HealthManager& playerHealth);
 	static HealthManager* s_pPlayerHealth;
+	
 
 private:
 	// Rule of 5 helper — implemented with the Rule of 5 in the .cpp
@@ -54,6 +57,12 @@ private:
 	int m_HurtRow{};
 	int m_AttackRow{};
 	std::vector <Texture> m_pMonsterTexture{};
+
+	static SoundEffect* s_pRoarSound;
+	static SoundEffect* s_pHurtSound;
+	static int s_EnemyAmount;
+	int m_PrevHealth{};
+	bool m_HadLineOfSight{false};
 };
 
 

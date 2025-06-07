@@ -63,6 +63,7 @@ void WeaponManager::AddAmo(int amount, WeaponType type)
 
 void WeaponManager::PickUpWeapon(WeaponType type)
 {
+	m_WeaponPickupSound.Play(false);
 	int typeIndex{ int(type) };
 	if (!m_UnlockedWeapons[typeIndex])
 	{

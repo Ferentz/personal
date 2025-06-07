@@ -31,6 +31,11 @@ int HealthManager::GetHealth() const
 	return m_Health;
 }
 
+int HealthManager::GetFullHealth() const
+{
+	return m_FullHealth;
+}
+
 int HealthManager::GetArmourHealth() const
 {
 	return m_ArmourHealth;
