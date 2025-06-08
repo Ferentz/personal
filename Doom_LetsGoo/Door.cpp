@@ -45,7 +45,7 @@ bool Door::Trigger()
 
 	//SOUND
 	//m_Door
-	bool DidPlay{ m_Door.Play(true) };
+	utils::PlaySoundwPriority(m_Door, 4, false);
 	return false;
 }
 

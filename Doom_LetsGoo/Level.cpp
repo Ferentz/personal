@@ -23,7 +23,6 @@
 
 Level::Level(Player& player)
 {
-	m_pThingTexture = new Texture("COLUA0_converted.png");
 	LevelGenerator gen{
 		m_BSP, m_BSPleafs,m_pPlanes,
 		m_pFloorsNCeilings, m_pThings,
@@ -41,7 +40,7 @@ Level::~Level() {
 	{
 		delete m_pThings[i];
 	}
-	delete m_pThingTexture;
+	
 }
 
 #pragma region rule of 5
@@ -59,8 +58,6 @@ Level& Level::operator=(Level&& rhs) noexcept
 void Level::MoveLevelMembers(Level&& toMove) noexcept
 {
 	m_isCleared = std::move(toMove.m_isCleared);
-	m_pThingTexture = std::move(toMove.m_pThingTexture);
-	toMove.m_pThingTexture = nullptr;
 	m_Textures = std::move(toMove.m_Textures);
 	m_BSP = std::move(toMove.m_BSP);
 	m_BSPleafs = std::move(toMove.m_BSPleafs);
@@ -181,8 +178,7 @@ void Level::DrawLeaf(int leafIndex)
 		int thingIndex{ m_BSPleafs[leafIndex].thingIndexes[thingNum] };
 		/*if (thingIndex == 93 || thingIndex == 94) // to check specific ones
 		{*/
-		assert(m_pThingTexture != nullptr);
-		m_pThings[thingIndex]->DrawThing(m_pThingTexture);
+		m_pThings[thingIndex]->DrawThing();
 		//}
 	}
 	int floorTexIdx{ m_pFloorsNCeilings[leafIndex * 2].GetTexIdx() };

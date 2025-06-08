@@ -21,7 +21,7 @@ public:
 	
 
 	virtual void UpdateThing(const Player& eyeObject, float elapsSec) override;
-	virtual void DrawThing(Texture* tex) override;
+	virtual void DrawThing() override;
 
 	Interactor* m_pInteractor{};
 

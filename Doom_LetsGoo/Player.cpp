@@ -30,10 +30,12 @@ bool Player::UpdatePlayer(float elapsedsecs, Level* pLevel)
 		{
 			
 			//SOUND m_NearDeath
+			utils::PlaySoundwPriority(m_NearDeath, 8, false);
 		}
 		else
 		{
 			//SOUND m_HurtSound
+			utils::PlaySoundwPriority(m_HurtSound, 8, false);
 		}
 	}
 	m_PrevHealth = newHealth;

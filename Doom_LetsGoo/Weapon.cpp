@@ -29,6 +29,7 @@ Weapon::~Weapon()
 void Weapon::Shoot(std::vector<Shootable*>& shootables, float windowWidth)
 {
 	//SOUND m_GunShootSound
+	utils::PlaySoundwPriority(m_GunShootSound, 4, false);
 	
 	m_IsShooting = true;
 	int closest{ -1 };

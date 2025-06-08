@@ -26,7 +26,7 @@ public:
 
 	// basics
 	virtual void UpdateThing(const Player& eyeObject, float elapsSec);
-	virtual void DrawThing(Texture* tex);
+	virtual void DrawThing();
 
 	//interactions
 	Vector2f GetStartPos() const;

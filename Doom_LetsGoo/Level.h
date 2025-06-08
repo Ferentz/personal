@@ -42,7 +42,7 @@ public:
 
 	
 	SoundStream m_LevelMusic{
-		"sounds/D_E1M1.mid"
+		"sounds/Doom_E1M1.mp3"
 	};
 	
 	
@@ -67,8 +67,6 @@ private:
 
 	bool m_isCleared{false};
 
-	Texture* m_pThingTexture{}; //temp untill Thing class is finalized   TODO:: include texture with Thing class
-	
 	std::vector<BSPnode> m_BSP{};
 	std::vector<BSPleafeNode> m_BSPleafs{};
 	std::vector <Plane*> m_pPlanes{};

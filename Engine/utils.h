@@ -161,6 +161,6 @@ namespace utils
 	/// </summary>
 	/// <param name="sound"></param>
 	/// <param name="priorityLevel"></param>
-	//void PlaySoundwPriority(SoundStream& sound, int priorityLevel, bool loop);
-	//void PlaySoundwPriority(SoundEffect& sound, int priorityLevel, bool loop);
+	void PlaySoundwPriority(SoundStream& sound, int priorityLevel, bool loop);
+	void PlaySoundwPriority(SoundEffect& sound, int priorityLevel, bool loop);
 }

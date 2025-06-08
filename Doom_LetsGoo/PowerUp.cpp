@@ -10,6 +10,7 @@
 #include "Texture.h"
 
 #include "SoundEffect.h"
+//#include "utils.h"
 
 SoundEffect* PowerUp::s_pPickupSound{nullptr};
 int PowerUp::s_MemberCount{0};
@@ -238,6 +239,7 @@ void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 	if (!m_PickedUp && (eyeObject.GetPos() - m_location.point3D).Length() < 100)
 	{
 		//SOUND s_pPickupSound
+		utils::PlaySoundwPriority(*s_pPickupSound, 4, false);
 		std::cout << "pickup" << std::endl;
 		m_PickedUp = true;
 		m_pInteractor->Interact();
@@ -245,11 +247,11 @@ void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 	Thing::UpdateThing(eyeObject, elapsSec);
 }
 
-void PowerUp::DrawThing(Texture* tex)
+void PowerUp::DrawThing()
 {
 	if (!m_PickedUp)
 	{
-		Thing::DrawThing(tex);
+		Thing::DrawThing();
 	}
 }
 
