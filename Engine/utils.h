@@ -4,6 +4,9 @@
 #include "Vector2f.h"
 #include "Vector3f.h"
 
+class SoundStream;
+class SoundEffect;
+
 namespace utils
 {
 	const float g_Pi{ 3.1415926535f };
@@ -98,6 +101,7 @@ namespace utils
 	std::string convertToCharString(const int16_t* stringStart);
 	short InvertInt(uint16_t field);
 #pragma endregion FileHandelingFunctionality
+	
 	int getArrIndex(int arrLen, int index);
 
 	int GetBSP(Vector2f& pos, const bool returnLeaf, const std::vector<BSPnode>& nodes);
@@ -149,4 +153,14 @@ namespace utils
 		Zombieman = 3004,
 
 	};
+	
+	/// <summary>
+	/// 4 priority levels
+	/// 1 = smallest -> most quiet
+	/// 4 = largest -> loudest
+	/// </summary>
+	/// <param name="sound"></param>
+	/// <param name="priorityLevel"></param>
+	//void PlaySoundwPriority(SoundStream& sound, int priorityLevel, bool loop);
+	//void PlaySoundwPriority(SoundEffect& sound, int priorityLevel, bool loop);
 }

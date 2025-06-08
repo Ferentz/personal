@@ -2,6 +2,7 @@
 #include "UI.h"
 #include "Texture.h"
 #include "Player.h"
+#include "utils.h"
 
 const Player*  UI::s_pPlayer{};
 

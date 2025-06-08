@@ -34,7 +34,7 @@ private:
 	bool m_PickedUp{false};
 	
 	//sound is same for all pickups
-	static SoundEffect* s_PickupSound;
+	static SoundEffect* s_pPickupSound;
 	static int s_MemberCount;
 };
 

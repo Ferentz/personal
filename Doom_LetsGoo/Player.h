@@ -1,10 +1,11 @@
 #pragma once
-#include "utils.h"
+
 #include <vector>
 #include "HealthManager.h"
 #include "WeaponManager.h"
 #include "Camera.h"
 #include "SoundEffect.h"
+
 //class Window;
 class Level;
 class Thing;

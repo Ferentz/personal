@@ -17,6 +17,8 @@
 #include "Navigator.h"
 #include "Interactor.h"
 
+#include "utils.h"
+
 
 
 Level::Level(Player& player)
@@ -27,7 +29,6 @@ Level::Level(Player& player)
 		m_pFloorsNCeilings, m_pThings,
 		m_Textures, player
 	};
-	m_LevelMusic.SetVolume(m_LevelMusic.GetVolume() / 2);
 }
 
 Level::~Level() {
@@ -303,7 +304,6 @@ void Level::ColideWLevel(const Vector3f& pos, Vector3f& r_nextPos, float& floorH
 			{
 				if (wall->IsDoor() && ignoreLedges)
 				{
-					m_Door.Play(false);
 					if (TriggerDoor(leaf, i) && ignoreLedges)
 					{
 						foundExit = true;

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "UI.h"
 #include "Level.h"
+#include "utils.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
@@ -45,7 +46,7 @@ void Game::Update( float elapsedSec )
 
 		if (!m_pLevel->m_LevelMusic.IsPlaying())
 		{
-			m_pLevel->m_LevelMusic.Play(true);
+			//SOUND m_pLevel->m_LevelMusic
 		}
 
 		m_pLevel->UpdateLevel(m_Player, elapsedSec);

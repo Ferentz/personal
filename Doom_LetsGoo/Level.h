@@ -2,7 +2,6 @@
 #include "BaseGame.h"
 #include <vector>
 
-#include "SoundEffect.h"
 #include "SoundStream.h"
 
 class Player;
@@ -77,8 +76,6 @@ private:
 	std::vector <Thing*> m_pThings{};
 	std::vector<Texture> m_Textures{};
 	
-	SoundEffect m_Door{
-		"sounds/DSDOROPN.wav"
-	};
+	
 };
 

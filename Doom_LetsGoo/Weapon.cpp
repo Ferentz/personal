@@ -3,6 +3,7 @@
 #include "Enemy.h"
 #include "Texture.h"
 #include <iostream>
+#include "utils.h"
 
 Weapon::Weapon(int startAmo, int maxAmo, float range, std::string soundFile)
 	:m_MaxAmo{ maxAmo },
@@ -27,7 +28,8 @@ Weapon::~Weapon()
 #pragma region shoot
 void Weapon::Shoot(std::vector<Shootable*>& shootables, float windowWidth)
 {
-	m_GunShootSound.Play(false);
+	//SOUND m_GunShootSound
+	
 	m_IsShooting = true;
 	int closest{ -1 };
 	float closestDist{ GetRange() };

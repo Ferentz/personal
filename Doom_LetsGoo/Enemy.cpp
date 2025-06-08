@@ -29,9 +29,6 @@ Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
 	{
 		s_pRoarSound = new SoundEffect{"sounds/DSPOSIT2.wav"};
 		s_pHurtSound = new SoundEffect{ "sounds/DSDMPAIN.wav" };
-
-		s_pRoarSound->SetVolume(s_pRoarSound->GetVolume() / 2);
-		s_pHurtSound->SetVolume(s_pHurtSound->GetVolume() / 2);
 	}
 	s_EnemyAmount++;
 }

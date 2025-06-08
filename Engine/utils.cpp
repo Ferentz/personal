@@ -7,6 +7,8 @@
 #include "utils.h"
 #include "structs.h"
 #include <string>
+#include "SoundEffect.h"
+#include "SoundStream.h"
 
 
 
@@ -1042,3 +1044,19 @@ int utils::GetBSP(Vector2f& pos, const int node, const bool returnLeaf, const st
 		return utils::GetBSP(pos, child, returnLeaf, nodes);
 	}
 }
+
+//void utils::PlaySoundwPriority(SoundStream& sound, int priority, bool loop)
+//{
+//	int maxVol{ 128 };
+//	int stepSize{ maxVol / 8 };
+//	sound.Play(loop);
+//	sound.SetVolume(stepSize * priority);
+//}
+
+//void utils::PlaySoundwPriority(SoundEffect& sound, int priority, bool loop)
+//{
+//	int maxVol{ 128 };
+//	int stepSize{ maxVol / 8 };
+//	sound.Play(loop);
+//	sound.SetVolume(stepSize * priority);
+//}
