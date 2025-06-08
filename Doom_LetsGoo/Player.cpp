@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "Player.h"
-#include <iostream>
+
 #include "Level.h"
 #include "Plane.h"
 #include "Enemy.h"
 #include "Navigator.h"
+
+#include "utils.h"
+
+#include <iostream>
 
 
 Player::Player(const Rectf& window)
@@ -24,11 +28,14 @@ bool Player::UpdatePlayer(float elapsedsecs, Level* pLevel)
 	{
 		if (newHealth < 25)
 		{
-			m_NearDeath.Play(false);
+			
+			//SOUND m_NearDeath
+			utils::PlaySoundwPriority(m_NearDeath, 8, false);
 		}
 		else
 		{
-			m_HurtSound.Play(false);
+			//SOUND m_HurtSound
+			utils::PlaySoundwPriority(m_HurtSound, 8, false);
 		}
 	}
 	m_PrevHealth = newHealth;

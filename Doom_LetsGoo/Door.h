@@ -1,5 +1,6 @@
 #pragma once
 #include "Plane.h"
+#include "SoundEffect.h"
 class Door final: public Plane
 {
 public:
@@ -20,5 +21,9 @@ private:
 	const float m_upperHeight;
 	const float m_lowerHeight;
 	const bool m_IsExit;
+
+	SoundEffect m_Door{
+		"sounds/DSDOROPN.wav"
+	};
 };
 

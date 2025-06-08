@@ -2,11 +2,12 @@
 #include "UI.h"
 #include "Texture.h"
 #include "Player.h"
+#include "utils.h"
 
 const Player*  UI::s_pPlayer{};
 
 UI::UI(const Rectf& window, Player* pPlayer)
-	:m_pBasisUI{ new Texture{"STBAR_converted.png"} },
+	:m_pBasisUI{ new Texture{"UIBits/STBAR_converted.png"} },
 	m_pNumbersRed{
 	new Texture{"numRed/STTNUM0.png"} ,
 	new Texture{"numRed/STTNUM1.png"},

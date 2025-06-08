@@ -10,17 +10,18 @@
 #include "Texture.h"
 
 #include "SoundEffect.h"
+//#include "utils.h"
 
-SoundEffect* PowerUp::s_PickupSound{nullptr};
+SoundEffect* PowerUp::s_pPickupSound{nullptr};
 int PowerUp::s_MemberCount{0};
 
 PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string sprite)
 	:Thing{ pos , height  , sprite, true }//,
 	//m_FilePath{ "pickUps/" + sprite + "A0.png" }
 {
-	if (s_PickupSound == nullptr)
+	if (s_pPickupSound == nullptr)
 	{
-		s_PickupSound = new SoundEffect{ "sounds/DSITEMUP.wav" };
+		s_pPickupSound = new SoundEffect{ "sounds/DSITEMUP.wav" };
 	}
 	s_MemberCount++;
 
@@ -141,8 +142,8 @@ PowerUp::~PowerUp()
 {
 	if (s_MemberCount == 1)
 	{
-		delete s_PickupSound;
-		s_PickupSound = nullptr;
+		delete s_pPickupSound;
+		s_pPickupSound = nullptr;
 	}
 	s_MemberCount--;
 	//delete m_pTex;
@@ -237,7 +238,8 @@ void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 {
 	if (!m_PickedUp && (eyeObject.GetPos() - m_location.point3D).Length() < 100)
 	{
-		s_PickupSound->Play(false);
+		//SOUND s_pPickupSound
+		utils::PlaySoundwPriority(*s_pPickupSound, 4, false);
 		std::cout << "pickup" << std::endl;
 		m_PickedUp = true;
 		m_pInteractor->Interact();
@@ -245,11 +247,11 @@ void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 	Thing::UpdateThing(eyeObject, elapsSec);
 }
 
-void PowerUp::DrawThing(Texture* tex)
+void PowerUp::DrawThing()
 {
 	if (!m_PickedUp)
 	{
-		Thing::DrawThing(tex);
+		Thing::DrawThing();
 	}
 }
 

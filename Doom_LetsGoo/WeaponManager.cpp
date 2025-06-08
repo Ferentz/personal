@@ -2,6 +2,7 @@
 #include <iostream>
 #include "WeaponManager.h"
 #include "Enemy.h"
+#include "utils.h"
 
 #pragma region basics
 void WeaponManager::DrawWeapon(float windowWidth) const
@@ -63,7 +64,8 @@ void WeaponManager::AddAmo(int amount, WeaponType type)
 
 void WeaponManager::PickUpWeapon(WeaponType type)
 {
-	m_WeaponPickupSound.Play(false);
+	//SOOUND m_WeaponPickupSound
+	utils::PlaySoundwPriority(m_WeaponPickupSound, 8, false);
 	int typeIndex{ int(type) };
 	if (!m_UnlockedWeapons[typeIndex])
 	{

@@ -11,6 +11,7 @@
 #include <filesystem>
 
 #include "SoundEffect.h"
+#include "utils.h"
 
 //TODO :: texture manager?
 Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
@@ -29,9 +30,6 @@ Enemy::Enemy(Vector2f& pos, float height, std::string& folder)
 	{
 		s_pRoarSound = new SoundEffect{"sounds/DSPOSIT2.wav"};
 		s_pHurtSound = new SoundEffect{ "sounds/DSDMPAIN.wav" };
-
-		s_pRoarSound->SetVolume(s_pRoarSound->GetVolume() / 2);
-		s_pHurtSound->SetVolume(s_pHurtSound->GetVolume() / 2);
 	}
 	s_EnemyAmount++;
 }
@@ -118,7 +116,7 @@ void Enemy::UpdateThing(const Player& player, float elapsSec)
 	Thing::UpdateThing(player, elapsSec);
 }
 
-void Enemy::DrawThing(Texture* tex)
+void Enemy::DrawThing()
 {
 	int index{ m_TexIndex * m_TextureColums };
 	switch (m_State)
@@ -158,14 +156,16 @@ void Enemy::UpdateEnemy(float elapsSec)
 	{
 		if (!m_HadLineOfSight )
 		{
-			s_pRoarSound->Play(false);
+			//SOUND
+			utils::PlaySoundwPriority(*s_pRoarSound, 2, false);
 		}
 		m_HadLineOfSight = m_pNavigator->m_hasLineOfSight;
 	}
 	if (m_HealthManager.GetHealth() < m_PrevHealth)
 	{
 		m_PrevHealth = m_HealthManager.GetHealth();
-		s_pHurtSound->Play(false);
+		//SOUND
+		utils::PlaySoundwPriority(*s_pHurtSound, 1, false);
 	}
 	
 	if (m_State != ShootableStates::dead)

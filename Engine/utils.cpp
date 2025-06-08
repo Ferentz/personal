@@ -7,6 +7,8 @@
 #include "utils.h"
 #include "structs.h"
 #include <string>
+#include "SoundEffect.h"
+#include "SoundStream.h"
 
 
 
@@ -825,7 +827,6 @@ LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
 		outArray[i] = new int16_t[elementsPerRow]; // Allocate columns
 	}
 
-	// **& outarr means it's a reference to a pointer of a pointer
 
 	// Fill the 2D array with integers
 	int index = 0;
@@ -835,9 +836,7 @@ LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
 		}
 	}
 
-	// Return the number of rows
-	//return rows;
-	return LMP{ outArray, rows, elementsPerRow };  // Return error code
+	return LMP{ outArray, rows, elementsPerRow };  // Return lmp
 }
 
 void utils::ReadTexLMP(const std::string& filename, std::vector<PatchData>& patches)
@@ -891,7 +890,6 @@ void utils::ReadTexData(std::vector<int8_t> data, int baseTextureDataIndex, std:
 	int16_t stringArr[4]{ };
 	for (int i{}; i < 4; i++)
 	{
-		data[baseTextureDataIndex];
 		int16_t number{ (data[baseTextureDataIndex + i * 2] << 8)
 			+ data[baseTextureDataIndex + i * 2 + 1] };
 		stringArr[i] = number;
@@ -903,17 +901,17 @@ void utils::ReadTexData(std::vector<int8_t> data, int baseTextureDataIndex, std:
 	int8_t boolVar3{ data[maskedBaseIndex + 2] };
 	int8_t boolVar4{ data[maskedBaseIndex + 3] };
 
-	int32_t masked{ (boolVar1 << 24) + (boolVar2 << 16) + (boolVar3 << 8) + boolVar4 };
+	//int32_t masked{ (boolVar1 << 24) + (boolVar2 << 16) + (boolVar3 << 8) + boolVar4 };
 
 	int widthBaseIndex{ maskedBaseIndex + 4};
 	int8_t widthVar1{ data[widthBaseIndex + 0] };
 	int8_t widthVar2{ data[widthBaseIndex + 1] };
-	int16_t width{ (widthVar1 << 8) + widthVar2 };
+	//int16_t width{ (widthVar1 << 8) + widthVar2 };
 
 	int heightBaseIndex{ widthBaseIndex + 2 };
 	int8_t heightVar1{ data[heightBaseIndex + 0] };
 	int8_t heightVar2{ data[heightBaseIndex + 1] };
-	int16_t height{ (heightVar1 << 8) + heightVar2 };
+	//int16_t height{ (heightVar1 << 8) + heightVar2 };
 
 	int ignoredBaseIndex{ heightBaseIndex + 2 };
 	int patchCountBaseIndex{ ignoredBaseIndex + 4 };
@@ -1041,4 +1039,20 @@ int utils::GetBSP(Vector2f& pos, const int node, const bool returnLeaf, const st
 		//go to the next node
 		return utils::GetBSP(pos, child, returnLeaf, nodes);
 	}
+}
+
+void utils::PlaySoundwPriority(SoundStream& sound, int priority, bool loop)
+{
+	int maxVol{ 128 };
+	int stepSize{ maxVol / 8 };
+	sound.Play(loop);
+	sound.SetVolume(stepSize * priority);
+}
+
+void utils::PlaySoundwPriority(SoundEffect& sound, int priority, bool loop)
+{
+	int maxVol{ 128 };
+	int stepSize{ maxVol / 8 };
+	sound.Play(loop);
+	sound.SetVolume(stepSize * priority);
 }

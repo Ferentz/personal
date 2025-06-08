@@ -93,7 +93,7 @@ void Thing::UpdateThing(const Player& player, float elapsSec)
 	m_ScreenRatio = player.GetCamera().GetWindowWidth()/800;
 }
 
-void Thing::DrawThing(Texture* tex)
+void Thing::DrawThing()
 {
 	float scale{ 0.001f };
 	float width{ m_pTex->GetWidth() * m_ScreenRatio / (m_location.Dist3D * scale)};

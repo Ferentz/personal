@@ -21,7 +21,7 @@ public:
 	
 
 	virtual void UpdateThing(const Player& eyeObject, float elapsSec) override;
-	virtual void DrawThing(Texture* tex) override;
+	virtual void DrawThing() override;
 
 	Interactor* m_pInteractor{};
 
@@ -34,7 +34,7 @@ private:
 	bool m_PickedUp{false};
 	
 	//sound is same for all pickups
-	static SoundEffect* s_PickupSound;
+	static SoundEffect* s_pPickupSound;
 	static int s_MemberCount;
 };
 

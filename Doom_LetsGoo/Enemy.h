@@ -23,7 +23,7 @@ public:
 	
 	//thing expansion
 	virtual void UpdateThing(const Player& player, float elapsSec) override;
-	virtual void DrawThing(Texture* tex) override;
+	virtual void DrawThing() override;
 
 	//enemy behaviour
 	void UpdateEnemy(float elapsSec);

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "UI.h"
 #include "Level.h"
+#include "utils.h"
 
 Game::Game(const Window& window)
 	:BaseGame{ window },
@@ -43,10 +44,7 @@ void Game::Update( float elapsedSec )
 	{
 		m_pUI->UpdateUI(elapsedSec);
 
-		if (!m_pLevel->m_LevelMusic.IsPlaying())
-		{
-			m_pLevel->m_LevelMusic.Play(true);
-		}
+		
 
 		m_pLevel->UpdateLevel(m_Player, elapsedSec);
 
@@ -219,6 +217,10 @@ void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 		{
 		case Game::GameState::menu:
 			m_State = GameState::alive;
+
+			utils::PlaySoundwPriority(m_pLevel->m_LevelMusic, 2, true);
+				//SOUND m_pLevel->m_LevelMusic
+			
 			SDL_ShowCursor(SDL_DISABLE);  // Hides the cursor
 			EnterLevel();
 			break;

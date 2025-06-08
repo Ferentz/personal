@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Door.h"
 #include <iostream>
+#include "utils.h"
 
 Door::Door(Vector3f& position, Vector3f& width, Vector3f& height, int colour, float upperHeight, float lowerHeight, bool isExit)
 	:Plane{  position,  width,  height, colour },
@@ -41,6 +42,10 @@ bool Door::Trigger()
 		return true;
 	}
 	m_opening = true;
+
+	//SOUND
+	//m_Door
+	utils::PlaySoundwPriority(m_Door, 4, false);
 	return false;
 }
 

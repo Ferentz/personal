@@ -4,7 +4,7 @@
 #include <iostream>
 //#include <cmath>
 //#include <vector>
-//#include <utils.h>
+#include <utils.h>
 
 #include "Texture.h"
 #include "Player.h"
