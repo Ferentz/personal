@@ -21,7 +21,7 @@ Window::Window( const std::string& title , float width , float height , bool isV
 //{
 //}
 
-LMP::LMP(int16_t** Arr2D, int rowAmount, int columAmount)
+LMP::LMP(int16_t** Arr2D, int rowAmount, unsigned int columAmount)
 	: data{ Arr2D }
 	, rows{ rowAmount }
 	, colums{ columAmount }
@@ -35,6 +35,15 @@ LMP::~LMP()
 	}
 	delete[] data;
 }
+
+LMP::LMP(LMP&& rhs) noexcept
+	: data{ std::move(rhs.data) },
+	rows{ std::move(rhs.rows) },
+	colums{ std::move(rhs.colums) }
+{
+	rhs.data = nullptr;
+}
+
 
 point2D_3D::point2D_3D()
 {

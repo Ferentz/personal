@@ -377,12 +377,12 @@ bool Level::TriggerDoor(const int leaf, const int wallIdx) const
 	{
 		return true;
 	}
-	int upIndex{ utils::getArrIndex(m_pPlanes.size(), wallIndex + 1) };
+	int upIndex{ utils::getArrIndex(int(m_pPlanes.size()), wallIndex + 1) };
 	if (m_pPlanes.at(upIndex)->IsDoor())
 	{
 		m_pPlanes.at(upIndex)->Trigger();
 	}
-	int downIndex{ utils::getArrIndex(m_pPlanes.size(), wallIndex - 1) };
+	int downIndex{ utils::getArrIndex(int(m_pPlanes.size()), wallIndex - 1) };
 	if (m_pPlanes.at(downIndex)->IsDoor())
 	{
 		m_pPlanes.at(downIndex)->Trigger();

@@ -20,7 +20,7 @@ PlaneIregular::PlaneIregular(std::vector<Vector2f> vertexes, int idx, int height
 	m_amoountOfPoints{ int(vertexes.size()) }
 {
 	for (int index{}; index < vertexes.size(); index++) {
-		m_pPointsArr.emplace_back(vertexes[index].x, vertexes[index].y, height);
+		m_pPointsArr.emplace_back(vertexes[index].x, vertexes[index].y, float(height));
 
 	}
 }

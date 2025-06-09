@@ -16,11 +16,15 @@ struct Window
 };
 
 struct LMP {
-	LMP(int16_t** Arr2D, int rows, int colums);
+	LMP(int16_t** Arr2D, int rows, unsigned int colums);
 	~LMP();
-	const int16_t* const* data;
+	LMP(const LMP& toCopy) = delete;
+	LMP(LMP&& rhs) noexcept;
+	LMP& operator=(const LMP& rhs) = delete;
+	LMP& operator=(LMP&& rhs) = delete;
+	const int16_t* const* data; // 2D array, only the outer pointer can change for move semantics
 	const int rows;
-	const int colums;
+	const unsigned int colums;
 };
 
 struct Line {

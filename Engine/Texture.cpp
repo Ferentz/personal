@@ -273,7 +273,7 @@ void Texture::CreateFromSurfaces(
 		return;
 	}
 
-	// 1. Determine required atlas size
+	//Determine required atlas size
 	int atlasWidth = 0;
 	int atlasHeight = 0;
 
@@ -291,7 +291,7 @@ void Texture::CreateFromSurfaces(
 		atlasHeight = std::max(atlasHeight, bottom);
 	}
 
-	// 2. Create atlas surface
+	//Create atlas surface
 	SDL_Surface* atlasSurface = SDL_CreateRGBSurface(
 		0, atlasWidth, atlasHeight, 32,
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -306,7 +306,7 @@ void Texture::CreateFromSurfaces(
 		return;
 	}
 
-	// 3. Blit each surface to the atlas at its given offset
+	//Blit each surface to the atlas at its given offset
 	for (size_t i = 0; i < surfaces.size(); ++i) {
 		const SDL_Surface* surf = surfaces[i];
 		const Int2& uv = uvOffsets[i];
@@ -314,23 +314,23 @@ void Texture::CreateFromSurfaces(
 		SDL_BlitSurface(const_cast<SDL_Surface*>(surf), nullptr, atlasSurface, &dst);
 	}
 
-	// 4. Determine pixel format
+	//Determine pixel format
 	GLenum pixelFormat = GL_RGBA;
 	switch (atlasSurface->format->BytesPerPixel) {
 	case 3:
-		pixelFormat = (atlasSurface->format->Rmask == 0x000000ff) ? GL_RGB : GL_BGR;
+		pixelFormat = (atlasSurface->format->Rmask == 0x000000ff) ? GL_RGB : GL_BGR; // see if r is the first one or not
 		break;
 	case 4:
 		pixelFormat = (atlasSurface->format->Rmask == 0x000000ff) ? GL_RGBA : GL_BGRA;
 		break;
 	default:
-		std::cerr << "Texture::CreateFromSurfacesWithOffsets: Unsupported pixel format.\n";
+		std::cerr << "Texture::CreateFromSurfacesWithOffsets: Unsupported pixel format.\n"; // if the pixel format coouldnt be determined
 		SDL_FreeSurface(atlasSurface);
 		m_CreationOk = false;
 		return;
 	}
 
-	// 5. Upload to OpenGL
+	// Make OpenGL
 	m_Width = float(atlasSurface->w);
 	m_Height = float(atlasSurface->h);
 
@@ -348,7 +348,7 @@ void Texture::CreateFromSurfaces(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	// 6. Clean up
+	//Clean up
 	SDL_FreeSurface(atlasSurface);
 }
 
@@ -495,21 +495,6 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Rectf& srcRect) 
 		defaultDstWidth = srcRect.width;
 	}
 
-	// Determine vertex coordinates
-	//float vertexTop{ dstRect.top };
-	//float vertexLeft{ dstRect.left };
-	//float vertexBottom{};
-	//float vertexRight{};
-	//if (!(dstRect.width > 0.001f && dstRect.height > 0.001f)) // If no size specified use default size
-	//{
-	//	vertexRight = vertexLeft + defaultDstWidth;
-	//	vertexBottom = vertexTop + defaultDstHeight;
-	//}
-	//else
-	//{
-	//	vertexRight = vertexLeft + dstRect.width;
-	//	vertexBottom = vertexTop + dstRect.height;
-	//}
 
 	// Tell opengl which texture we will use
 	glBindTexture(GL_TEXTURE_2D, m_Id);
@@ -552,7 +537,6 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Rectf& srcRect) 
 
 void Texture::DrawTexturePersp(const Vector3f* pVertices, const Vector2f*pVerteciesLayout , const int numVertices, const int scale, const Rectf& srcRect) const
 {
-	//if (numVertices < 3) return; // Must have at least 3 vertices
 
 	// Bind the texture
 	glBindTexture(GL_TEXTURE_2D, m_Id);
@@ -564,11 +548,9 @@ void Texture::DrawTexturePersp(const Vector3f* pVertices, const Vector2f*pVertec
 
 	glBegin(GL_POLYGON);  // Suitable for convex floors
 	{
-		//const float textureScale = 100.0f;  // Adjust for texture density
 
 		for (int i = 0; i < numVertices; ++i)
 		{
-			//float w = 1.0f / pVertices[i].z;  // Perspective correction
 
 			// World-aligned texture coordinates (makes texture follow the floor)
 			float texU = (pVerteciesLayout[i].x / scale);

@@ -94,10 +94,7 @@ namespace utils
 #pragma endregion CollisionFunctionality
 #pragma region FileHandelingFunctionality
 	//LMP ReadLMP(const std::string& filename, int16_t**& outArray, int elementsPerRow);
-	LMP ReadLMP(const std::string& filename, int elementsPerRow);
-	void ReadTexLMP(const std::string& filename, std::vector<PatchData>& patches);
-	void ReadTexData(std::vector<int8_t> data, int baseTextureDataIndex, std::vector<int32_t>& offsets, std::vector<PatchData>& patches);
-	void ReadPatchData(std::vector<int8_t> data, int basePatchDataIndex, int16_t patchCount, std::vector<PatchData>& patches);
+	LMP ReadLMP(const std::string& filename, unsigned int elementsPerRow);
 	std::string convertToCharString(const int16_t* stringStart);
 	short InvertInt(uint16_t field);
 #pragma endregion FileHandelingFunctionality
@@ -155,12 +152,19 @@ namespace utils
 	};
 	
 	/// <summary>
-	/// 4 priority levels
+	/// 8 priority levels
 	/// 1 = smallest -> most quiet
-	/// 4 = largest -> loudest
+	/// 8 = largest -> loudest
 	/// </summary>
 	/// <param name="sound"></param>
 	/// <param name="priorityLevel"></param>
 	void PlaySoundwPriority(SoundStream& sound, int priorityLevel, bool loop);
+	/// <summary>
+	/// 8 priority levels
+	/// 1 = smallest -> most quiet
+	/// 8 = largest -> loudest
+	/// </summary>
+	/// <param name="sound"></param>
+	/// <param name="priorityLevel"></param>
 	void PlaySoundwPriority(SoundEffect& sound, int priorityLevel, bool loop);
 }

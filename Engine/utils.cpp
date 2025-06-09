@@ -740,57 +740,8 @@ bool utils::IntersectRectLine(const Rectf& r, const Vector2f& p1, const Vector2f
 #pragma endregion CollisionFunctionality
 
 #pragma region FileHandelingFunctionality
-//int utils::ReadLMP(const std::string& filename, int16_t**& outArray, int elementsPerRow) {
-//	std::string fullPath = ("..\\" + filename);
-//
-//	
-//
-//	// Open the file in binary mode
-//	std::ifstream file(filename, std::ios::binary);
-//	if (!file) {
-//		std::cerr << "Error: Could not open the file." << std::endl; // cerr is typicaly used for errors
-//		return -1; // Return error code
-//	}
-//
-//	// Vector to store the signed 16-bit integers
-//	std::vector<int16_t> integers;
-//
-//	// Read the file 2 bytes at a time
-//	int16_t value;
-//	while (file.read(reinterpret_cast<char*>(&value), sizeof(int16_t))) {
-//		integers.push_back(value);
-//	}
-//	file.close();
-//
-//	// Calculate the number of rows
-//	int totalElements = int(integers.size());
-//	if (totalElements % elementsPerRow != 0) {
-//		std::cerr << "Error: File data size is not divisible by the expected row size." << std::endl;
-//		return -1; // Return -1 as an error code
-//	}
-//	int rows = totalElements / elementsPerRow;
-//
-//	// Dynamically allocate the 2D array
-//	outArray = new int16_t * [rows]; // Allocate rows
-//	for (int i = 0; i < rows; ++i) {
-//		outArray[i] = new int16_t[elementsPerRow]; // Allocate columns
-//	}
-//
-//	// **& outarr means it's a reference to a pointer of a pointer
-//
-//	// Fill the 2D array with integers
-//	int index = 0;
-//	for (int i = 0; i < rows; ++i) {
-//		for (int j = 0; j < elementsPerRow; ++j) {
-//			outArray[i][j] = integers[index++];
-//		}
-//	}
-//
-//	// Return the number of rows
-//	return rows;
-//}
 
-LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
+LMP utils::ReadLMP(const std::string& filename, unsigned int elementsPerRow) {
 	std::string fullPath = ("..\\Resources/" + filename);
 
 	int16_t** outArray{};
@@ -799,8 +750,8 @@ LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
 	std::ifstream file(filename, std::ios::binary);
 	if (!file) {
 		std::cerr << "Error: Could not open the file." << std::endl; // cerr is typicaly used for errors
+
 		return LMP{ nullptr, -1, elementsPerRow };  // Return error code
-		//return -1; // Return error code
 	}
 
 	// Vector to store the signed 16-bit integers
@@ -829,7 +780,7 @@ LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
 
 
 	// Fill the 2D array with integers
-	int index = 0;
+	unsigned int index = 0;
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < elementsPerRow; ++j) {
 			outArray[i][j] = integers[index++];
@@ -839,103 +790,7 @@ LMP utils::ReadLMP(const std::string& filename, int elementsPerRow) {
 	return LMP{ outArray, rows, elementsPerRow };  // Return lmp
 }
 
-void utils::ReadTexLMP(const std::string& filename, std::vector<PatchData>& patches)
-{
-	//https://doomwiki.org/wiki/TEXTURE1_and_TEXTURE2
-	std::string fullPath = ("..\\Resources/" + filename);
 
-	//int16_t** outArray{};
-
-	// Open the file in binary mode
-	std::ifstream file(filename, std::ios::binary);
-	if (!file) {
-		std::cerr << "Error: Could not open the file." << std::endl; // cerr is typicaly used for errors
-		//return -1; // Return error code
-	}
-
-	// Vector to store the signed 16-bit integers
-	//std::vector<int16_t> integers;
-	std::vector<int8_t> integers;
-	// Read the file 2 bytes at a time
-	int8_t value;
-	while (file.read(reinterpret_cast<char*>(&value), sizeof(int8_t))) {
-		integers.push_back(value);
-	}
-	file.close();
-
-	int8_t var1{ integers[0]};
-	int8_t var2{ integers[1] };
-	int8_t var3{ integers[2] };
-	int8_t var4{ integers[3] };
-
-	int32_t numTextures{ (int32_t(var4) << 24) + (int32_t(var3) << 16) + (int32_t(var2) << 8) + int32_t(var1)};
-
-	int baseOffsetIndex{ 4 };
-	int baseTextureDataIndex{ baseOffsetIndex + numTextures * 4 };
-	std::vector<int32_t> offsets{};
-	for (int offsetIndex{}; offsetIndex < numTextures; offsetIndex++)
-	{
-		int index = baseOffsetIndex + offsetIndex * 4;
-		int8_t var1_ofset{ integers[index + 0] };
-		int8_t var2_ofset{ integers[index + 1] };
-		int8_t var3_ofset{ integers[index + 2] };
-		int8_t var4_ofset{ integers[index + 3] };
-		offsets.push_back((var1_ofset << 24) + (var2_ofset << 16) + (var3_ofset << 8) + var4_ofset); // << does bitshifting
-	}
-	ReadTexData(integers, baseTextureDataIndex, offsets, patches);
-}
-
-void utils::ReadTexData(std::vector<int8_t> data, int baseTextureDataIndex, std::vector<int32_t>& offsets, std::vector<PatchData>& patches)
-{
-	int16_t stringArr[4]{ };
-	for (int i{}; i < 4; i++)
-	{
-		int16_t number{ (data[baseTextureDataIndex + i * 2] << 8)
-			+ data[baseTextureDataIndex + i * 2 + 1] };
-		stringArr[i] = number;
-	}
-	std::string name{ convertToCharString(stringArr) };
-	int maskedBaseIndex{ baseTextureDataIndex + 8 };
-	int8_t boolVar1{ data[maskedBaseIndex + 0] };
-	int8_t boolVar2{ data[maskedBaseIndex + 1] };
-	int8_t boolVar3{ data[maskedBaseIndex + 2] };
-	int8_t boolVar4{ data[maskedBaseIndex + 3] };
-
-	//int32_t masked{ (boolVar1 << 24) + (boolVar2 << 16) + (boolVar3 << 8) + boolVar4 };
-
-	int widthBaseIndex{ maskedBaseIndex + 4};
-	int8_t widthVar1{ data[widthBaseIndex + 0] };
-	int8_t widthVar2{ data[widthBaseIndex + 1] };
-	//int16_t width{ (widthVar1 << 8) + widthVar2 };
-
-	int heightBaseIndex{ widthBaseIndex + 2 };
-	int8_t heightVar1{ data[heightBaseIndex + 0] };
-	int8_t heightVar2{ data[heightBaseIndex + 1] };
-	//int16_t height{ (heightVar1 << 8) + heightVar2 };
-
-	int ignoredBaseIndex{ heightBaseIndex + 2 };
-	int patchCountBaseIndex{ ignoredBaseIndex + 4 };
-	int8_t patchCVar1{ data[patchCountBaseIndex + 0] };
-	int8_t patchCVar2{ data[patchCountBaseIndex + 1] };
-	int16_t patchCount{ (patchCVar1 << 8) + patchCVar2 };
-	int patchBaseIndex{ patchCountBaseIndex + 2 };
-	//std::vector<PatchData> patches{};
-	ReadPatchData(data, patchBaseIndex, patchCount, patches);
-}
-
-void utils::ReadPatchData(std::vector<int8_t> data, int basePatchDataIndex,
-	int16_t patchCount, std::vector<PatchData>& patches)
-{
-	for (int patchIndex{}; patchIndex < patchCount; patchIndex++)
-	{
-		int curPatchIndex{ basePatchDataIndex + patchIndex * 10 };
-		PatchData patch{};
-		patch.xOffset = (data[curPatchIndex] << 8) + data[curPatchIndex + 1]; //(boolVar3 << 8) + boolVar4
-		patch.yOffset = (data[curPatchIndex + 2] << 8) + data[curPatchIndex + 2 + 1];
-		patch.patchNum = (data[curPatchIndex + 4] << 8) + data[curPatchIndex + 4 + 1];
-		patches.push_back(patch);
-	}
-}
 
 std::string utils::convertToCharString(const int16_t* stringStart)
 {
@@ -956,11 +811,11 @@ std::string utils::convertToCharString(const int16_t* stringStart)
 	result[6] = d & 0xFF;        // Lower 8 bits of D
 	result[7] = (d >> 8) & 0xFF; // Upper 8 bits of D
 
-	for (int i{7}; i >=0; i--)
+	for (int byteIndex{7}; byteIndex >=0; byteIndex--)
 	{
-		if (result[i] == 0)
+		if (result[byteIndex] == 0)
 		{
-			result.erase(i, 1);
+			result.erase(byteIndex, 1);
 		}
 	}
 
@@ -1010,16 +865,16 @@ int utils::GetBSP(Vector2f& pos, const int node, const bool returnLeaf, const st
 	// we want to run over the BSP with the camera and check where it is;
 	//Vector2f pos = Vector2f{ player.m_Pos.x, player.m_Pos.y };
 	int orient = pos.orientation(nodes[node].partitionLine.startPoint, nodes[node].partitionLine.endPoint);
-	int child{ 0 };
+	int16_t child{ 0 };
 	if (orient > 0)
 	{
 		// go to left child
-		child = nodes[node].children[1];
+		child = int16_t(nodes[node].children[1]);
 	}
 	else if (orient < 0)
 	{
 		// go to right child
-		child = nodes[node].children[0];
+		child = int16_t(nodes[node].children[0]);
 	}
 
 	if (child < 0)

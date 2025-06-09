@@ -22,7 +22,7 @@ public:
 	Thing( const Thing& toCopy );
 	Thing( Thing&& rhs ) noexcept;
 	Thing& operator=(const Thing& rhs);
-	Thing& operator=(Thing&& rhs);
+	Thing& operator=(Thing&& rhs) noexcept;
 
 	// basics
 	virtual void UpdateThing(const Player& eyeObject, float elapsSec);

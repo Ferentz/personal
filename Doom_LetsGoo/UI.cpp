@@ -145,7 +145,7 @@ void UI::UpdateUI(float elapsedSecs)
 	int curHealth{ s_pPlayer->m_HealthManager.GetHealth() };
 	float HeathFrac = float(curHealth) / s_pPlayer->m_HealthManager.GetFullHealth();
 	float HealthInccrement{ 1.f / s_FaceHurtLevels };
-	m_HurtLevel = s_FaceHurtLevels - (HeathFrac / HealthInccrement);
+	m_HurtLevel = int(s_FaceHurtLevels - (HeathFrac / HealthInccrement));
 	if (m_HurtLevel < 0)
 	{
 		m_HurtLevel = 0;

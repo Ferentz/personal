@@ -35,7 +35,7 @@ void Navigator::CalcNextPos( const Vector3f& playerPos, const std::vector<Plane*
 
 	if (m_timer <= 0 && !m_SeesPlayer)
 	{
-		float angle = float(rand()) / RAND_MAX * 2 * M_PI;
+		float angle = float(rand() / RAND_MAX * 2 * M_PI);
 		m_Direction.x = cosf(angle) * m_Speed;
 		m_Direction.y = sinf(angle) * m_Speed;
 

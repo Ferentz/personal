@@ -205,7 +205,6 @@ bool Vector2f::intersection(Vector2f p1, Vector2f p2, Vector2f s1, Vector2f s2, 
 	float b1 = s1.x - s2.x;
 	float c1 = a1 * (s1.x) + b1 * (s1.y);
 	float det = a * b1 - a1 * b;
-	const float EPSILON = 1e-6; // Small tolerance for floating-point errors
 	if (det== 0)
 	{
 		return false;
@@ -306,7 +305,7 @@ bool operator==(Vector2f lhs, const Vector2f& rhs)
 
 bool operator!=(Vector2f lhs, const Vector2f& rhs)
 {
-	float e{ 0.00001 };
+	float e{ 0.00001f };
 	//if (lhs.x != rhs.x || lhs.y != rhs.y)
 	if ((lhs.x - rhs.x) * (lhs.x - rhs.x) > e || (lhs.y - rhs.y) * (lhs.y - rhs.y) > e)
 	{

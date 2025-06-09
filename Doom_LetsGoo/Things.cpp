@@ -73,7 +73,7 @@ Thing& Thing::operator=(const Thing& rhs)
 	return *this;
 }
 
-Thing& Thing::operator=(Thing&& rhs)
+Thing& Thing::operator=(Thing&& rhs) noexcept
 {
 	if (&rhs != this)
 	{
