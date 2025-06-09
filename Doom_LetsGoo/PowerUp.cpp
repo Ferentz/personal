@@ -114,6 +114,7 @@ PowerUp::PowerUp(Vector2f pos, float height, utils::ThingsEnum type, std::string
 		false };
 		break;
 	case utils::ThingsEnum::Megaarmor:
+		std::cout << "megaarmour" << std::endl;
 		m_InteractorSwitch_HiF_WiT = false;
 		m_pInteractor = new HealthInteractor{
 			1/2.f,

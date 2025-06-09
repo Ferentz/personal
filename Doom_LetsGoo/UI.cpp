@@ -142,9 +142,13 @@ void UI::UpdateUI(float elapsedSecs)
 	{
 		m_DiffFaceTimer -= elapsedSecs;
 	}
+
 	int curHealth{ s_pPlayer->m_HealthManager.GetHealth() };
 	float HeathFrac = float(curHealth) / s_pPlayer->m_HealthManager.GetFullHealth();
 	float HealthInccrement{ 1.f / s_FaceHurtLevels };
+
+	UpdateOverlay(elapsedSecs, curHealth);
+
 	m_HurtLevel = int(s_FaceHurtLevels - (HeathFrac / HealthInccrement));
 	if (m_HurtLevel < 0)
 	{
@@ -154,38 +158,12 @@ void UI::UpdateUI(float elapsedSecs)
 	{
 		m_HurtLevel = s_FaceHurtLevels - 1;
 	}
-
-	m_Hurt = false;
-	if(curHealth < m_PrevHealth)
-	{
-		m_DiffFaceTimer = m_DiffFaceTime;
-		HurtF_ShootT = false;
-		m_Hurt = true;
-		m_PrevHealth = curHealth;
-	}
-	else if (curHealth > m_PrevHealth)
-	{
-		m_PickedUp = true;
-	}
-
-	m_PickedUp = false;
-	if (s_pPlayer->m_WeaponManager.GetPistolAmo() > m_PrevAmo[0])
-	{
-		m_PickedUp = true;
-		m_PrevAmo[0] = s_pPlayer->m_WeaponManager.GetPistolAmo();
-	}
-	else if (s_pPlayer->m_WeaponManager.GetShotgunAmo() > m_PrevAmo[1])
-	{
-		m_PickedUp = true;
-		m_PrevAmo[1] = s_pPlayer->m_WeaponManager.GetShotgunAmo();
-	}
-	else if(s_pPlayer->m_WeaponManager.GetPistolAmo() < m_PrevAmo[0]||
+	
+	if (s_pPlayer->m_WeaponManager.GetPistolAmo() < m_PrevAmo[0] ||
 		s_pPlayer->m_WeaponManager.GetShotgunAmo() < m_PrevAmo[1])
 	{
-		m_PrevAmo[0] = s_pPlayer->m_WeaponManager.GetPistolAmo();
-		m_PrevAmo[1] = s_pPlayer->m_WeaponManager.GetShotgunAmo();
 		m_DiffFaceTimer = m_DiffFaceTime;
-		HurtF_ShootT = true;
+		HurtFalse_ShootTrue = true;
 	}
 
 	if (m_Timer >= m_IntervalTime)
@@ -208,21 +186,40 @@ void UI::UpdateUI(float elapsedSecs)
 		}
 		m_Timer = 0;
 	}
-	
+	m_PrevAmo[0] = s_pPlayer->m_WeaponManager.GetPistolAmo();
+	m_PrevAmo[1] = s_pPlayer->m_WeaponManager.GetShotgunAmo();
+	m_PrevArmourHealth = s_pPlayer->m_HealthManager.GetArmourHealth();
+	m_PrevHealth = curHealth;
 }
 
-void UI::DrawOverlay()
+void UI::UpdateOverlay(float elapsedSecs, int curHealth)
 {
-	glDepthFunc(GL_ALWAYS);
-	if (m_Hurt)
+	if (m_Hurt || m_PickedUp)
 	{
-		utils::SetColor(1.f, 0.f, 0.f, .5f);
-		utils::FillRect(0.f, 0.f, r_Window.width, r_Window.height);
+		m_TimerOverlay += elapsedSecs;
+		if (m_TimerOverlay >= m_OverlayTime)
+		{
+			m_Hurt = false;
+			m_PickedUp = false;
+			m_TimerOverlay = 0;
+		}
 	}
-	else if (m_PickedUp)
+	else
 	{
-		utils::SetColor(1.f, 1.f, 0.f, .5f);
-		utils::FillRect(0.f, 0.f, r_Window.width, r_Window.height);
+		if (curHealth < m_PrevHealth)
+		{
+			m_DiffFaceTimer = m_DiffFaceTime;
+			HurtFalse_ShootTrue = false;
+			m_Hurt = true;
+		}
+
+		if (curHealth > m_PrevHealth ||
+			s_pPlayer->m_WeaponManager.GetPistolAmo() > m_PrevAmo[0] ||
+			s_pPlayer->m_WeaponManager.GetShotgunAmo() > m_PrevAmo[1] ||
+			s_pPlayer->m_HealthManager.GetArmourHealth() > m_PrevArmourHealth)
+		{
+			m_PickedUp = true;
+		}
 	}
 }
 
@@ -245,7 +242,7 @@ void UI::DrawUI(const float width,
 		int FaceDisplayIndex = m_FaceIndex + m_HurtLevel * s_NormalFaceRows;
 		if (m_DiffFaceTimer > 0)
 		{
-			if (HurtF_ShootT)
+			if (HurtFalse_ShootTrue)
 			{
 				m_pDoomguyFaceKill[m_HurtLevel]->Draw(
 					Rectf{ 0.f,
@@ -309,6 +306,21 @@ void UI::DrawUI(const float width,
 
 	s_pPlayer->m_WeaponManager.DrawWeapon(r_Window.width);
 
+}
+
+void UI::DrawOverlay()
+{
+	glDepthFunc(GL_ALWAYS);
+	if (m_Hurt)
+	{
+		utils::SetColor(1.f, 0.f, 0.f, .5f);
+		utils::FillRect(0.f, 0.f, r_Window.width, r_Window.height);
+	}
+	else if (m_PickedUp)
+	{
+		utils::SetColor(1.f, 1.f, 0.f, .5f);
+		utils::FillRect(0.f, 0.f, r_Window.width, r_Window.height);
+	}
 }
 
 void UI::DrawRedNumbers() const
@@ -572,4 +584,6 @@ void UI::PrintNumber(int number, bool percent, int numberSwitch) const
 		);
 	}
 }
+
+
 
