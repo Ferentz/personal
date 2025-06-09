@@ -110,7 +110,7 @@ Explain which project (version) must be run.
 
 <!-- HOW TO PLAY -->
 ## How to play
-a blue start screen will apear, cklick with your left mouse once to enter the level.
+a blue start screen will apear, click with your left mouse once to enter the level.
 
 You shoot the enemies.  
 If they're trying to shoot you, you can avoid being hit by quickly finding cover.
@@ -120,7 +120,7 @@ Kill the enemies and find the end of the base. Good luck marine.
 
 ### Controls
 * wasd for moving up, left, down, right
-* space to jump ( not in original game, but i suck and need a way to skip most of the level to make it to the end )
+* space to jump ( not in original game, but if you suck like me it's a way to skip most of the level to make it to the end )
 * left mouse button to shoot
 * 1 and 2 to switch weapons (2 becomes available once the second weapon type was picked up)
 * mouse movement to rotate camera
@@ -141,22 +141,22 @@ we have classes like:
 * weaponmanger
 * healthmanager
 
-that exist to grant other object certain abilities
+that exist to grant other objects certain abilities     
 respectively:
 * "ai" navigation, like a brain for NPCs : Enemy 
-* afecting the player under circomstances ( curent implementation if close-> add something to player ) : powwerUp
-* owning and handeling different weapons and their amunition : player 
-* having health : shootable ( not realy implemented atm), enemy, player )
+* afecting the player under circomstances ( curent implementation if close-> add something to player ) : PowerUp
+* owning and handeling different weapons and their amunition : Player 
+* having health and armour : shootable ( not realy implemented atm), Enemy, Player 
 
 ### Inheritance 
 Explain where you applied inheritance (mandatory).
 
 thing -> shootable -> enemy  
 thing -> powerUp
-* thing : things that can exist in the level  
-* shootable : things that can be afected by amo  
+* thing : objects that can exist in the level  
+* shootable : things that have health ( can be afected by being shot ) 
 * enemy : shootable that can walk around and shoot the player  
-* powerUp : thing that can be picked up and which will affect the player
+* powerUp : thing that can be picked up and affect the player
 
     
 interactor -> healthInteractor  
@@ -202,9 +202,9 @@ weapon -> shotgun
 - [x] week 08 topics applied
     - [x] move semantics (rule of 55555)
 - [x] week 09 topics applied (optional)
-    - [x] streams. (yes. data reading. ha. haha. so funny. not realy? idk i did most of the data reading before we saw this.)
+    - [x] streams. (yes. data reading. i think? i did most of the data reading before we saw this.)
 - [x] week 10 topics applied (optional)
-    - [x] error handeling ( didn't need it at this point, but made the apropriate functions noexept )
+    - [x] error handeling ( didn't need once we learned this, but made the apropriate functions noexept )
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -226,7 +226,10 @@ Use this space to list resources you find helpful and would like to give credit 
 * [Example 1: cpp reference on std::vector](https://en.cppreference.com/w/cpp/container/vector)
 * [doom documentation 1](https://doom.fandom.com/wiki/Doom_Wiki)
 * [doom documentation 2](https://zdoom.org/wiki/Main_Page)
-* [chatgp cuz I dont always have a teacher around to tell me i made a dumb typo and that's why my shit doesnt work](https://chatgpt.com/g/g-cksUvVWar-code-gpt)
+* [chatgp for proofreading and understanding code and doom documention](https://chatgpt.com/g/g-cksUvVWar-code-gpt)
+* [stackoverflow for finding company in my misery.](https://stackoverflow.com/questions) ( And solutions. Mostly solutions )
+* [GeeksForGeeks for comprehensive c++ documentation.](https://www.geeksforgeeks.org/c-plus-plus/)
+* Ivo (Gaston?) De Pauw for better insight into angles which facilitated this project
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
