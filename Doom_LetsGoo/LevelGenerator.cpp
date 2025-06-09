@@ -14,7 +14,6 @@
 
 #include "Texture.h"
 #include "Player.h"
-//#include "LevelGenerator.h"
 
 /*
 * so, we want to generate the level.
@@ -22,13 +21,12 @@ we're gonna load the lmp's and then do shit
 
 from the level, we want to receive the scale
 
-the level just wants the bsp tree, the walls, the floors. and that's it basicaly
+the level just wants the bsp tree, the walls, the floors, the level objects (things). and that's it basicaly
 */
 
-
-LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BSPleafeNode>& p_BSPleafs_p,
-	std::vector <Plane*>& p_Planes_p, std::vector <PlaneIregular>& p_FloorsNCeilings_p,
-	std::vector <Thing*>& things, std::vector<Texture>& m_Textures, Player& player)
+LevelGenerator::LevelGenerator(std::vector<BSPnode>& BSPtree, std::vector<BSPleafeNode>& BSPleafs,
+	std::vector <Plane*>& pPlanes, std::vector <PlaneIregular>& floorsNCeilings,
+	std::vector <Thing*>& pThings, std::vector<Texture>& textures, Player& player)
 	:vertexesImported{ utils::ReadLMP("VERTEXES.lmp", VERTEXCOLUMS) },
 	linesImported{ utils::ReadLMP("LINEDEFS.lmp", LINECOLUMS) },
 	sidesImported{ utils::ReadLMP("SIDEDEFS.lmp", SIDECOLUMS) },
@@ -37,12 +35,12 @@ LevelGenerator::LevelGenerator(std::vector<BSPnode>& p_BSPtree_p, std::vector<BS
 	segsImported{ utils::ReadLMP("SEGS.lmp", SEGSCOLUMS) },
 	sectorSegsImported{ utils::ReadLMP("SSECTORS.lmp", SECTORSEGSCOLUMS) },
 	thingsImported{ utils::ReadLMP("THINGS.lmp", THINGSSCOLUMS) },
-	r_BSPtree{ p_BSPtree_p },
-	r_BSPleafs{ p_BSPleafs_p },
-	r_pPlanes{ p_Planes_p },
-	r_FloorsNCeilings{ p_FloorsNCeilings_p },
-	r_pThings{things},
-	r_Textures{ m_Textures },
+	r_BSPtree{ BSPtree },
+	r_BSPleafs{ BSPleafs },
+	r_pPlanes{ pPlanes },
+	r_FloorsNCeilings{ floorsNCeilings },
+	r_pThings{pThings},
+	r_Textures{ textures },
 	r_Player{ player }
 {
 	GenerateLevel();
@@ -831,7 +829,7 @@ void LevelGenerator::ReadThings()
 
 		if (sprite.size() < 3)
 		{
-			std::cout << "empty" << std::endl;
+			std::cerr << "empty" << std::endl;
 		}
 
 		switch (type)
@@ -872,7 +870,6 @@ void LevelGenerator::AdjustThings()
 #pragma region hardcoded date
 void LevelGenerator::MapNames() {
 	
-	//std::string name{ utils::convertToCharString(texNamesImported.data[ReadTexNames::nameIndex]) };
 	for (int texID{}; texID < m_Walltextures.size(); texID ++)
 	{
 
@@ -880,14 +877,11 @@ void LevelGenerator::MapNames() {
 		r_Textures.emplace_back(m_Walltextures[texID]);
 
 	}
-	//givenTexPointer = new Texture( walltextures[1] );
-	//Texture test{ walltextures[2] };
 }
 
 void LevelGenerator::AddFnCTextures()
 {
 	int startSize{ int(r_Textures.size()) };
-	//Texture test{ "patches/FLAT20" };
 	r_Textures.emplace_back("patches/FLAT20.png");
 	m_NameMap.insert(std::pair<std::string, int >("FLAT20", startSize));
 	r_Textures.emplace_back("patches/FLAT5_5.png");

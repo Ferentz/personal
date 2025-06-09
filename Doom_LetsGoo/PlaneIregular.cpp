@@ -30,7 +30,6 @@ void PlaneIregular::UpdatePlane(const Player& player) {
 
 	//so, when updating, we can get the offseto fo the point. and, we can project the texture along world space then.
 	for (int index{ 0 }; index < m_amoountOfPoints; index++) {
-		//std::cout << index << std::endl;
 		m_pPointsArr[index].point2D = player.GetCamera().PerspectiveCalculation(m_pPointsArr[index]);
 		//x = 0, y = 1, Used = 2
 		if (m_pPointsArr[index].AngleXYUsed[2] > M_PI * 0.5f || m_pPointsArr[index].AngleXYUsed[2] < - M_PI * 0.5f) {
@@ -76,7 +75,6 @@ int PlaneIregular::GetTexIdx() const
 void PlaneIregular::printPoints() const
 {
 	for (int index{ 0 }; index < m_amoountOfPoints; index++) {
-		//std::cout << index << std::endl;
 		std::cout << m_pPointsArr[index].point3D.x << " " << m_pPointsArr[index].point3D.y << " " << m_pPointsArr[index].point3D.z << " " << std::endl;
 	}
 

@@ -132,11 +132,6 @@ bool Plane::PlaneCollision(const Vector3f& pos3D, const Vector3f& nextPos3D,
 		{
 			return false;
 		}
-		/*std::cout << m_bBlock << std::endl;
-		std::cout << m_bBlockMonster << std::endl;
-		std::cout << m_bSecret << std::endl;
-		std::cout << m_bSoundBlock << std::endl;
-		std::cout << std::endl;*/
 
 		Vector2f moveDir = (nextPos - pos).Normalized();
 		Vector2f hitNormal = hitInfo.normal.Normalized();

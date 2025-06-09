@@ -240,7 +240,6 @@ void PowerUp::UpdateThing(const Player& eyeObject, float elapsSec)
 	{
 		//SOUND s_pPickupSound
 		utils::PlaySoundwPriority(*s_pPickupSound, 4, false);
-		std::cout << "pickup" << std::endl;
 		m_PickedUp = true;
 		m_pInteractor->Interact();
 	}

@@ -162,9 +162,6 @@ bool Camera::ClipLineToFOV(point2D_3D& frontPt, point2D_3D& backPt) const
 		else
 		{
 			angleInvis = angleInvis - 2 * float(M_PI);
-			//std::cout << "visible angle " << angleVis << std::endl;
-			//std::cout << "invisible angle " << angleInvis << std::endl;
-			std::cout << "different!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 		}
 		
 	}

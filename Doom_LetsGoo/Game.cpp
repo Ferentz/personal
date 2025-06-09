@@ -167,20 +167,6 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
-	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
-	//switch ( e.keysym.sym )
-	//{
-	//case SDLK_LEFT:
-	//	//std::cout << "Left arrow key released\n";
-	//	break;
-	//case SDLK_RIGHT:
-	//	//std::cout << "`Right arrow key released\n";
-	//	break;
-	//case SDLK_1:
-	//case SDLK_KP_1:
-	//	//std::cout << "Key 1 released\n";
-	//	break;
-	//}
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
@@ -241,19 +227,6 @@ void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 	case SDL_BUTTON_MIDDLE:
 		break;
 	}
-	/*std::cout << "MOUSEBUTTONUP event: ";
-	switch ( e.button )
-	{
-	case SDL_BUTTON_LEFT:
-		std::cout << " left button " << std::endl;
-		break;
-	case SDL_BUTTON_RIGHT:
-		std::cout << " right button " << std::endl;
-		break;
-	case SDL_BUTTON_MIDDLE:
-		std::cout << " middle button " << std::endl;
-		break;
-	}*/
 }
 
 void Game::ProcessMouseWheelEvent( const SDL_MouseWheelEvent& e)

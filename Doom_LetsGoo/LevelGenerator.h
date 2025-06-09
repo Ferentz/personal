@@ -12,9 +12,9 @@ class Player;
 class LevelGenerator final
 {
 public:
-	explicit LevelGenerator(std::vector<BSPnode>& p_BSPtree, std::vector<BSPleafeNode>& p_BSPleafs,
-		std::vector <Plane*>& p_Planes, std::vector <PlaneIregular>& p_FloorsNCeilings,
-		std::vector <Thing*>& things, std::vector<Texture>& m_Textures, Player& player);
+	explicit LevelGenerator(std::vector<BSPnode>& BSPtree, std::vector<BSPleafeNode>& BSPleafs,
+		std::vector <Plane*>& pPlanes, std::vector <PlaneIregular>& floorsNCeilings,
+		std::vector <Thing*>& pThings, std::vector<Texture>& textures, Player& player);
 	
 private:
 	void GenerateLevel();
@@ -45,47 +45,47 @@ private:
 	// vertexes.
 	//		2	   |	2
 	//  X POSITION | Y POSITION
-	const int VERTEXCOLUMS{ 2 };
+	const unsigned int VERTEXCOLUMS{ 2 };
 	const LMP vertexesImported;
 
 	// lines. defines the walls/doors
 	//   2		|    2	   |   2   |       2		|     2		 |     2	  |   2
 	// VERTEX 1 | VERTEX 2 | flags | action special | sector tag | FRONT SIDE | BACK SIDE
-	const int LINECOLUMS{ 7 };
+	const unsigned int LINECOLUMS{ 7 };
 	const LMP linesImported;
 
 	// sides. defines what the walls look like + sector 
 	//    2	    |    2	   |    8	   |     8	   |     8		|   2
 	// x offset | y offset | UPPER TEX | LOWER TEX | MIDDLE TEX | SECTORS
-	const int SIDECOLUMS{ 15 };
+	const unsigned int SIDECOLUMS{ 15 };
 	const LMP sidesImported;
 
 	// sectors. sector def and visualization
 	//     2	   |    2		   | 8		   |  8		  |  2			|   2	  | 2
 	// FLOOR HEIGH | CEILING HEIGH | FLOOR TEX | CEIL TEX | LIGHT LEVEL | special | tag
 	//fun fact, properly defining these gave me a breakthrough in an issue i had
-	const int SECTORCOLUMS{ 13 };
+	const unsigned int SECTORCOLUMS{ 13 };
 	const LMP sectorsImported;
 
 	// sectors. sector def and visualization
 	//     2	   |    2		 |		2	|   2	  |  2		 |   2		   |	2	   |	2	   |    2	  |		2		|   2		|	2		 |   2		   | 2 
 	// partition x | partition y | p x diff | p y diff| rBox top | rBox bottom | rBox left | rBox right| lBox top | lBox bottom | lBox left | lBox right | right child | left child
-	const int NODESCULOMS{ 14 };
+	const unsigned int NODESCULOMS{ 14 };
 	const LMP nodesImported;
 
 	// segments. line segments of the roof/floor polygons
 	//    2		|    2	   | 2	   |  2	  |  2	 |   2
 	// VERTEX 1 | VERTEX 2 | angle | LINE | SIDE | offset 
-	const int SEGSCOLUMS{ 6 };
+	const unsigned int SEGSCOLUMS{ 6 };
 	const LMP segsImported;
 
 	// segments for each sector
 	//    2		 |    2	  
 	// SEG COUNT | FIRST SEG
-	const int SECTORSEGSCOLUMS{ 2 };
+	const unsigned int SECTORSEGSCOLUMS{ 2 };
 	const LMP sectorSegsImported;
 
-	const int THINGSSCOLUMS{ 5 };
+	const unsigned int THINGSSCOLUMS{ 5 };
 	const LMP thingsImported;
 
 	//const int TEXNAMESCOLUMS{ 6 };
